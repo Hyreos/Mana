@@ -248,7 +248,10 @@ namespace mona {
                     consume();
                     break;
                 default:
-                    std::cerr << "Unhandled token '" << peek(0) << "'" << std::endl;
+                    std::cerr << "ERROR: Unhandled token '" << peek(0) << "'" << std::endl;
+                    
+                    std::exit(1);
+                    
                     return;
             }
         }
