@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#define CHECK(COND) if (!(COND)) *reinterpret_cast<size_t*>(0x1337) = 55
+#include "Helpers/Macros.hh"
 
 namespace mona {
     GrLexer::GrLexer(const std::string& _code)

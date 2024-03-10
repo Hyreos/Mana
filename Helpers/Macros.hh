@@ -3,6 +3,10 @@
 #include <string>
 #include <format>
 
+#define ASAN_CRASH() *reinterpret_cast<size_t*>(0x1337) = 0xdeadbeef;
+
+#define CHECK(COND) if (!(COND)) { ASAN_CRASH(); std::exit(1); }
+
 using ErrorCallback_T = void(*)(const std::string& msg);
 
 static ErrorCallback_T g_errorCallback;
