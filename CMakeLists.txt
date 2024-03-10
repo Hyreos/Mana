@@ -6,9 +6,18 @@ project(${PROJECT_NAME})
 
 add_executable(${PROJECT_NAME})
 
+option(MONA_IS_ASAN "Enable ASAN build" OFF)
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(${PROJECT_NAME} PRIVATE -O0 -fno-asynchronous-unwind-tables -fno-exceptions -fsanitize=address)
-    target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+    target_compile_options(${PROJECT_NAME} PRIVATE -fno-asynchronous-unwind-tables -fno-exceptions)
+
+    if (MONA_IS_ASAN)
+        target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+
+        target_compile_options(${PROJECT_NAME} PRIVATE -O0 -fsanitize=address)
+    else()
+        target_compile_options(${PROJECT_NAME} PRIVATE -Ofast)
+    endif()
 
     set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
 endif()
