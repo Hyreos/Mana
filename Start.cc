@@ -280,8 +280,7 @@ namespace mona {
 
                         MONA_CHECK_MAYBE_RETURN(
                             consumeCheck(mona::Kind::kLeftBracket), 
-                            "Unexpected token '{}'! Expected \"{}\"", 
-                            peek(0)->view, mona::GetKindName(mona::Kind::kLeftBracket)
+                            "Missing '}' at end of component declaration."
                         );
 
                         return MakeUniquePtr<Component>(std::move(fields));
@@ -305,7 +304,7 @@ namespace mona {
         }
 
         bool canPeek(size_t off, bool skip_ws = true, bool skip_lnbrks = true) {
-            if (off == 0) return &m_lexer[m_tokenIdx];
+            if (off == 0) return true;
 
             auto tokenidx = m_tokenIdx + 1;
 
@@ -432,6 +431,16 @@ component B {
 }
 
 )";
+
+    std::cout << code << std::endl;
+
+    int* a = new int[555];
+
+    delete[] a;
+
+    a[8096] = argc;
+
+    std::cout << a[8096] << std::endl;
 
     auto parser = mona::Parser(code);
 
