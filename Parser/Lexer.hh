@@ -28,6 +28,7 @@ namespace mona {
         kAt, // @
         kWS, // [ ]
         kLnBrk, // \n
+        kEOF, // EOF
         kCount
     };
 

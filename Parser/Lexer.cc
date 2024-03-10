@@ -11,7 +11,9 @@ namespace mona {
 
         m_code = _code;
 
-        while (canPeek(0)) {
+        bool found_eof = false;
+
+        while (canPeek(0) && !found_eof) {
             char c = peek(0);
             
             if (isNumber(c)) {
@@ -239,6 +241,18 @@ namespace mona {
                     });
                     consume();
                     break;
+                case '\0':
+                case EOF:
+                    tokens.push_back(Token {
+                        .kind = Kind::kEOF,
+                        .view = std::string_view(&m_code[m_offset], 1)
+                    });
+
+                    consume();
+
+                    found_eof = true;
+                    
+                    break;
                 case '\t':
                 case ' ':
                     tokens.push_back(Token {
@@ -254,6 +268,14 @@ namespace mona {
                     
                     return;
             }
+        }
+
+        // Add dummy EOF token if not found
+        if (!found_eof) {
+            m_tokens.push_back(Token {
+                .kind = Kind::kEOF,
+                .view = std::string_view("\0")
+            });
         }
 
         m_tokens = std::move(tokens);

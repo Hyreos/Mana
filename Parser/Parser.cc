@@ -1,5 +1,7 @@
 #include "Parser.hh"
 
+#include <iostream>
+
 namespace mona {
     Parser::Parser(const std::string& code) 
         : m_lexer { code },
@@ -34,6 +36,8 @@ namespace mona {
         if (!tk) return nullptr;
 
         switch (tk->kind) {
+            case Kind::kEOF:
+                return nullptr;
             case Kind::kAt: {
                 const mona::Token* attr_name;
                 

@@ -2,9 +2,7 @@ component A {
     @serialize(1) string p1
 
     @serialize(2) string p2
-}
-
-component B {
+}component B {
     @serialize (1) string p1
 
     @serialize(2) string p2

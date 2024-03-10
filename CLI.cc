@@ -44,15 +44,15 @@ public:
                         
                         f.read(&data[0], data.size());
 
-                        std::cout << "source: " << std::endl;
-
-                        std::cout << "(" << std::endl << data << std::endl << ")" << std::endl;
+                        std::cout << "[@] Generating..." << std::endl;
 
                         auto parser = mona::Parser(data);
 
                         parser.registerErrorCallback(LogParserError);
 
                         parser.parse();
+
+                        std::cout << "[@] Done." << std::endl;
                     }
                 }
             }
