@@ -22,7 +22,17 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
 endif()
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 
-target_sources(${PROJECT_NAME} PRIVATE Lexer.cc Start.cc)
+target_sources(${PROJECT_NAME} PRIVATE  Start.cc 
+                                        Parser/Parser.cc
+                                        Parser/Lexer.cc
+                                        Parser/AST/Attribute.cc
+                                        Parser/AST/CField.cc
+                                        Parser/AST/Component.cc
+                                        Parser/AST/Number.cc
+                                        Parser/AST/TreeNode.cc
+                                        Parser/AST/TSymbol.cc)
 
