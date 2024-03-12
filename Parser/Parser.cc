@@ -4,7 +4,7 @@
 #include <queue>
 #include <stack>
 
-namespace mona {
+namespace mana {
     Parser::Parser()
     {
     }
@@ -21,7 +21,7 @@ namespace mona {
         m_stats.lineIndex = 1;
         m_stats.columnIndex = 0;
 
-        m_lexer = std::make_unique<mona::GrLexer>(code);
+        m_lexer = std::make_unique<mana::GrLexer>(code);
 
         if (m_lexer->size() > 0)
             if ((*m_lexer)[0].kind == Kind::kWS || (*m_lexer)[0].kind == Kind::kLnBrk) {
@@ -173,9 +173,9 @@ namespace mona {
             case Kind::kEOF:
                 return nullptr;
             case Kind::kAt: {
-                const mona::Token* attr_name;
+                const mana::Token* attr_name;
                 
-                MONA_TRY_GET(consumeCheck(Kind::kIdentifier), attr_name, "Missing identifier in attribute.");
+                MANA_TRY_GET(consumeCheck(Kind::kIdentifier), attr_name, "Missing identifier in attribute.");
 
                 MANA_CHECK_MAYBE_RETURN(
                     attr_name->view == "serialize", 
@@ -192,7 +192,7 @@ namespace mona {
 
                 std::unique_ptr<TreeNode> nxt;
                 
-                MONA_TRY_GET(parsePrimary(), nxt, "Failed to gerante ASTNode");
+                MANA_TRY_GET(parsePrimary(), nxt, "Failed to gerante ASTNode");
 
                 nxt->addAttribute(std::move(attr));
 
@@ -209,7 +209,7 @@ namespace mona {
 
                     const Token* identifier;
                     
-                    MONA_TRY_GET(consumeCheck(Kind::kIdentifier), identifier, "Missing identifier in component declaration.");
+                    MANA_TRY_GET(consumeCheck(Kind::kIdentifier), identifier, "Missing identifier in component declaration.");
                     
                     MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftBracket), "Missing '{' in component declaration");
 
@@ -220,7 +220,7 @@ namespace mona {
                         // Peek a identifier
                         const Token* field_name;
                         
-                        MONA_TRY_GET(consumeCheck(Kind::kIdentifier), field_name, "Invalid token");
+                        MANA_TRY_GET(consumeCheck(Kind::kIdentifier), field_name, "Invalid token");
 
                         fields.push_back(std::make_unique<CField>(std::move(field_type), std::string(field_name->view)));
                     }

@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace mona {
+namespace mana {
     class CField : public TreeNode {
     public:
         static constexpr ASTKind kind { ASTKind::kComponentField };

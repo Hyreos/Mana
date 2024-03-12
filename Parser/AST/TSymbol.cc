@@ -1,6 +1,6 @@
 #include "TSymbol.hh"
 
-namespace mona {
+namespace mana {
     TSymbol::TSymbol(const std::string& identifier) 
         : TreeNode(kind),
             m_identifier { identifier }

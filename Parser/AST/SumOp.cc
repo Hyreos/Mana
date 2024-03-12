@@ -1,6 +1,6 @@
 #include "SumOp.hh"
 
-namespace mona {
+namespace mana {
     SumOp::SumOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs)
         : TreeNode(kind),
             m_lhs{std::move(lhs)},

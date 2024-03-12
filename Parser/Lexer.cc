@@ -4,7 +4,7 @@
 
 #include "Helpers/Macros.hh"
 
-namespace mona {
+namespace mana {
     GrLexer::GrLexer(const std::string& _code)
     {
         std::vector<Token> tokens;

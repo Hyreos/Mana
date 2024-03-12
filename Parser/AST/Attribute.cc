@@ -1,6 +1,6 @@
 #include "Attribute.hh"
 
-namespace mona {
+namespace mana {
     Attribute::Attribute(
         const std::string& name,
         std::unique_ptr<TreeNode> value

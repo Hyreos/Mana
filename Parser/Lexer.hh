@@ -4,7 +4,7 @@
 #include <vector>
 #include <string_view>
 
-namespace mona {
+namespace mana {
     enum class Kind {
         kNumber,
         kPlus, // +

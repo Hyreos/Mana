@@ -46,7 +46,7 @@ public:
 
                         std::cout << "[@] Generating..." << std::endl;
 
-                        auto parser = mona::Parser();
+                        auto parser = mana::Parser();
 
                         parser.registerErrorCallback(LogParserError);
 

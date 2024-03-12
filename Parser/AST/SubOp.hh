@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace mona {
+namespace mana {
     class SubOp : public TreeNode {
     public:
         static constexpr ASTKind kind { ASTKind::kSub };

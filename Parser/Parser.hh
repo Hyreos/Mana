@@ -19,7 +19,7 @@
 
 #include "Lexer.hh"
 
-namespace mona {
+namespace mana {
     class Parser {
     public:
         Parser();
@@ -65,6 +65,6 @@ namespace mona {
         
         int64_t m_tokenIdx;   
 
-        std::unique_ptr<mona::GrLexer> m_lexer;
+        std::unique_ptr<mana::GrLexer> m_lexer;
     };
 }

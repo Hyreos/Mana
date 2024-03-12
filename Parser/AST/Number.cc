@@ -1,6 +1,6 @@
 #include "Number.hh"
 
-namespace mona {
+namespace mana {
     Number::Number(const std::string& identifier) 
         : TreeNode(kind),
             m_identifier { identifier }

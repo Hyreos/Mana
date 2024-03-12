@@ -1,6 +1,6 @@
 #include "Component.hh"
 
-namespace mona {
+namespace mana {
     Component::Component(
         const std::string& name,
         std::vector<std::unique_ptr<TreeNode>> fields

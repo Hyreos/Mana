@@ -1,6 +1,6 @@
 #include "DivOp.hh"
 
-namespace mona {
+namespace mana {
     DivOp::DivOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs)
         : TreeNode(kind), m_lhs { std::move(lhs) }, m_rhs { std::move(rhs) }
     {

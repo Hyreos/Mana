@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace mona {
+namespace mana {
     class TSymbol : public TreeNode {
     public:
         static constexpr ASTKind kind { ASTKind::kTSymbol };

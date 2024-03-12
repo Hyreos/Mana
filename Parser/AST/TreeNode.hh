@@ -6,7 +6,7 @@
 
 #include "Helpers/Deleted.hh"
 
-namespace mona {
+namespace mana {
     enum class ASTKind {
         kAttribute,
         kComponent,

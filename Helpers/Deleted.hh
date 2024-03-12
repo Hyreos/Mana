@@ -3,7 +3,7 @@
 #include <memory>
 #include <functional>
 
-namespace mona {
+namespace mana {
     template<typename T>
     using DeletedUnique_T = std::unique_ptr<T, std::function<void(void*)>>;
 

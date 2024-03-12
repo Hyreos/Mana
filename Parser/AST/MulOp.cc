@@ -1,6 +1,6 @@
 #include "MulOp.hh"
 
-namespace mona {
+namespace mana {
     MulOp::MulOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs)
         : TreeNode(kind),
             m_lhs{std::move(lhs)},

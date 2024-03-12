@@ -2,7 +2,7 @@
 
 #include "TreeNode.hh"
 
-namespace mona {
+namespace mana {
     class Component : public TreeNode {
     public:
         static constexpr ASTKind kind { ASTKind::kComponent };

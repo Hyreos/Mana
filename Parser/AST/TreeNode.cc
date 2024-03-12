@@ -1,6 +1,6 @@
 #include "TreeNode.hh"
 
-namespace mona {
+namespace mana {
     TreeNode::TreeNode(ASTKind kind) 
         : m_kind{ kind } 
     {

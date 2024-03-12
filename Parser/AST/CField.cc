@@ -1,6 +1,6 @@
 #include "CField.hh"
 
-namespace mona {
+namespace mana {
     CField::CField(
         std::unique_ptr<TreeNode> type,
         const std::string& name
