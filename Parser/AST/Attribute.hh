@@ -11,14 +11,14 @@ namespace mona {
 
         Attribute(
             const std::string& name,
-            DeletedUnique_T<TreeNode> value
+            std::unique_ptr<TreeNode> value
         );
 
-        DeletedUnique_T<TreeNode> clone() override;
+        std::unique_ptr<TreeNode> clone() override;
 
         void print(std::ostream& stream, size_t ident) override;
     private:
         std::string m_name;
-        DeletedUnique_T<TreeNode> m_value;
+        std::unique_ptr<TreeNode> m_value;
     };
 }

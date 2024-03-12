@@ -1,14 +1,14 @@
 #include "DivOp.hh"
 
 namespace mona {
-    DivOp::DivOp(DeletedUnique_T<TreeNode> lhs, DeletedUnique_T<TreeNode> rhs)
+    DivOp::DivOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs)
         : TreeNode(kind), m_lhs { std::move(lhs) }, m_rhs { std::move(rhs) }
     {
     }
 
-    DeletedUnique_T<TreeNode> DivOp::clone()
+    std::unique_ptr<TreeNode> DivOp::clone()
     {
-        return MakeUniquePtr<DivOp>(m_lhs->clone(), m_rhs->clone());
+        return std::make_unique<DivOp>(m_lhs->clone(), m_rhs->clone());
     }
 
     void DivOp::print(std::ostream& stream, size_t ident)

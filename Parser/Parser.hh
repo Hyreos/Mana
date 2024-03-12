@@ -45,12 +45,12 @@ namespace mona {
 
         size_t getPrecedence(const Token& tk);
 
-        DeletedUnique_T<TreeNode> parsePrimary();
+        std::unique_ptr<TreeNode> parsePrimary();
 
-        DeletedUnique_T<TreeNode> parseExpression();
+        std::unique_ptr<TreeNode> parseExpression();
 
-        DeletedUnique_T<TreeNode> parseExpression1(
-            DeletedUnique_T<TreeNode> lhs,
+        std::unique_ptr<TreeNode> parseExpression1(
+            std::unique_ptr<TreeNode> lhs,
             size_t min_precedence
         );
 

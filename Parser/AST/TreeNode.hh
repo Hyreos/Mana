@@ -25,8 +25,10 @@ namespace mona {
     public:
         TreeNode(ASTKind kind);
 
-        virtual DeletedUnique_T<TreeNode> clone() = 0;
+        virtual ~TreeNode() = default;
 
+        virtual std::unique_ptr<TreeNode> clone() = 0;
+        
         template<typename T>
         T* cast() 
         {
@@ -42,12 +44,12 @@ namespace mona {
 
         virtual void print(std::ostream& stream, size_t ident) = 0;
 
-        void addAttribute(DeletedUnique_T<TreeNode> attr);
+        void addAttribute(std::unique_ptr<TreeNode> attr);
 
-        std::vector<DeletedUnique_T<TreeNode>>& attributes();
+        std::vector<std::unique_ptr<TreeNode>>& attributes();
     private:
         ASTKind m_kind;
 
-        std::vector<DeletedUnique_T<TreeNode>> m_attributes;
+        std::vector<std::unique_ptr<TreeNode>> m_attributes;
     };
 }

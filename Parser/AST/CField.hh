@@ -10,15 +10,15 @@ namespace mona {
         static constexpr ASTKind kind { ASTKind::kComponentField };
 
         CField(
-            DeletedUnique_T<TreeNode> type,
+            std::unique_ptr<TreeNode> type,
             const std::string& name
         );
 
-        DeletedUnique_T<TreeNode> clone() override;
+        std::unique_ptr<TreeNode> clone() override;
 
         void print(std::ostream& stream, size_t ident) override;
     private:
         std::string m_name;
-        DeletedUnique_T<TreeNode> m_type;
+        std::unique_ptr<TreeNode> m_type;
     };
 }

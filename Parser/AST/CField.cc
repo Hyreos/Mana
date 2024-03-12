@@ -2,7 +2,7 @@
 
 namespace mona {
     CField::CField(
-        DeletedUnique_T<TreeNode> type,
+        std::unique_ptr<TreeNode> type,
         const std::string& name
     ) 
         : TreeNode(kind),
@@ -11,9 +11,9 @@ namespace mona {
     {
     }
 
-    DeletedUnique_T<TreeNode> CField::clone()
+    std::unique_ptr<TreeNode> CField::clone()
     {
-        return MakeUniquePtr<CField>(m_type->clone(), m_name);
+        return std::make_unique<CField>(m_type->clone(), m_name);
     }
 
     void CField::print(std::ostream& stream, size_t ident)

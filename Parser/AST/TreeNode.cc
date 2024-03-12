@@ -6,12 +6,12 @@ namespace mona {
     {
     }
 
-    void TreeNode::addAttribute(DeletedUnique_T<TreeNode> attr)
+    void TreeNode::addAttribute(std::unique_ptr<TreeNode> attr)
     {
         m_attributes.push_back(attr->clone());
     }
 
-    std::vector<DeletedUnique_T<TreeNode>>& TreeNode::attributes()
+    std::vector<std::unique_ptr<TreeNode>>& TreeNode::attributes()
     {
         return m_attributes;
     }

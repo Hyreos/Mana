@@ -3,7 +3,7 @@
 namespace mona {
     Attribute::Attribute(
         const std::string& name,
-        DeletedUnique_T<TreeNode> value
+        std::unique_ptr<TreeNode> value
     ) 
         : TreeNode(kind),
             m_name { name },
@@ -11,9 +11,9 @@ namespace mona {
     {
     }
 
-    DeletedUnique_T<TreeNode> Attribute::clone()
+    std::unique_ptr<TreeNode> Attribute::clone()
     {
-        return MakeUniquePtr<Attribute>(m_name, m_value->clone());
+        return std::make_unique<Attribute>(m_name, m_value->clone());
     }
 
     void Attribute::print(std::ostream& stream, size_t ident)

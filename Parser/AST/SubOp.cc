@@ -1,16 +1,16 @@
 #include "SubOp.hh"
 
 namespace mona {
-    SubOp::SubOp(DeletedUnique_T<TreeNode> lhs, DeletedUnique_T<TreeNode> rhs)
+    SubOp::SubOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs)
         : TreeNode(kind),
             m_lhs{std::move(lhs)},
             m_rhs{std::move(rhs)}
     {
     }
 
-    DeletedUnique_T<TreeNode> SubOp::clone()
+    std::unique_ptr<TreeNode> SubOp::clone()
     {
-        return MakeUniquePtr<SubOp>(m_lhs->clone(), m_rhs->clone());
+        return std::make_unique<SubOp>(m_lhs->clone(), m_rhs->clone());
     }
 
     void SubOp::print(std::ostream& stream, size_t ident)

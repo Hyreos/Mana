@@ -9,13 +9,13 @@ namespace mona {
     public:
         static constexpr ASTKind kind { ASTKind::kMul };
 
-        MulOp(DeletedUnique_T<TreeNode> lhs, DeletedUnique_T<TreeNode> rhs);
+        MulOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs);
 
-        DeletedUnique_T<TreeNode> clone() override;
+        std::unique_ptr<TreeNode> clone() override;
 
         void print(std::ostream& stream, size_t ident) override;
     private:
-        DeletedUnique_T<TreeNode> m_lhs;
-        DeletedUnique_T<TreeNode> m_rhs;
+        std::unique_ptr<TreeNode> m_lhs;
+        std::unique_ptr<TreeNode> m_rhs;
     };
 }

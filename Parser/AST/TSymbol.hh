@@ -11,7 +11,7 @@ namespace mona {
 
         TSymbol(const std::string& identifier);
 
-        DeletedUnique_T<TreeNode> clone() override;
+        std::unique_ptr<TreeNode> clone() override;
 
         void print(std::ostream& stream, size_t ident) override;
     private:

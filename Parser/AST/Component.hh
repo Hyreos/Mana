@@ -9,14 +9,14 @@ namespace mona {
 
         Component(
             const std::string& name,
-            std::vector<DeletedUnique_T<TreeNode>> fields
+            std::vector<std::unique_ptr<TreeNode>> fields
         );
 
-        DeletedUnique_T<TreeNode> clone() override;
+        std::unique_ptr<TreeNode> clone() override;
 
         void print(std::ostream& stream, size_t ident) override;
     private:
-        std::vector<DeletedUnique_T<TreeNode>> m_fields;
+        std::vector<std::unique_ptr<TreeNode>> m_fields;
 
         std::string m_name;
     };

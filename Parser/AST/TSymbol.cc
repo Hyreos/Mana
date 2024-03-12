@@ -7,9 +7,9 @@ namespace mona {
     {
     }
 
-    DeletedUnique_T<TreeNode> TSymbol::clone()
+    std::unique_ptr<TreeNode> TSymbol::clone()
     {
-        return MakeUniquePtr<TSymbol>(m_identifier);
+        return std::make_unique<TSymbol>(m_identifier);
     }
 
     void TSymbol::print(std::ostream& stream, size_t ident)

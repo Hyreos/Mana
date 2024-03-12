@@ -30,7 +30,7 @@ namespace mona {
                 m_tokenIdx--;
             }
 
-        std::vector<DeletedUnique_T<TreeNode>> tr_nodes;
+        std::vector<std::unique_ptr<TreeNode>> tr_nodes;
         
         while (canPeek(1)) {
             auto r = parseExpression();
@@ -77,7 +77,7 @@ namespace mona {
         mana::unreachable();
     }
 
-    DeletedUnique_T<TreeNode> Parser::parseExpression() {
+    std::unique_ptr<TreeNode> Parser::parseExpression() {
         return parseExpression1(parsePrimary(), 1ull);
     }
 
@@ -96,8 +96,8 @@ namespace mona {
         mana::unreachable();
     }
 
-    DeletedUnique_T<TreeNode> Parser::parseExpression1(
-        DeletedUnique_T<TreeNode> lhs,
+    std::unique_ptr<TreeNode> Parser::parseExpression1(
+        std::unique_ptr<TreeNode> lhs,
         size_t min_precedence
     )
     {
@@ -136,19 +136,19 @@ namespace mona {
 
                 switch (op->kind) {
                     case Kind::kPlus: {
-                        lhs = MakeUniquePtr<SumOp>(std::move(lhs), std::move(rhs));
+                        lhs = std::make_unique<SumOp>(std::move(lhs), std::move(rhs));
                     } break;
 
                     case Kind::kMinus: {
-                        lhs = MakeUniquePtr<SubOp>(std::move(lhs), std::move(rhs));
+                        lhs = std::make_unique<SubOp>(std::move(lhs), std::move(rhs));
                     } break;
 
                     case Kind::kSlash: {
-                        lhs = MakeUniquePtr<DivOp>(std::move(lhs), std::move(rhs));
+                        lhs = std::make_unique<DivOp>(std::move(lhs), std::move(rhs));
                     } break;
 
                     case Kind::kAsterisk: {
-                        lhs = MakeUniquePtr<MulOp>(std::move(lhs), std::move(rhs));
+                        lhs = std::make_unique<MulOp>(std::move(lhs), std::move(rhs));
                     } break;
                     default:
                         mana::unreachable();
@@ -161,13 +161,13 @@ namespace mona {
         }
     }
     
-    DeletedUnique_T<TreeNode> Parser::parsePrimary()
+    std::unique_ptr<TreeNode> Parser::parsePrimary()
     {
         auto tk = consume();
 
         if (!tk) return nullptr;
 
-        DeletedUnique_T<TreeNode> result;
+        std::unique_ptr<TreeNode> result;
 
         switch (tk->kind) {
             case Kind::kEOF:
@@ -188,9 +188,9 @@ namespace mona {
 
                 MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftParenthesis), "Missing ')' in attribute."); // )
 
-                auto attr = MakeUniquePtr<Attribute>(std::string(attr_name->view), std::move(attr_value));
+                auto attr = std::make_unique<Attribute>(std::string(attr_name->view), std::move(attr_value));
 
-                DeletedUnique_T<TreeNode> nxt;
+                std::unique_ptr<TreeNode> nxt;
                 
                 MONA_TRY_GET(parsePrimary(), nxt, "Failed to gerante ASTNode");
 
@@ -200,12 +200,12 @@ namespace mona {
             } break;
 
             case Kind::kNumber: {
-                return MakeUniquePtr<Number>(std::string(tk->view));
+                return std::make_unique<Number>(std::string(tk->view));
             } break;
 
             case Kind::kIdentifier: {
                 if (tk->view == "component") {
-                    std::vector<DeletedUnique_T<TreeNode>> fields;
+                    std::vector<std::unique_ptr<TreeNode>> fields;
 
                     const Token* identifier;
                     
@@ -222,7 +222,7 @@ namespace mona {
                         
                         MONA_TRY_GET(consumeCheck(Kind::kIdentifier), field_name, "Invalid token");
 
-                        fields.push_back(MakeUniquePtr<CField>(std::move(field_type), std::string(field_name->view)));
+                        fields.push_back(std::make_unique<CField>(std::move(field_type), std::string(field_name->view)));
                     }
 
                     MANA_CHECK_MAYBE_RETURN(
@@ -230,9 +230,9 @@ namespace mona {
                         "Missing '}' at end of component declaration."
                     );
 
-                    result = MakeUniquePtr<Component>(std::string(identifier->view), std::move(fields));
-                } else if (tk->view == "string") result = MakeUniquePtr<TSymbol>("string");
-                else result = MakeUniquePtr<TSymbol>(std::string(tk->view));
+                    result = std::make_unique<Component>(std::string(identifier->view), std::move(fields));
+                } else if (tk->view == "string") result = std::make_unique<TSymbol>("string");
+                else result = std::make_unique<TSymbol>(std::string(tk->view));
             } break;
             case Kind::kAsterisk:
             case Kind::kMinus:

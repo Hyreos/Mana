@@ -3,7 +3,7 @@
 namespace mona {
     Component::Component(
         const std::string& name,
-        std::vector<DeletedUnique_T<TreeNode>> fields
+        std::vector<std::unique_ptr<TreeNode>> fields
     ) 
         : TreeNode(kind),
             m_fields{ std::move(fields) },
@@ -11,13 +11,13 @@ namespace mona {
     {
     }
 
-    DeletedUnique_T<TreeNode> Component::clone()
+    std::unique_ptr<TreeNode> Component::clone()
     {
-        std::vector<DeletedUnique_T<TreeNode>> cfields;
+        std::vector<std::unique_ptr<TreeNode>> cfields;
 
         for (auto& f : m_fields) cfields.push_back(f->clone());
 
-        return MakeUniquePtr<Component>(m_name, std::move(cfields));
+        return std::make_unique<Component>(m_name, std::move(cfields));
     }
 
     void Component::print(std::ostream& stream, size_t ident)
