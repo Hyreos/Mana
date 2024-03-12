@@ -182,11 +182,11 @@ namespace mona {
                     std::format("Invalid identifier '{}' in attribute.", attr_name->view)
                 );
             
-                MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kRightParenthesis), "Missing '(' in attribute."); // (
+                MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftParen), "Missing '(' in attribute."); // (
                 
                 auto attr_value = parseExpression();
 
-                MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftParenthesis), "Missing ')' in attribute."); // )
+                MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kRightParen), "Missing ')' in attribute."); // )
 
                 auto attr = std::make_unique<Attribute>(std::string(attr_name->view), std::move(attr_value));
 
@@ -211,10 +211,10 @@ namespace mona {
                     
                     MONA_TRY_GET(consumeCheck(Kind::kIdentifier), identifier, "Missing identifier in component declaration.");
                     
-                    MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kRightBracket), "Missing '{' in component declaration");
+                    MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftBracket), "Missing '{' in component declaration");
 
                     // Keep looping until next token is a left bracket
-                    while (canPeek(1) && peek(1)->kind != Kind::kLeftBracket) {                        
+                    while (canPeek(1) && peek(1)->kind != Kind::kRightBracket) {                        
                         auto field_type = parsePrimary();
 
                         // Peek a identifier
@@ -226,7 +226,7 @@ namespace mona {
                     }
 
                     MANA_CHECK_MAYBE_RETURN(
-                        consumeCheck(Kind::kLeftBracket), 
+                        consumeCheck(Kind::kRightBracket), 
                         "Missing '}' at end of component declaration."
                     );
 
@@ -238,8 +238,8 @@ namespace mona {
             case Kind::kMinus:
             case Kind::kSlash:
             case Kind::kPlus:
-            case Kind::kRightParenthesis:
-            case Kind::kLeftParenthesis:
+            case Kind::kLeftParen:
+            case Kind::kRightParen:
                 MANA_FATAL_NO_RETURN("Received operator while doing primary parsing.");
             default:
                 MANA_FATAL_NO_RETURN("Invalid token.");

@@ -125,7 +125,7 @@ namespace mona {
                     break;
                 case '(':
                     tokens.push_back(Token {
-                        .kind = Kind::kRightParenthesis,
+                        .kind = Kind::kLeftParen,
                         .view = { &m_code[m_offset], 1 }
                     });
                     advance();
@@ -165,7 +165,7 @@ namespace mona {
                     break;
                 case ')':
                     tokens.push_back(Token {
-                        .kind = Kind::kLeftParenthesis,
+                        .kind = Kind::kRightParen,
                         .view = { &m_code[m_offset], 1 }
                     });
                     advance();
@@ -228,14 +228,14 @@ namespace mona {
                     break;
                 case '{':
                     tokens.push_back(Token {
-                        .kind = Kind::kRightBracket,
+                        .kind = Kind::kLeftBracket,
                         .view = { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '}':
                     tokens.push_back(Token {
-                        .kind = Kind::kLeftBracket,
+                        .kind = Kind::kRightBracket,
                         .view = { &m_code[m_offset], 1 }
                     });
                     advance();

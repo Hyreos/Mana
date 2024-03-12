@@ -12,8 +12,8 @@ namespace mona {
         kAsterisk, // *
         kDot, // .
         kIdentifier,
-        kLeftParenthesis, // (
-        kRightParenthesis, // )
+        kRightParen, // (
+        kLeftParen, // )
         kEqual, // =
         kGreaterThan, // >
         kLessThan, // <
