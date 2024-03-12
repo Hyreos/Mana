@@ -4,6 +4,7 @@
 #include <functional>
 #include <cstdint>
 #include <type_traits>
+#include <limits>
 
 #define ASAN_CRASH() *reinterpret_cast<size_t*>(0x1337) = 0xdeadbeef;
 
