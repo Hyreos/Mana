@@ -101,14 +101,14 @@ namespace mana {
                     } else if (matches(0, 's')) {
                         advance();
 
-                        if (std::in_range<uint16_t>(value)) {
+                        if (mana::in_range<uint16_t>(value)) {
                             tokens.push_back(Token {
                                 .kind = Token::Type::kU16Lit,
                                 .value = static_cast<uint16_t>(value)
                             });
                         } else MANA_FATAL_NO_RETURN("Value overflows u16 limits.");
                     } else {
-                        if (std::in_range<uint32_t>(value)) {
+                        if (mana::in_range<uint32_t>(value)) {
                             tokens.push_back(Token {
                                 .kind = Token::Type::kU32Lit,
                                 .value = static_cast<uint32_t>(value)
@@ -118,7 +118,7 @@ namespace mana {
                 } else if (matches(0, 'l')) {
                     advance();
 
-                    if (std::in_range<int64_t>(value)) {
+                    if (mana::in_range<int64_t>(value)) {
                         tokens.push_back(Token {
                             .kind = Token::Type::kI64Lit,
                             .value = static_cast<int64_t>(value)
@@ -128,14 +128,14 @@ namespace mana {
                 } else if (matches(0, 's')) {
                     advance();
 
-                    if (std::in_range<int16_t>(value)) {
+                    if (mana::in_range<int16_t>(value)) {
                         tokens.push_back(Token {
                             .kind = Token::Type::kI16Lit,
                             .value = static_cast<int16_t>(value)
                         });
                     } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
                 } else {
-                    if (std::in_range<int32_t>(value)) {
+                    if (mana::in_range<int32_t>(value)) {
                         tokens.push_back(Token {
                             .kind = Token::Type::kI32Lit,
                             .value = static_cast<int32_t>(value)
