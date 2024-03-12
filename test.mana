@@ -1,5 +1,5 @@
 component A {
-    @serialize(0xFFFFus + 0xFFFFFFFFu / 0xFFFFFFFFFFl + 0xFFFFFFFFFFFFFFFFul) 
+    @serialize(0xFFFFus + 0xFFFFFFFFu / -0xFFFFFFFFFFl + 0xFFFFFFFFFFFFFFFFul) 
     string p1
 
     @serialize(0x15 + 6 / 8 + 8 * 9) 

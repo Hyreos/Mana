@@ -55,7 +55,10 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/SubOp.cc
                                         Parser/AST/SumOp.cc
                                         Parser/AST/MulOp.cc
-                                        Parser/AST/DivOp.cc)
+                                        Parser/AST/DivOp.cc
+                                        
+                                        Parser/AST/UnaryMinus.cc
+                                        Parser/AST/UnaryPlus.cc)
 
 if (MANA_BUILD_CLI)
     add_executable(manac)

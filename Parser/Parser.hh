@@ -19,6 +19,9 @@
 #include "AST/MulOp.hh"
 #include "AST/DivOp.hh"
 
+#include "AST/UnaryMinus.hh"
+#include "AST/UnaryPlus.hh"
+
 #include "Helpers/Deleted.hh"
 #include "Helpers/Macros.hh"
 

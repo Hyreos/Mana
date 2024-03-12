@@ -17,7 +17,10 @@ namespace mana {
         kSlash,
         kMul,
         kMod,
-        
+
+        kUnaryMinus,
+        kUnaryPlus,
+
         kInt64Lit,
         kInt32Lit,
         kInt16Lit,

@@ -252,10 +252,12 @@ namespace mana {
                 } else if (tk->asStringView() == "string") result = std::make_unique<TSymbol>("string");
                 else result = std::make_unique<TSymbol>(tk->asString());
             } break;
-            case Token::Type::kAsterisk:
-            case Token::Type::kMinus:
-            case Token::Type::kSlash:
+            case Token::Type::kMinus: {
+                result = std::make_unique<UnaryMinus>(parsePrimary());
+            } break;
             case Token::Type::kPlus:
+            case Token::Type::kAsterisk:
+            case Token::Type::kSlash:
             case Token::Type::kLeftParen:
             case Token::Type::kRightParen:
                 MANA_FATAL_NO_RETURN("Received operator while doing primary parsing.");

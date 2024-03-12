@@ -19,7 +19,7 @@ namespace mana {
 
         m_lhs->print(stream, ident);
 
-        stream << "+";
+        stream << " + ";
 
         m_rhs->print(stream, ident);
 

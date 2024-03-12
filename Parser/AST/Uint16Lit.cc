@@ -14,6 +14,6 @@ namespace mana {
 
     void Uint16Lit::print(std::ostream& stream, size_t ident)
     {
-        stream << m_value;
+        stream << "(" << m_value << ")";
     }
 }
