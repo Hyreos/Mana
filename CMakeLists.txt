@@ -9,6 +9,7 @@ add_library(${PROJECT_NAME})
 option(MANA_IS_ASAN "Enable ASAN build" OFF)
 option(MANA_IS_VERBOSE "Enable verbose mode" OFF)
 option(MANA_BUILD_CLI "Enable command-line tool build" ON)
+option(MANA_IS_DYNAMIC "Enable dynamic MSVC runtime linking" OFF)
 
 if (MANA_IS_ASAN)
     target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
@@ -26,7 +27,26 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     endif()
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
+if (MANA_IS_DYNAMIC)
+    set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+else()
+    set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
+
+if (MANA_IS_ASAN)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+        message(FATAL_ERROR "Clang ASAN builds are not supported in debug mode.")
+    endif()
+
+    if (MANA_IS_DYNAMIC)
+        if (WIN32)
+            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+                message(FATAL_ERROR "Windows dynamic ASAN builds are not supported on Clang")
+            endif()
+        endif()
+    endif()
+endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
@@ -81,7 +101,11 @@ if (MANA_BUILD_CLI)
         endif()
     endif()
 
-    set_target_properties(manac PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
+    if (MANA_IS_DYNAMIC)
+        set_target_properties(manac PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    else()
+        set_target_properties(manac PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
 
     target_link_libraries(manac PRIVATE ${PROJECT_NAME})
 
