@@ -2,7 +2,7 @@ component A {
     @serialize(1) 
     string p1
 
-    @serialize(2 + 6 + 8 + 9) 
+    @serialize(2 + 6 / 8 + 8 * 9) 
     string p2
 }
 

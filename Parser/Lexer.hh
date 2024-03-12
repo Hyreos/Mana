@@ -50,11 +50,13 @@ namespace mona {
 
         size_t size() const;
     private:
+        bool matches(size_t offset, char c);
+
         bool canPeek(size_t offset);
 
         char peek(size_t offset);
 
-        char consume();
+        char advance();
 
         bool isNumber(char c) const;
 

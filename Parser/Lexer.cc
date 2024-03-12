@@ -22,21 +22,21 @@ namespace mona {
                 number = std::string_view(&m_code[m_offset], 1);
                 auto start = m_offset;
 
-                consume();
+                advance();
 
                 // 0[b|x|h]
                 //     ^
                 // ____|_
-                if (peek(0) == 'b' || peek(0) == 'x' || peek(0) == 'h') {
-                    // consume
-                    consume();
+                if (matches(0, 'b') || matches(0, 'x') || matches(0, 'h')) {
+                    // advance
+                    advance();
 
                     // Next token should be a number?????????
                     // Loop until the number is exausted
                     while (isNumber(peek(0))) {
                         number = { &m_code[start], m_offset - start + 1 };
                         
-                        consume();
+                        advance();
                     }
                 } else {
                     // Next token should be a number?????????
@@ -44,27 +44,27 @@ namespace mona {
                     while (isNumber(peek(0))) {
                         number = { &m_code[start], m_offset - start + 1 };
                         
-                        consume();
+                        advance();
                     }
 
                     // If after constructing the number we have a '.', then it's a fractional
-                    if (peek(0) == '.') {
-                        consume(); // .
+                    if (matches(0, '.')) {
+                        advance(); // .
 
                         // Next token should be a number?????????
                         // Loop until the number is exausted
                         while (isNumber(peek(0))) {
                             number = { &m_code[start], m_offset - start + 1 };
                             
-                            consume();
+                            advance();
                         }   
                     }
                 }
 
-                if (peek(0) == 'u') {
+                if (matches(0, 'u')) {
                     number = { &m_code[start], m_offset - start + 1 };
 
-                    consume();
+                    advance();
                 }
 
                 tokens.push_back(Token {
@@ -83,7 +83,7 @@ namespace mona {
                 while (isIdentifierOrNumber(peek(0))) {
                     identifier = { &m_code[start], m_offset - start + 1 };
                     
-                    consume();
+                    advance();
                 }
 
                 tokens.push_back(Token {
@@ -100,42 +100,42 @@ namespace mona {
                         .kind = Kind::kEqual,
                         .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '>':
                     tokens.push_back(Token {
                         .kind = Kind::kGreaterThan,
                         .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '<':
                     tokens.push_back(Token {
                         .kind = Kind::kLessThan,
                         .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '!':
                     tokens.push_back(Token {
                         .kind = Kind::kInv,
                         .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '(':
                     tokens.push_back(Token {
                         .kind = Kind::kRightParenthesis,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '%':
                     tokens.push_back(Token {
                         .kind = Kind::kMod,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
 
                 case '@':
@@ -143,130 +143,125 @@ namespace mona {
                         .kind = Kind::kAt,
                         .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
-
+                    advance();
                     break;
                 case '/':
-                    if (canPeek(1) && peek(1) == '*') {
-                        consume(); // /
-                        consume(); // *
+                    if (matches(1, '*')) {
+                        advance(); // /
+                        advance(); // *
 
-                        while (peek(0) != '*' || canPeek(1) && peek(1) != '/') 
-                            consume();
+                        while (!matches(0, '*') && !matches(1, '/')) 
+                            advance();
 
-                        consume(); // *
-                        consume(); // /
+                        advance(); // *
+                        advance(); // /
                     } else {
                         tokens.push_back(Token {
                             .kind = Kind::kSlash,
-                            .view = std::string_view(&m_code[m_offset], 1)
+                            .view = { &m_code[m_offset], 1 }
                         });
-                        consume();
+                        advance();
                     }
-
                     break;
                 case ')':
                     tokens.push_back(Token {
                         .kind = Kind::kLeftParenthesis,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '"':
                     tokens.push_back(Token {
                         .kind = Kind::kDoubleQuote,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '\'':
                     tokens.push_back(Token {
                         .kind = Kind::kSingleQuote,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '+':
                     tokens.push_back(Token {
                         .kind = Kind::kPlus,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '-':
                     tokens.push_back(Token {
                         .kind = Kind::kMinus,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '*':
                     tokens.push_back(Token {
                         .kind = Kind::kAsterisk,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '.':
                     tokens.push_back(Token {
                         .kind = Kind::kDot,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case ',':
                     tokens.push_back(Token {
                         .kind = Kind::kComma,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '\n':
                     tokens.push_back(Token {
                         .kind = Kind::kLnBrk,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '{':
                     tokens.push_back(Token {
                         .kind = Kind::kRightBracket,
                         .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '}':
                     tokens.push_back(Token {
                         .kind = Kind::kLeftBracket,
                         .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 case '\0':
                 case EOF:
                     tokens.push_back(Token {
                         .kind = Kind::kEOF,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
 
-                    consume();
+                    advance();
 
                     found_eof = true;
-                    
                     break;
                 case '\t':
                 case ' ':
                     tokens.push_back(Token {
                         .kind = Kind::kWS,
-                        .view = std::string_view(&m_code[m_offset], 1)
+                        .view = { &m_code[m_offset], 1 }
                     });
-                    consume();
+                    advance();
                     break;
                 default:
                     std::cerr << "ERROR: Unhandled token '" << peek(0) << "'" << std::endl;
-                    
-                    std::exit(1);
-                    
+                    std::exit(1);                   
                     return;
             }
         }
@@ -280,6 +275,11 @@ namespace mona {
         }
 
         m_tokens = std::move(tokens);
+    }
+
+    bool GrLexer::matches(size_t offset, char c)
+    {
+        return (canPeek(offset) && peek(offset) == c);
     }
 
     char GrLexer::peek(size_t off)
@@ -297,7 +297,7 @@ namespace mona {
         return (m_offset + off < m_code.size());
     }
 
-    char GrLexer::consume()
+    char GrLexer::advance()
     {
         return m_code[m_offset++];
     }
