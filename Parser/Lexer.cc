@@ -6,7 +6,7 @@
 #include "Helpers/Macros.hh"
 
 namespace mana {
-    GrLexer::GrLexer(const std::string& _code)
+    Lexer::Lexer(const std::string& _code)
     {
         std::vector<Token> tokens;
 
@@ -382,12 +382,12 @@ namespace mana {
 #       endif
     }
 
-    bool GrLexer::matches(size_t offset, char c)
+    bool Lexer::matches(size_t offset, char c)
     {
         return (canPeek(offset) && peek(offset) == c);
     }
 
-    bool GrLexer::isHexDigit(size_t offset)
+    bool Lexer::isHexDigit(size_t offset)
     {
         if (!canPeek(1)) return false;
 
@@ -396,42 +396,42 @@ namespace mana {
         return ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
     }
 
-    char GrLexer::peek(size_t off)
+    char Lexer::peek(size_t off)
     {
         return m_code[m_offset + off];
     }
 
-    size_t GrLexer::size() const
+    size_t Lexer::size() const
     {
         return m_tokens.size();
     }
 
-    bool GrLexer::canPeek(size_t off)
+    bool Lexer::canPeek(size_t off)
     {
         return (m_offset + off < m_code.size());
     }
 
-    char GrLexer::advance()
+    char Lexer::advance()
     {
         return m_code[m_offset++];
     }
 
-    bool GrLexer::isIdentifier(char c) const
+    bool Lexer::isIdentifier(char c) const
     {
         return ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_');
     }
 
-    bool GrLexer::isNumber(char c) const
+    bool Lexer::isNumber(char c) const
     {
         return (c >= '0' && c <= '9');
     }
 
-    bool GrLexer::isIdentifierOrNumber(char c) const
+    bool Lexer::isIdentifierOrNumber(char c) const
     {
         return (isNumber(c) || isIdentifier(c));
     }
 
-    Token& GrLexer::operator[](size_t idx)
+    Token& Lexer::operator[](size_t idx)
     {
         CHECK(idx < m_tokens.size());
 

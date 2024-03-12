@@ -21,7 +21,7 @@ namespace mana {
         m_stats.lineIndex = 1;
         m_stats.columnIndex = 0;
 
-        m_lexer = std::make_unique<mana::GrLexer>(code);
+        m_lexer = std::make_unique<mana::Lexer>(code);
 
         if (m_lexer->size() > 0)
             if ((*m_lexer)[0].kind == Token::Type::kWS || (*m_lexer)[0].kind == Token::Type::kLnBrk) {

@@ -95,9 +95,9 @@ namespace mana {
         }
     };
     
-    class GrLexer {
+    class Lexer {
     public:
-        GrLexer(const std::string& code);
+        Lexer(const std::string& code);
     
         Token& operator[](size_t idx);
 

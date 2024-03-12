@@ -65,6 +65,6 @@ namespace mana {
         
         int64_t m_tokenIdx;   
 
-        std::unique_ptr<mana::GrLexer> m_lexer;
+        std::unique_ptr<mana::Lexer> m_lexer;
     };
 }
