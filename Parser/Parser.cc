@@ -183,7 +183,7 @@ namespace mana {
                 
                 MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), attr_name, "Missing identifier in attribute.");
 
-                MANA_CHECK_MAYBE_RETURN(attr_name->asStr() == "serialize", "Invalid identifier in attribute.");
+                MANA_CHECK_MAYBE_RETURN(attr_name->asStringView() == "serialize", "Invalid identifier in attribute.");
             
                 MANA_CHECK_MAYBE_RETURN(consumeCheck (Token::Type::kLeftParen), "Missing '(' in attribute."); // (
                 
@@ -191,7 +191,7 @@ namespace mana {
 
                 MANA_CHECK_MAYBE_RETURN(consumeCheck (Token::Type::kRightParen), "Missing ')' in attribute."); // )
 
-                auto attr = std::make_unique<Attribute>(std::string(attr_name->asStr()), std::move(attr_value));
+                auto attr = std::make_unique<Attribute>(attr_name->asString(), std::move(attr_value));
 
                 std::unique_ptr<TreeNode> nxt;
                 
@@ -222,7 +222,7 @@ namespace mana {
                 break;
 
             case Token::Type::kIdentifier: {
-                if (tk->asStr() == "component") {
+                if (tk->asStringView() == "component") {
                     std::vector<std::unique_ptr<TreeNode>> fields;
 
                     const Token* identifier;
@@ -240,7 +240,7 @@ namespace mana {
                         
                         MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), field_name, "Invalid token");
 
-                        fields.push_back(std::make_unique<CField>(std::move(field_type), std::string(field_name->asStr())));
+                        fields.push_back(std::make_unique<CField>(std::move(field_type), field_name->asString()));
                     }
 
                     MANA_CHECK_MAYBE_RETURN(
@@ -248,9 +248,9 @@ namespace mana {
                         "Missing '}' at end of component declaration."
                     );
 
-                    result = std::make_unique<Component>(std::string(identifier->asStr()), std::move(fields));
-                } else if (tk->asStr() == "string") result = std::make_unique<TSymbol>("string");
-                else result = std::make_unique<TSymbol>(std::string(tk->asStr()));
+                    result = std::make_unique<Component>(identifier->asString(), std::move(fields));
+                } else if (tk->asStringView() == "string") result = std::make_unique<TSymbol>("string");
+                else result = std::make_unique<TSymbol>(tk->asString());
             } break;
             case Token::Type::kAsterisk:
             case Token::Type::kMinus:
