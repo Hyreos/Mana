@@ -100,7 +100,7 @@ namespace mana {
                         });
                     } else if (matches(0, 's')) {
                         advance();
-                        
+
                         if (auto [v, s] = checkConv<uint32_t>(value); s) {
                             value = v;
 
@@ -119,37 +119,24 @@ namespace mana {
                             });
                         } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
                     }
-                } else if (matches(0, 'i')) {
+                } else if (matches(0, 'l')) {
                     advance();
 
-                    if (matches(0, 'l')) {
-                        advance();
+                    tokens.push_back(Token {
+                        .kind = Token::Type::kI64Lit,
+                        .value = value
+                    });
+                } else if (matches(0, 's')) {
+                    advance();
+
+                    if (auto [v, s] = checkConv<int16_t>(value); s) {
+                        value = v;
 
                         tokens.push_back(Token {
-                            .kind = Token::Type::kI64Lit,
+                            .kind = Token::Type::kI16Lit,
                             .value = value
                         });
-                    } else if (matches(0, 's')) {
-                        advance();
-
-                        if (auto [v, s] = checkConv<int16_t>(value); s) {
-                            value = v;
-
-                            tokens.push_back(Token {
-                                .kind = Token::Type::kI16Lit,
-                                .value = value
-                            });
-                        } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
-                    } else {
-                        if (auto [v, s] = checkConv<int32_t>(value); s) {
-                            value = v;
-
-                            tokens.push_back(Token {
-                                .kind = Token::Type::kI32Lit,
-                                .value = value
-                            });
-                        } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
-                    }
+                    } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
                 } else {
                     if (auto [v, s] = checkConv<int32_t>(value); s) {
                         value = v;
