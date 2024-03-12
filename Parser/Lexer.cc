@@ -99,6 +99,8 @@ namespace mana {
                             .value = value
                         });
                     } else if (matches(0, 's')) {
+                        advance();
+                        
                         if (auto [v, s] = checkConv<uint32_t>(value); s) {
                             value = v;
 
@@ -128,6 +130,8 @@ namespace mana {
                             .value = value
                         });
                     } else if (matches(0, 's')) {
+                        advance();
+
                         if (auto [v, s] = checkConv<int16_t>(value); s) {
                             value = v;
 
