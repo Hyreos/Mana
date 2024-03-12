@@ -106,7 +106,7 @@ namespace mana {
     template<class R, class T>
     constexpr bool in_range(T t) noexcept
     {
-        return std::cmp_greater_equal(t, std::numeric_limits<R>::min()) &&
-            std::cmp_less_equal(t, std::numeric_limits<R>::max());
+        return cmp_greater_equal(t, std::numeric_limits<R>::min()) &&
+            cmp_less_equal(t, std::numeric_limits<R>::max());
     }
 }
