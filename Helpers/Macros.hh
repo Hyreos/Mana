@@ -2,6 +2,7 @@
 
 #include <string>
 #include <functional>
+#include <cstdint>
 #include <type_traits>
 
 #define ASAN_CRASH() *reinterpret_cast<size_t*>(0x1337) = 0xdeadbeef;
