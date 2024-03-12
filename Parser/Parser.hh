@@ -29,13 +29,22 @@ namespace mona {
 
         void registerErrorCallback(ErrorCallback_T callback);
     private:
+        enum class Associativity {
+            kLeft,
+            kRight
+        };
+
         bool canPeek(int64_t off, bool skip_ws = true, bool skip_lnbrks = true);
 
         const Token* consumeCheck(Kind kind, size_t off = 1, bool skip_ws = true, bool skip_lnbrks = true);
 
         const Token* consume(size_t off = 1, bool skip_ws = true, bool skip_lnbrks = true);
 
-        bool isOperator(Token tok);
+        bool isOperator(const Token& tok);
+
+        Associativity getAssociativity(const Token& tk);
+
+        size_t getPrecedence(const Token& tk);
 
         DeletedUnique_T<TreeNode> parsePrimary();
 

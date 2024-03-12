@@ -29,20 +29,15 @@ namespace mona {
 
                 m_tokenIdx--;
             }
+
+        std::vector<DeletedUnique_T<TreeNode>> tr_nodes;
         
         while (canPeek(1)) {
-            auto expr = parseExpression();
-            expr->print(std::cout);
-            std::cout << std::endl;
-            //std::cout <<  " @ ";
+            tr_nodes.push_back(parseExpression());
         }
-
-        std::cout << std::endl;
-
-        for (DeletedUnique_T<TreeNode> ptr = parsePrimary(); ptr; ptr = parsePrimary()) {}
     }
 
-    static size_t getPrecedence(Token tk) {
+    size_t Parser::getPrecedence(const Token& tk) {
         switch (tk.kind) {
             case Kind::kMinus:
             case Kind::kPlus:
@@ -57,12 +52,7 @@ namespace mona {
         }
     }
 
-    enum class Associativity {
-        kLeft,
-        kRight
-    };
-
-    static Associativity getAssociativity(Token tk) {
+    Parser::Associativity Parser::getAssociativity(const Token& tk) {
         switch (tk.kind) {
             case Kind::kMinus:
             case Kind::kPlus:
@@ -80,7 +70,7 @@ namespace mona {
         return parseExpression1(parsePrimary(), 1ull);
     }
 
-    bool Parser::isOperator(Token tok)
+    bool Parser::isOperator(const Token& tok)
     {
         switch (tok.kind) {
             case Kind::kAsterisk:
@@ -100,56 +90,64 @@ namespace mona {
         size_t min_precedence
     )
     {
-        auto* lookahead = consume();
+        if (!canPeek(1)) return lhs;
 
-        MANA_CHECK_MAYBE_RETURN(lookahead, "Trying to consume end of stream.");
+        auto* lookahead = peek(1);
 
-        while (lookahead && isOperator(*lookahead) && getPrecedence(*lookahead) >= min_precedence) {
-            auto op = lookahead;
+        if (isOperator(*lookahead)) {
+            consume();
 
-            auto rhs = parsePrimary();
+            MANA_CHECK_MAYBE_RETURN(lookahead, "Trying to consume end of stream.");
 
-            MANA_CHECK_MAYBE_RETURN(rhs, "Error while parsing token.");
+            while (lookahead && isOperator(*lookahead) && getPrecedence(*lookahead) >= min_precedence) {
+                auto op = lookahead;
 
-            lookahead = peek(1);
+                auto rhs = parsePrimary();
 
-            while (lookahead && (
-                isOperator(*lookahead) 
-                && getPrecedence(*lookahead) >= getPrecedence(*op) 
-                || (getAssociativity(*lookahead) == Associativity::kRight 
-                    && getPrecedence(*lookahead) == getPrecedence(*op))
-            ))
-            {
-                rhs = parseExpression1(
-                    std::move(rhs),
-                    getPrecedence(*op) + ((getPrecedence(*lookahead) > getPrecedence(*op)) ? 1 : 0) 
-                );
+                MANA_CHECK_MAYBE_RETURN(rhs, "Error while parsing token.");
 
                 lookahead = peek(1);
+
+                while (lookahead && (
+                    isOperator(*lookahead) 
+                    && getPrecedence(*lookahead) >= getPrecedence(*op) 
+                    || (getAssociativity(*lookahead) == Associativity::kRight 
+                        && getPrecedence(*lookahead) == getPrecedence(*op))
+                ))
+                {
+                    rhs = parseExpression1(
+                        std::move(rhs),
+                        getPrecedence(*op) + ((getPrecedence(*lookahead) > getPrecedence(*op)) ? 1 : 0) 
+                    );
+
+                    lookahead = peek(1);
+                }
+
+                switch (op->kind) {
+                    case Kind::kPlus: {
+                        lhs = MakeUniquePtr<SumOp>(std::move(lhs), std::move(rhs));
+                    } break;
+
+                    case Kind::kMinus: {
+                        lhs = MakeUniquePtr<SubOp>(std::move(lhs), std::move(rhs));
+                    } break;
+
+                    case Kind::kSlash: {
+                        lhs = MakeUniquePtr<DivOp>(std::move(lhs), std::move(rhs));
+                    } break;
+
+                    case Kind::kAsterisk: {
+                        lhs = MakeUniquePtr<MulOp>(std::move(lhs), std::move(rhs));
+                    } break;
+                    default:
+                        mana::unreachable();
+                }
             }
 
-            switch (op->kind) {
-                case Kind::kPlus: {
-                    lhs = MakeUniquePtr<SumOp>(std::move(lhs), std::move(rhs));
-                } break;
-
-                case Kind::kMinus: {
-                    lhs = MakeUniquePtr<SubOp>(std::move(lhs), std::move(rhs));
-                } break;
-
-                case Kind::kSlash: {
-                    lhs = MakeUniquePtr<DivOp>(std::move(lhs), std::move(rhs));
-                } break;
-
-                case Kind::kAsterisk: {
-                    lhs = MakeUniquePtr<MulOp>(std::move(lhs), std::move(rhs));
-                } break;
-                default:
-                    mana::unreachable();
-            }
+            return lhs;
+        } else {
+            return lhs;
         }
-
-        return lhs;
     }
     
     DeletedUnique_T<TreeNode> Parser::parsePrimary()
