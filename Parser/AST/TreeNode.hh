@@ -12,12 +12,20 @@ namespace mana {
         kComponent,
         kComponentField,
         kTSymbol,
-        kNumber,
         kAdd,
         kSub,
         kSlash,
         kMul,
         kMod,
+        
+        kInt64Lit,
+        kInt32Lit,
+        kInt16Lit,
+
+        kUint64Lit,
+        kUint32Lit,
+        kUint16Lit,
+
         kExpr
     };
 

@@ -20,7 +20,7 @@ namespace mana {
             if (isNumber(c)) {
                 std::string_view number;
 
-                int64_t value = 0;
+                uint64_t value = 0;
 
                 number = std::string_view(&m_code[m_offset], 1);
                 auto start = m_offset;
@@ -51,7 +51,7 @@ namespace mana {
                         if (ec == std::errc::invalid_argument) {
                             MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer. Not a number.");
                         } else if (ec == std::errc::result_out_of_range) {
-                            MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer. Number is larger than an int64.");
+                            MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer. Number is larger than an i64.");
                         } else {
                             MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer.");
                         }
@@ -74,15 +74,15 @@ namespace mana {
 
                         // TODO: Parse float.
                     } else {
-                        auto [_, ec] = std::from_chars(number.data(), number.data() + number.length(), value, 16);
+                        auto [_, ec] = std::from_chars(number.data(), number.data() + number.length(), value, 10);
                     
                         if (ec != std::errc()) {
                             if (ec == std::errc::invalid_argument) {
-                                MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer. Not a number.");
+                                MANA_FATAL_NO_RETURN("Failed to parse integer. Not a number.");
                             } else if (ec == std::errc::result_out_of_range) {
-                                MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer. Number is larger than an int64.");
+                                MANA_FATAL_NO_RETURN("Failed to parse integer. Number is larger than the i64 max limit.");
                             } else {
-                                MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer.");
+                                MANA_FATAL_NO_RETURN("Failed to parse integer.");
                             }
                         }
                     }
@@ -96,54 +96,49 @@ namespace mana {
 
                         tokens.push_back(Token {
                             .kind = Token::Type::kU64Lit,
-                            .value = value
+                            .value = static_cast<int64_t>(value)
                         });
                     } else if (matches(0, 's')) {
                         advance();
 
-                        if (auto [v, s] = checkConv<uint32_t>(value); s) {
-                            value = v;
-
+                        if (std::in_range<uint16_t>(value)) {
                             tokens.push_back(Token {
                                 .kind = Token::Type::kU16Lit,
-                                .value = value
+                                .value = static_cast<uint16_t>(value)
                             });
-                        } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
+                        } else MANA_FATAL_NO_RETURN("Value overflows u16 limits.");
                     } else {
-                        if (auto [v, s] = checkConv<uint32_t>(value); s) {
-                            value = v;
-
+                        if (std::in_range<uint32_t>(value)) {
                             tokens.push_back(Token {
                                 .kind = Token::Type::kU32Lit,
-                                .value = value
+                                .value = static_cast<uint32_t>(value)
                             });
-                        } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
+                        } else MANA_FATAL_NO_RETURN("Value overflows u32 limits.");
                     }
                 } else if (matches(0, 'l')) {
                     advance();
 
-                    tokens.push_back(Token {
-                        .kind = Token::Type::kI64Lit,
-                        .value = value
-                    });
+                    if (std::in_range<int64_t>(value)) {
+                        tokens.push_back(Token {
+                            .kind = Token::Type::kI64Lit,
+                            .value = static_cast<int64_t>(value)
+                        });
+                    } else {                        
+                        MANA_FATAL_NO_RETURN("Value overflows i64 limits."); }
                 } else if (matches(0, 's')) {
                     advance();
 
-                    if (auto [v, s] = checkConv<int16_t>(value); s) {
-                        value = v;
-
+                    if (std::in_range<int16_t>(value)) {
                         tokens.push_back(Token {
                             .kind = Token::Type::kI16Lit,
-                            .value = value
+                            .value = static_cast<int16_t>(value)
                         });
                     } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
                 } else {
-                    if (auto [v, s] = checkConv<int32_t>(value); s) {
-                        value = v;
-
+                    if (std::in_range<int32_t>(value)) {
                         tokens.push_back(Token {
                             .kind = Token::Type::kI32Lit,
-                            .value = value
+                            .value = static_cast<int32_t>(value)
                         });
                     } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
                 }

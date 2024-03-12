@@ -203,13 +203,23 @@ namespace mana {
             } break;
 
             case Token::Type::kI16Lit: 
+                result = std::make_unique<Int16Lit>(tk->as16Int());
+                break;
             case Token::Type::kI32Lit: 
+                result = std::make_unique<Int32Lit>(tk->as32Int());
+                break;
             case Token::Type::kI64Lit: 
+                result = std::make_unique<Int64Lit>(tk->as64Int());
+                break;
             case Token::Type::kU16Lit:
+                result = std::make_unique<Uint16Lit>(tk->as16UInt());
+                break;
             case Token::Type::kU32Lit:
-            case Token::Type::kU64Lit: {               
-                result = std::make_unique<Number>(tk->as64Int());
-            } break;
+                result = std::make_unique<Uint32Lit>(tk->as32UInt());
+                break;
+            case Token::Type::kU64Lit:
+                result = std::make_unique<Uint64Lit>(tk->as64UInt());
+                break;
 
             case Token::Type::kIdentifier: {
                 if (tk->asStr() == "component") {

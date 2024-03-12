@@ -5,14 +5,15 @@
 #include <cstdint>
 #include <type_traits>
 #include <limits>
+#include <iostream>
 
 #define ASAN_CRASH() *reinterpret_cast<size_t*>(0x1337) = 0xdeadbeef;
 
-#define CHECK(COND) if (!(COND)) { ASAN_CRASH(); std::exit(1); }
+#define CHECK(COND) if (!(COND)) {  ASAN_CRASH(); std::exit(1); }
 
 using ErrorCallback_T = void(*)(const std::string& msg);
 
-static ErrorCallback_T g_errorCallback;
+inline ErrorCallback_T g_errorCallback;
 
 #define MANA_CHECK_MAYBE_RETURN(X, MSG) { if (!(X)) { if (g_errorCallback) g_errorCallback(std::string("(") + std::to_string(m_stats.lineIndex) + ":" + std::to_string(m_stats.columnIndex) + "): " + MSG); return {}; } }
 
@@ -32,17 +33,6 @@ namespace mana {
     #else // GCC, Clang
         __builtin_unreachable();
     #endif
-    }
-
-    using ConvSuccess_T = bool;
-
-    template<typename T, typename F>
-    std::pair<T, ConvSuccess_T> checkConv(F value) {
-        if (value >= std::numeric_limits<T>::min() && 
-            value <= std::numeric_limits<T>::max())
-            return { static_cast<T>(value), true };
-
-        return { static_cast<T>(0), false };
     }
 
     inline std::string_view unescapeCharacter(char c)

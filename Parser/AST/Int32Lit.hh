@@ -6,16 +6,16 @@
 #include <variant>
 
 namespace mana {
-    class Number : public TreeNode {
+    class Int32Lit : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kNumber };
+        static constexpr ASTKind kind { ASTKind::kInt32Lit };
 
-        Number(std::variant<double, int64_t> value);
+        Int32Lit(int32_t value);
 
         std::unique_ptr<TreeNode> clone() override;
 
         void print(std::ostream& stream, size_t ident) override;
     private:
-        std::variant<double, int64_t> m_value;
+        int32_t m_value;
     };
 }

@@ -1,11 +1,12 @@
 #include <iostream>
 #include <functional>
 #include <fstream>
+#include <utility>
 
 #include "Parser/Parser.hh"
 
 void LogParserError(const std::string& msg) {
-    std::cerr << msg << std::endl;
+    std::cerr << "FATAL: " << msg << std::endl;
 
     std::exit(1);
 }

@@ -41,9 +41,16 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/Attribute.cc
                                         Parser/AST/CField.cc
                                         Parser/AST/Component.cc
-                                        Parser/AST/Number.cc
                                         Parser/AST/TreeNode.cc
                                         Parser/AST/TSymbol.cc
+
+                                        Parser/AST/Int16Lit.cc
+                                        Parser/AST/Int32Lit.cc
+                                        Parser/AST/Int64Lit.cc
+
+                                        Parser/AST/Uint16Lit.cc
+                                        Parser/AST/Uint32Lit.cc
+                                        Parser/AST/Uint64Lit.cc
                                         
                                         Parser/AST/SubOp.cc
                                         Parser/AST/SumOp.cc

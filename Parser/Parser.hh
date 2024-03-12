@@ -4,7 +4,15 @@
 #include "AST/Attribute.hh"
 #include "AST/CField.hh"
 #include "AST/Component.hh"
-#include "AST/Number.hh"
+
+#include "AST/Int16Lit.hh"
+#include "AST/Int32Lit.hh"
+#include "AST/Int64Lit.hh"
+
+#include "AST/Uint16Lit.hh"
+#include "AST/Uint32Lit.hh"
+#include "AST/Uint64Lit.hh"
+
 #include "AST/TSymbol.hh"
 #include "AST/SubOp.hh"
 #include "AST/SumOp.hh"
