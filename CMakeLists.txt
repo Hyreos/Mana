@@ -39,7 +39,6 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/Number.cc
                                         Parser/AST/TreeNode.cc
                                         Parser/AST/TSymbol.cc
-                                        Parser/AST/Expr.cc
                                         
                                         Parser/AST/SubOp.cc
                                         Parser/AST/SumOp.cc

@@ -12,7 +12,7 @@ namespace mona {
         return MakeUniquePtr<Number>(m_identifier);
     }
 
-    void Number::print(std::ostream& stream)
+    void Number::print(std::ostream& stream, size_t ident)
     {
         stream << m_identifier;
     }

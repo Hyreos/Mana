@@ -11,15 +11,15 @@ namespace mona {
         return MakeUniquePtr<DivOp>(m_lhs->clone(), m_rhs->clone());
     }
 
-    void DivOp::print(std::ostream& stream)
+    void DivOp::print(std::ostream& stream, size_t ident)
     {
         stream << "(";
 
-        m_lhs->print(stream);
+        m_lhs->print(stream, ident);
 
         stream << "/";
 
-        m_rhs->print(stream);
+        m_rhs->print(stream, ident);
 
         stream << ")";
     }

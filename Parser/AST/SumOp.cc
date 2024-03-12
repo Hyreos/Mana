@@ -13,15 +13,15 @@ namespace mona {
         return MakeUniquePtr<SumOp>(m_lhs->clone(), m_rhs->clone());
     }
 
-    void SumOp::print(std::ostream& stream)
+    void SumOp::print(std::ostream& stream, size_t ident)
     {
         stream << "(";
 
-        m_lhs->print(stream);
+        m_lhs->print(stream, ident);
 
         stream << "+";
 
-        m_rhs->print(stream);
+        m_rhs->print(stream, ident);
 
         stream << ")";
     }

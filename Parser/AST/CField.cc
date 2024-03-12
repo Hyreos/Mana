@@ -15,4 +15,16 @@ namespace mona {
     {
         return MakeUniquePtr<CField>(m_type->clone(), m_name);
     }
+
+    void CField::print(std::ostream& stream, size_t ident)
+    {
+        for (auto& attr : attributes())
+            attr->print(stream, ident);
+
+        m_type->print(stream, ident);
+
+        stream << " ";
+
+        stream << m_name;
+    }
 }

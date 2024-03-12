@@ -40,7 +40,7 @@ namespace mona {
             return m_kind;
         }
 
-        virtual void print(std::ostream& stream) { stream << "TODO!"; }
+        virtual void print(std::ostream& stream, size_t ident) = 0;
 
         void addAttribute(DeletedUnique_T<TreeNode> attr);
 

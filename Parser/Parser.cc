@@ -33,7 +33,18 @@ namespace mona {
         std::vector<DeletedUnique_T<TreeNode>> tr_nodes;
         
         while (canPeek(1)) {
-            tr_nodes.push_back(parseExpression());
+            auto r = parseExpression();
+
+            if (r) tr_nodes.push_back(std::move(r));
+        }
+
+        std::ostream& stream { std::cout };
+
+        stream << "AST Print:" << std::endl;
+
+        for (auto& it : tr_nodes) {
+            it->print(stream, 0);
+            stream << std::endl;
         }
     }
 
@@ -173,7 +184,7 @@ namespace mona {
             
                 MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kRightParenthesis), "Missing '(' in attribute."); // (
                 
-                auto attr_value = parsePrimary();
+                auto attr_value = parseExpression();
 
                 MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftParenthesis), "Missing ')' in attribute."); // )
 
@@ -203,7 +214,7 @@ namespace mona {
                     MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kRightBracket), "Missing '{' in component declaration");
 
                     // Keep looping until next token is a left bracket
-                    while (peek(1)->kind != Kind::kLeftBracket) {
+                    while (canPeek(1) && peek(1)->kind != Kind::kLeftBracket) {                        
                         auto field_type = parsePrimary();
 
                         // Peek a identifier
@@ -219,7 +230,7 @@ namespace mona {
                         "Missing '}' at end of component declaration."
                     );
 
-                    result = MakeUniquePtr<Component>(std::move(fields));
+                    result = MakeUniquePtr<Component>(std::string(identifier->view), std::move(fields));
                 } else if (tk->view == "string") result = MakeUniquePtr<TSymbol>("string");
                 else result = MakeUniquePtr<TSymbol>(std::string(tk->view));
             } break;

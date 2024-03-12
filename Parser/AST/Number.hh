@@ -13,7 +13,7 @@ namespace mona {
 
         DeletedUnique_T<TreeNode> clone() override;
 
-        void print(std::ostream& stream) override;
+        void print(std::ostream& stream, size_t ident) override;
     private:
         std::string m_identifier;
     };
