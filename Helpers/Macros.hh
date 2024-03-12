@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <format>
 
 #define ASAN_CRASH() *reinterpret_cast<size_t*>(0x1337) = 0xdeadbeef;
 
@@ -11,7 +10,7 @@ using ErrorCallback_T = void(*)(const std::string& msg);
 
 static ErrorCallback_T g_errorCallback;
 
-#define MANA_CHECK_MAYBE_RETURN(X, MSG) if (!(X)) { if (g_errorCallback) g_errorCallback(std::format("({}:{}): {}", m_stats.lineIndex, m_stats.columnIndex,  MSG)); return {}; }
+#define MANA_CHECK_MAYBE_RETURN(X, MSG) if (!(X)) { if (g_errorCallback) g_errorCallback(std::string("(") + std::to_string(m_stats.lineIndex) + ":" + std::to_string(m_stats.columnIndex) + "): " + MSG); return {}; }
 
 #define MANA_TRY_GET(X, PTR, MSG) PTR = X; if (!PTR) { if (g_errorCallback) g_errorCallback(MSG); return {}; }+18
 

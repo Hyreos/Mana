@@ -177,10 +177,7 @@ namespace mana {
                 
                 MANA_TRY_GET(consumeCheck(Kind::kIdentifier), attr_name, "Missing identifier in attribute.");
 
-                MANA_CHECK_MAYBE_RETURN(
-                    attr_name->view == "serialize", 
-                    std::format("Invalid identifier '{}' in attribute.", attr_name->view)
-                );
+                MANA_CHECK_MAYBE_RETURN(attr_name->view == "serialize", "Invalid identifier in attribute.");
             
                 MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftParen), "Missing '(' in attribute."); // (
                 
