@@ -7,6 +7,7 @@ project(${PROJECT_NAME})
 add_library(${PROJECT_NAME})
 
 option(MANA_IS_ASAN "Enable ASAN build" OFF)
+option(MANA_IS_VERBOSE "Enable verbose mode" OFF)
 option(MANA_BUILD_CLI "Enable command-line tool build" ON)
 
 if (MANA_IS_ASAN)
@@ -30,6 +31,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThre
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+
+if (MANA_IS_VERBOSE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MANA_IS_VERBOSE)
+endif()
 
 target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/Lexer.cc

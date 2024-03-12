@@ -1,8 +1,8 @@
 component A {
-    @serialize(1) 
+    @serialize(15555555555ul) 
     string p1
 
-    @serialize(2 + 6 / 8 + 8 * 9) 
+    @serialize(0x15 + 6 / 8 + 8 * 9) 
     string p2
 }
 

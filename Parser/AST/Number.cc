@@ -1,19 +1,21 @@
 #include "Number.hh"
 
 namespace mana {
-    Number::Number(const std::string& identifier) 
+    Number::Number(std::variant<double, int64_t> value) 
         : TreeNode(kind),
-            m_identifier { identifier }
+            m_value { value }
     {
     }
 
     std::unique_ptr<TreeNode> Number::clone()
     {
-        return std::make_unique<Number>(m_identifier);
+        return std::make_unique<Number>(m_value);
     }
 
     void Number::print(std::ostream& stream, size_t ident)
     {
-        stream << m_identifier;
+        std::visit([&](auto&& arg) {
+            stream << arg;
+        }, m_value);
     }
 }

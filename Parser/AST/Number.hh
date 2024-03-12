@@ -3,18 +3,19 @@
 #include "TreeNode.hh"
 
 #include <string>
+#include <variant>
 
 namespace mana {
     class Number : public TreeNode {
     public:
         static constexpr ASTKind kind { ASTKind::kNumber };
 
-        Number(const std::string& identifier);
+        Number(std::variant<double, int64_t> value);
 
         std::unique_ptr<TreeNode> clone() override;
 
         void print(std::ostream& stream, size_t ident) override;
     private:
-        std::string m_identifier;
+        std::variant<double, int64_t> m_value;
     };
 }

@@ -24,7 +24,7 @@ namespace mana {
         m_lexer = std::make_unique<mana::GrLexer>(code);
 
         if (m_lexer->size() > 0)
-            if ((*m_lexer)[0].kind == Kind::kWS || (*m_lexer)[0].kind == Kind::kLnBrk) {
+            if ((*m_lexer)[0].kind == Token::Type::kWS || (*m_lexer)[0].kind == Token::Type::kLnBrk) {
                 consume();
 
                 m_tokenIdx--;
@@ -50,13 +50,13 @@ namespace mana {
 
     size_t Parser::getPrecedence(const Token& tk) {
         switch (tk.kind) {
-            case Kind::kMinus:
-            case Kind::kPlus:
+            case Token::Type::kMinus:
+            case Token::Type::kPlus:
                 return 1;
-            case Kind::kAsterisk:
+            case Token::Type::kAsterisk:
                 return 2;
-            case Kind::kSlash:
-            case Kind::kMod:
+            case Token::Type::kSlash:
+            case Token::Type::kMod:
                 return 3;
             default:
                 return 0;
@@ -65,10 +65,10 @@ namespace mana {
 
     Parser::Associativity Parser::getAssociativity(const Token& tk) {
         switch (tk.kind) {
-            case Kind::kMinus:
-            case Kind::kPlus:
-            case Kind::kAsterisk:
-            case Kind::kSlash:
+            case Token::Type::kMinus:
+            case Token::Type::kPlus:
+            case Token::Type::kAsterisk:
+            case Token::Type::kSlash:
                 return Associativity::kLeft;
             default:
                 return Associativity::kRight;
@@ -84,10 +84,10 @@ namespace mana {
     bool Parser::isOperator(const Token& tok)
     {
         switch (tok.kind) {
-            case Kind::kAsterisk:
-            case Kind::kSlash:
-            case Kind::kPlus:
-            case Kind::kMinus:
+            case Token::Type::kAsterisk:
+            case Token::Type::kSlash:
+            case Token::Type::kPlus:
+            case Token::Type::kMinus:
                 return true;
             default:
                 return false;
@@ -135,19 +135,19 @@ namespace mana {
                 }
 
                 switch (op->kind) {
-                    case Kind::kPlus: {
+                    case Token::Type::kPlus: {
                         lhs = std::make_unique<SumOp>(std::move(lhs), std::move(rhs));
                     } break;
 
-                    case Kind::kMinus: {
+                    case Token::Type::kMinus: {
                         lhs = std::make_unique<SubOp>(std::move(lhs), std::move(rhs));
                     } break;
 
-                    case Kind::kSlash: {
+                    case Token::Type::kSlash: {
                         lhs = std::make_unique<DivOp>(std::move(lhs), std::move(rhs));
                     } break;
 
-                    case Kind::kAsterisk: {
+                    case Token::Type::kAsterisk: {
                         lhs = std::make_unique<MulOp>(std::move(lhs), std::move(rhs));
                     } break;
                     default:
@@ -169,23 +169,29 @@ namespace mana {
 
         std::unique_ptr<TreeNode> result;
 
+#       ifdef MANA_IS_VERBOSE
+            std::visit([](auto&& arg) {
+                std::cout << "Processing token: " << arg << std::endl;
+            }, tk->value);
+#       endif
+
         switch (tk->kind) {
-            case Kind::kEOF:
+            case Token::Type::kEOF:
                 return nullptr;
-            case Kind::kAt: {
+            case Token::Type::kAt: {
                 const mana::Token* attr_name;
                 
-                MANA_TRY_GET(consumeCheck(Kind::kIdentifier), attr_name, "Missing identifier in attribute.");
+                MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), attr_name, "Missing identifier in attribute.");
 
-                MANA_CHECK_MAYBE_RETURN(attr_name->view == "serialize", "Invalid identifier in attribute.");
+                MANA_CHECK_MAYBE_RETURN(attr_name->asStr() == "serialize", "Invalid identifier in attribute.");
             
-                MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftParen), "Missing '(' in attribute."); // (
+                MANA_CHECK_MAYBE_RETURN(consumeCheck (Token::Type::kLeftParen), "Missing '(' in attribute."); // (
                 
                 auto attr_value = parseExpression();
 
-                MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kRightParen), "Missing ')' in attribute."); // )
+                MANA_CHECK_MAYBE_RETURN(consumeCheck (Token::Type::kRightParen), "Missing ')' in attribute."); // )
 
-                auto attr = std::make_unique<Attribute>(std::string(attr_name->view), std::move(attr_value));
+                auto attr = std::make_unique<Attribute>(std::string(attr_name->asStr()), std::move(attr_value));
 
                 std::unique_ptr<TreeNode> nxt;
                 
@@ -196,56 +202,61 @@ namespace mana {
                 result = std::move(nxt);
             } break;
 
-            case Kind::kNumber: {
-                return std::make_unique<Number>(std::string(tk->view));
+            case Token::Type::kI16Lit: 
+            case Token::Type::kI32Lit: 
+            case Token::Type::kI64Lit: 
+            case Token::Type::kU16Lit:
+            case Token::Type::kU32Lit:
+            case Token::Type::kU64Lit: {               
+                result = std::make_unique<Number>(tk->as64Int());
             } break;
 
-            case Kind::kIdentifier: {
-                if (tk->view == "component") {
+            case Token::Type::kIdentifier: {
+                if (tk->asStr() == "component") {
                     std::vector<std::unique_ptr<TreeNode>> fields;
 
                     const Token* identifier;
                     
-                    MANA_TRY_GET(consumeCheck(Kind::kIdentifier), identifier, "Missing identifier in component declaration.");
+                    MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), identifier, "Missing identifier in component declaration.");
                     
-                    MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftBracket), "Missing '{' in component declaration");
+                    MANA_CHECK_MAYBE_RETURN(consumeCheck (Token::Type::kLeftBracket), "Missing '{' in component declaration");
 
                     // Keep looping until next token is a left bracket
-                    while (canPeek(1) && peek(1)->kind != Kind::kRightBracket) {                        
+                    while (canPeek(1) && peek(1)->kind != Token::Type::kRightBracket) {                        
                         auto field_type = parsePrimary();
 
                         // Peek a identifier
                         const Token* field_name;
                         
-                        MANA_TRY_GET(consumeCheck(Kind::kIdentifier), field_name, "Invalid token");
+                        MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), field_name, "Invalid token");
 
-                        fields.push_back(std::make_unique<CField>(std::move(field_type), std::string(field_name->view)));
+                        fields.push_back(std::make_unique<CField>(std::move(field_type), std::string(field_name->asStr())));
                     }
 
                     MANA_CHECK_MAYBE_RETURN(
-                        consumeCheck(Kind::kRightBracket), 
+                        consumeCheck (Token::Type::kRightBracket), 
                         "Missing '}' at end of component declaration."
                     );
 
-                    result = std::make_unique<Component>(std::string(identifier->view), std::move(fields));
-                } else if (tk->view == "string") result = std::make_unique<TSymbol>("string");
-                else result = std::make_unique<TSymbol>(std::string(tk->view));
+                    result = std::make_unique<Component>(std::string(identifier->asStr()), std::move(fields));
+                } else if (tk->asStr() == "string") result = std::make_unique<TSymbol>("string");
+                else result = std::make_unique<TSymbol>(std::string(tk->asStr()));
             } break;
-            case Kind::kAsterisk:
-            case Kind::kMinus:
-            case Kind::kSlash:
-            case Kind::kPlus:
-            case Kind::kLeftParen:
-            case Kind::kRightParen:
+            case Token::Type::kAsterisk:
+            case Token::Type::kMinus:
+            case Token::Type::kSlash:
+            case Token::Type::kPlus:
+            case Token::Type::kLeftParen:
+            case Token::Type::kRightParen:
                 MANA_FATAL_NO_RETURN("Received operator while doing primary parsing.");
             default:
-                MANA_FATAL_NO_RETURN("Invalid token.");
+                MANA_FATAL_NO_RETURN("Unrecognized token.");
         }
 
         return result;
     }
 
-    const Token* Parser::peekExpected(int64_t off, Kind kind, bool skip_ws, bool skip_lnbrks)
+    const Token* Parser::peekExpected(int64_t off, Token::Type kind, bool skip_ws, bool skip_lnbrks)
     {
         auto tk = peek(off, skip_ws, skip_lnbrks);
 
@@ -262,12 +273,12 @@ namespace mana {
         auto tokenidx = m_tokenIdx + 1;
 
         while (off != 0 && tokenidx < m_lexer->size()) {
-            if (skip_ws && (*m_lexer)[tokenidx].kind == Kind::kWS) {
+            if (skip_ws && (*m_lexer)[tokenidx].kind == Token::Type::kWS) {
                 tokenidx++;
                 continue;
             }
 
-            if (skip_lnbrks && (*m_lexer)[tokenidx].kind == Kind::kLnBrk) {
+            if (skip_lnbrks && (*m_lexer)[tokenidx].kind == Token::Type::kLnBrk) {
                 tokenidx++;
                 continue;
             }
@@ -294,10 +305,10 @@ namespace mana {
             tokenidx = m_tokenIdx + 1;
 
             for (; off != 0 && tokenidx < m_lexer->size(); tokenidx++) {
-                if (skip_ws && (*m_lexer)[tokenidx].kind == Kind::kWS) 
+                if (skip_ws && (*m_lexer)[tokenidx].kind == Token::Type::kWS) 
                     continue;
 
-                if (skip_lnbrks && (*m_lexer)[tokenidx].kind == Kind::kLnBrk)
+                if (skip_lnbrks && (*m_lexer)[tokenidx].kind == Token::Type::kLnBrk)
                     continue;
             
                 if (--off == 0) break;
@@ -308,10 +319,10 @@ namespace mana {
             tokenidx = m_tokenIdx - 1;
 
             for (; off != 0 && tokenidx >= 0; tokenidx--) {
-                if (skip_ws && (*m_lexer)[tokenidx].kind == Kind::kWS) 
+                if (skip_ws && (*m_lexer)[tokenidx].kind == Token::Type::kWS) 
                     continue;
 
-                if (skip_lnbrks && (*m_lexer)[tokenidx].kind == Kind::kLnBrk)
+                if (skip_lnbrks && (*m_lexer)[tokenidx].kind == Token::Type::kLnBrk)
                     continue;
             
                 if (++off == 0) break;
@@ -323,7 +334,7 @@ namespace mana {
         return &(*m_lexer)[tokenidx];   
     }
 
-    const Token* Parser::consumeCheck(Kind kind, size_t off, bool skip_ws, bool skip_lnbrks) 
+    const Token* Parser::consumeCheck (Token::Type kind, size_t off, bool skip_ws, bool skip_lnbrks) 
     {
         const Token* tk = consume(off, skip_ws, skip_lnbrks);
 
@@ -345,15 +356,15 @@ namespace mana {
         m_tokenIdx++;
 
         while (off != 0 && m_tokenIdx < m_lexer->size()) {
-            m_stats.columnIndex += (*m_lexer)[m_tokenIdx].view.size();
+            m_stats.columnIndex += 1;//(*m_lexer)[m_tokenIdx].value.size();
 
-            if ((*m_lexer)[m_tokenIdx].kind == Kind::kWS)
+            if ((*m_lexer)[m_tokenIdx].kind == Token::Type::kWS)
                 if (skip_ws) {
                     m_tokenIdx++;
                     continue;
                 }
 
-            if ((*m_lexer)[m_tokenIdx].kind == Kind::kLnBrk) {
+            if ((*m_lexer)[m_tokenIdx].kind == Token::Type::kLnBrk) {
                 m_stats.columnIndex = 0;
                 m_stats.lineIndex++;
 

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <functional>
+#include <type_traits>
 
 #define ASAN_CRASH() *reinterpret_cast<size_t*>(0x1337) = 0xdeadbeef;
 
@@ -10,13 +12,13 @@ using ErrorCallback_T = void(*)(const std::string& msg);
 
 static ErrorCallback_T g_errorCallback;
 
-#define MANA_CHECK_MAYBE_RETURN(X, MSG) if (!(X)) { if (g_errorCallback) g_errorCallback(std::string("(") + std::to_string(m_stats.lineIndex) + ":" + std::to_string(m_stats.columnIndex) + "): " + MSG); return {}; }
+#define MANA_CHECK_MAYBE_RETURN(X, MSG) { if (!(X)) { if (g_errorCallback) g_errorCallback(std::string("(") + std::to_string(m_stats.lineIndex) + ":" + std::to_string(m_stats.columnIndex) + "): " + MSG); return {}; } }
 
-#define MANA_TRY_GET(X, PTR, MSG) PTR = X; if (!PTR) { if (g_errorCallback) g_errorCallback(MSG); return {}; }+18
+#define MANA_TRY_GET(X, PTR, MSG) { PTR = X; if (!PTR) { if (g_errorCallback) g_errorCallback(MSG); return {}; } }
 
-#define MANA_FATAL(MSG) if (g_errorCallback) g_errorCallback(MSG); return {};
+#define MANA_FATAL(MSG) { if (g_errorCallback) g_errorCallback(MSG); return {} };
 
-#define MANA_FATAL_NO_RETURN(MSG) if (g_errorCallback) g_errorCallback(MSG); std::exit(1);
+#define MANA_FATAL_NO_RETURN(MSG) { if (g_errorCallback) g_errorCallback(MSG); std::exit(1); }
 
 namespace mana {
     [[noreturn]] inline void unreachable() {
@@ -28,5 +30,37 @@ namespace mana {
     #else // GCC, Clang
         __builtin_unreachable();
     #endif
+    }
+
+    using ConvSuccess_T = bool;
+
+    template<typename T, typename F>
+    std::pair<T, ConvSuccess_T> checkConv(F value) {
+        if (value >= std::numeric_limits<T>::min() && 
+            value <= std::numeric_limits<T>::max())
+            return { static_cast<T>(value), true };
+
+        return { static_cast<T>(0), false };
+    }
+
+    inline std::string_view unescapeCharacter(char c)
+    {
+        switch (c)
+        {
+            case '\a':  return "\\a";
+            case '\b':  return "\\b";
+            case '\f':  return "\\f";
+            case '\n':  return "\\n";
+            case '\r':  return "\\r";
+            case '\t':  return "\\t";
+            case '\v':  return "\\v";
+            case '\\':  return "\\\\";
+            case '\'':  return "\\'";
+            case '\"':  return "\\\"";
+            case '\?':  return "\\\?";
+            default: return "";
+        }
+
+        unreachable();
     }
 }

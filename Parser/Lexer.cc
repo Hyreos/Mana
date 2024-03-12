@@ -1,6 +1,7 @@
 #include "Lexer.hh"
 
 #include <iostream>
+#include <charconv>
 
 #include "Helpers/Macros.hh"
 
@@ -19,31 +20,45 @@ namespace mana {
             if (isNumber(c)) {
                 std::string_view number;
 
+                int64_t value = 0;
+
                 number = std::string_view(&m_code[m_offset], 1);
                 auto start = m_offset;
 
                 advance();
 
-                // 0[b|x|h]
-                //     ^
-                // ____|_
-                if (matches(0, 'b') || matches(0, 'x') || matches(0, 'h')) {
+                // 0[x]
+                //    ^
+                // ___|
+                if (c == '0' && (matches(0, 'x') || matches(0, 'X'))) {
                     // advance
                     advance();
 
-                    // Next token should be a number?????????
-                    // Loop until the number is exausted
-                    while (isNumber(peek(0))) {
+                    start = m_offset;
+                    number = { &m_code[start], 1 };
+
+                    while (isHexDigit(0)) {
                         number = { &m_code[start], m_offset - start + 1 };
-                        
                         advance();
                     }
+
+                    if (start == m_offset) 
+                        MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer. Missing integer part of hex.");
+
+                    auto [_, ec] = std::from_chars(number.data(), number.data() + number.length(), value, 16);
+                
+                    if (ec != std::errc()) {
+                        if (ec == std::errc::invalid_argument) {
+                            MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer. Not a number.");
+                        } else if (ec == std::errc::result_out_of_range) {
+                            MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer. Number is larger than an int64.");
+                        } else {
+                            MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer.");
+                        }
+                    }
                 } else {
-                    // Next token should be a number?????????
-                    // Loop until the number is exausted
                     while (isNumber(peek(0))) {
                         number = { &m_code[start], m_offset - start + 1 };
-                        
                         advance();
                     }
 
@@ -51,26 +66,96 @@ namespace mana {
                     if (matches(0, '.')) {
                         advance(); // .
 
-                        // Next token should be a number?????????
-                        // Loop until the number is exausted
                         while (isNumber(peek(0))) {
                             number = { &m_code[start], m_offset - start + 1 };
                             
                             advance();
                         }   
+
+                        // TODO: Parse float.
+                    } else {
+                        auto [_, ec] = std::from_chars(number.data(), number.data() + number.length(), value, 16);
+                    
+                        if (ec != std::errc()) {
+                            if (ec == std::errc::invalid_argument) {
+                                MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer. Not a number.");
+                            } else if (ec == std::errc::result_out_of_range) {
+                                MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer. Number is larger than an int64.");
+                            } else {
+                                MANA_FATAL_NO_RETURN("Failed to parse hexadecimal integer.");
+                            }
+                        }
                     }
                 }
 
                 if (matches(0, 'u')) {
-                    number = { &m_code[start], m_offset - start + 1 };
-
                     advance();
-                }
 
-                tokens.push_back(Token {
-                    .kind = Kind::kNumber,
-                    .view = number
-                });
+                    if (matches(0, 'l')) {
+                        advance();
+
+                        tokens.push_back(Token {
+                            .kind = Token::Type::kU64Lit,
+                            .value = value
+                        });
+                    } else if (matches(0, 's')) {
+                        if (auto [v, s] = checkConv<uint32_t>(value); s) {
+                            value = v;
+
+                            tokens.push_back(Token {
+                                .kind = Token::Type::kU16Lit,
+                                .value = value
+                            });
+                        } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
+                    } else {
+                        if (auto [v, s] = checkConv<uint32_t>(value); s) {
+                            value = v;
+
+                            tokens.push_back(Token {
+                                .kind = Token::Type::kU32Lit,
+                                .value = value
+                            });
+                        } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
+                    }
+                } else if (matches(0, 'i')) {
+                    advance();
+
+                    if (matches(0, 'l')) {
+                        advance();
+
+                        tokens.push_back(Token {
+                            .kind = Token::Type::kI64Lit,
+                            .value = value
+                        });
+                    } else if (matches(0, 's')) {
+                        if (auto [v, s] = checkConv<int16_t>(value); s) {
+                            value = v;
+
+                            tokens.push_back(Token {
+                                .kind = Token::Type::kI16Lit,
+                                .value = value
+                            });
+                        } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
+                    } else {
+                        if (auto [v, s] = checkConv<int32_t>(value); s) {
+                            value = v;
+
+                            tokens.push_back(Token {
+                                .kind = Token::Type::kI32Lit,
+                                .value = value
+                            });
+                        } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
+                    }
+                } else {
+                    if (auto [v, s] = checkConv<int32_t>(value); s) {
+                        value = v;
+
+                        tokens.push_back(Token {
+                            .kind = Token::Type::kI32Lit,
+                            .value = value
+                        });
+                    } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
+                }
 
                 continue;
             }
@@ -87,8 +172,8 @@ namespace mana {
                 }
 
                 tokens.push_back(Token {
-                    .kind = Kind::kIdentifier,
-                    .view = identifier
+                    .kind = Token::Type::kIdentifier,
+                    .value = identifier
                 });
 
                 continue;
@@ -97,51 +182,51 @@ namespace mana {
             switch (c) {
                 case '=':
                     tokens.push_back(Token {
-                        .kind = Kind::kEqual,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kEqual,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '>':
                     tokens.push_back(Token {
-                        .kind = Kind::kGreaterThan,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kGreaterThan,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '<':
                     tokens.push_back(Token {
-                        .kind = Kind::kLessThan,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kLessThan,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '!':
                     tokens.push_back(Token {
-                        .kind = Kind::kInv,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kInv,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '(':
                     tokens.push_back(Token {
-                        .kind = Kind::kLeftParen,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kLeftParen,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '%':
                     tokens.push_back(Token {
-                        .kind = Kind::kMod,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kMod,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
 
                 case '@':
                     tokens.push_back(Token {
-                        .kind = Kind::kAt,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kAt,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
@@ -157,94 +242,94 @@ namespace mana {
                         advance(); // /
                     } else {
                         tokens.push_back(Token {
-                            .kind = Kind::kSlash,
-                            .view = { &m_code[m_offset], 1 }
+                            .kind = Token::Type::kSlash,
+                            .value = std::string_view { &m_code[m_offset], 1 }
                         });
                         advance();
                     }
                     break;
                 case ')':
                     tokens.push_back(Token {
-                        .kind = Kind::kRightParen,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kRightParen,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '"':
                     tokens.push_back(Token {
-                        .kind = Kind::kDoubleQuote,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kDoubleQuote,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '\'':
                     tokens.push_back(Token {
-                        .kind = Kind::kSingleQuote,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kSingleQuote,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '+':
                     tokens.push_back(Token {
-                        .kind = Kind::kPlus,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kPlus,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '-':
                     tokens.push_back(Token {
-                        .kind = Kind::kMinus,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kMinus,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '*':
                     tokens.push_back(Token {
-                        .kind = Kind::kAsterisk,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kAsterisk,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '.':
                     tokens.push_back(Token {
-                        .kind = Kind::kDot,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kDot,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case ',':
                     tokens.push_back(Token {
-                        .kind = Kind::kComma,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kComma,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '\n':
                     tokens.push_back(Token {
-                        .kind = Kind::kLnBrk,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kLnBrk,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '{':
                     tokens.push_back(Token {
-                        .kind = Kind::kLeftBracket,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kLeftBracket,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '}':
                     tokens.push_back(Token {
-                        .kind = Kind::kRightBracket,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kRightBracket,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
                 case '\0':
                 case EOF:
                     tokens.push_back(Token {
-                        .kind = Kind::kEOF,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kEOF,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
 
                     advance();
@@ -254,8 +339,8 @@ namespace mana {
                 case '\t':
                 case ' ':
                     tokens.push_back(Token {
-                        .kind = Kind::kWS,
-                        .view = { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kWS,
+                        .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
                     break;
@@ -269,17 +354,55 @@ namespace mana {
         // Add dummy EOF token if not found
         if (!found_eof) {
             m_tokens.push_back(Token {
-                .kind = Kind::kEOF,
-                .view = std::string_view("\0")
+                .kind = Token::Type::kEOF,
+                .value = std::string_view("\0")
             });
         }
 
         m_tokens = std::move(tokens);
+
+#       ifdef MANA_IS_VERBOSE
+            std::cout << "[!] Printing lexer tokens: " << std::endl;
+            
+            for (auto i = 0; i < m_tokens.size(); i++) {
+                std::visit([i](auto&& arg) {
+                    using T = std::decay_t<decltype(arg)>;
+
+                    if (i > 0) std::cout << ", ";
+
+                    std::cout << "\"";
+                    
+                    if constexpr (std::is_same_v<T, std::string_view>) {
+                        for (auto c : arg) {
+                            auto unesc = unescapeCharacter(c);
+
+                            if (unesc != "") std::cout << unesc;
+                            else std::cout << c;
+                        }
+                    } else {
+                        std::cout << arg;
+                    }
+
+                    std::cout << "\"";
+                }, m_tokens[i].value);
+            }
+            
+            std::cout << std::endl;
+#       endif
     }
 
     bool GrLexer::matches(size_t offset, char c)
     {
         return (canPeek(offset) && peek(offset) == c);
+    }
+
+    bool GrLexer::isHexDigit(size_t offset)
+    {
+        if (!canPeek(1)) return false;
+
+        auto c = peek(offset);
+
+        return ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
     }
 
     char GrLexer::peek(size_t off)

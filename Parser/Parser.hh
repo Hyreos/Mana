@@ -35,7 +35,7 @@ namespace mana {
 
         bool canPeek(int64_t off, bool skip_ws = true, bool skip_lnbrks = true);
 
-        const Token* consumeCheck(Kind kind, size_t off = 1, bool skip_ws = true, bool skip_lnbrks = true);
+        const Token* consumeCheck (Token::Type kind, size_t off = 1, bool skip_ws = true, bool skip_lnbrks = true);
 
         const Token* consume(size_t off = 1, bool skip_ws = true, bool skip_lnbrks = true);
 
@@ -54,7 +54,7 @@ namespace mana {
             size_t min_precedence
         );
 
-        const Token* peekExpected(int64_t off, Kind kind, bool skip_ws = true, bool skip_lnbrks = true);
+        const Token* peekExpected(int64_t off, Token::Type kind, bool skip_ws = true, bool skip_lnbrks = true);
 
         const Token* peek(int64_t off, bool skip_ws = true, bool skip_lnbrks = true);
 
