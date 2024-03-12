@@ -147,10 +147,9 @@ namespace mona {
 
                     break;
                 case '/':
-                    consume();
-
-                    if (peek(0) == '*') {
-                        consume();
+                    if (canPeek(1) && peek(1) == '*') {
+                        consume(); // /
+                        consume(); // *
 
                         while (peek(0) != '*' || canPeek(1) && peek(1) != '/') 
                             consume();
@@ -159,10 +158,12 @@ namespace mona {
                         consume(); // /
                     } else {
                         tokens.push_back(Token {
-                            .kind = Kind::kDiv,
+                            .kind = Kind::kSlash,
                             .view = std::string_view(&m_code[m_offset], 1)
                         });
+                        consume();
                     }
+
                     break;
                 case ')':
                     tokens.push_back(Token {

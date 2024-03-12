@@ -1,22 +1,12 @@
 #include "Parser.hh"
 
 #include <iostream>
+#include <queue>
+#include <stack>
 
 namespace mona {
-    Parser::Parser(const std::string& code) 
-        : m_lexer { code },
-            m_tokenIdx { -1 },
-            m_stats { 
-                .lineIndex = 1, 
-                .columnIndex = 0
-            }
+    Parser::Parser()
     {
-        if (m_lexer.size() > 0)
-            if (m_lexer[0].kind == Kind::kWS || m_lexer[0].kind == Kind::kLnBrk) {
-                consume();
-
-                m_tokenIdx--;
-            }
     }
 
     void Parser::registerErrorCallback(ErrorCallback_T callback)
@@ -24,16 +14,151 @@ namespace mona {
         g_errorCallback = callback;
     }
 
-    void Parser::parse() 
+    void Parser::parse(const std::string& code) 
     {
-        for (DeletedUnique_T<TreeNode> ptr = processToken(); ptr; ptr = processToken()) {}
+        m_tokenIdx = -1;
+
+        m_stats.lineIndex = 1;
+        m_stats.columnIndex = 0;
+
+        m_lexer = std::make_unique<mona::GrLexer>(code);
+
+        if (m_lexer->size() > 0)
+            if ((*m_lexer)[0].kind == Kind::kWS || (*m_lexer)[0].kind == Kind::kLnBrk) {
+                consume();
+
+                m_tokenIdx--;
+            }
+        
+        while (canPeek(1)) {
+            auto expr = parseExpression();
+            expr->print(std::cout);
+            std::cout << std::endl;
+            //std::cout <<  " @ ";
+        }
+
+        std::cout << std::endl;
+
+        for (DeletedUnique_T<TreeNode> ptr = parsePrimary(); ptr; ptr = parsePrimary()) {}
+    }
+
+    static size_t getPrecedence(Token tk) {
+        switch (tk.kind) {
+            case Kind::kMinus:
+            case Kind::kPlus:
+                return 1;
+            case Kind::kAsterisk:
+                return 2;
+            case Kind::kSlash:
+            case Kind::kMod:
+                return 3;
+            default:
+                return 0;
+        }
+    }
+
+    enum class Associativity {
+        kLeft,
+        kRight
+    };
+
+    static Associativity getAssociativity(Token tk) {
+        switch (tk.kind) {
+            case Kind::kMinus:
+            case Kind::kPlus:
+            case Kind::kAsterisk:
+            case Kind::kSlash:
+                return Associativity::kLeft;
+            default:
+                return Associativity::kRight;
+        }
+
+        mana::unreachable();
+    }
+
+    DeletedUnique_T<TreeNode> Parser::parseExpression() {
+        return parseExpression1(parsePrimary(), 1ull);
+    }
+
+    bool Parser::isOperator(Token tok)
+    {
+        switch (tok.kind) {
+            case Kind::kAsterisk:
+            case Kind::kSlash:
+            case Kind::kPlus:
+            case Kind::kMinus:
+                return true;
+            default:
+                return false;
+        }
+
+        mana::unreachable();
+    }
+
+    DeletedUnique_T<TreeNode> Parser::parseExpression1(
+        DeletedUnique_T<TreeNode> lhs,
+        size_t min_precedence
+    )
+    {
+        auto* lookahead = consume();
+
+        MANA_CHECK_MAYBE_RETURN(lookahead, "Trying to consume end of stream.");
+
+        while (lookahead && isOperator(*lookahead) && getPrecedence(*lookahead) >= min_precedence) {
+            auto op = lookahead;
+
+            auto rhs = parsePrimary();
+
+            MANA_CHECK_MAYBE_RETURN(rhs, "Error while parsing token.");
+
+            lookahead = peek(1);
+
+            while (lookahead && (
+                isOperator(*lookahead) 
+                && getPrecedence(*lookahead) >= getPrecedence(*op) 
+                || (getAssociativity(*lookahead) == Associativity::kRight 
+                    && getPrecedence(*lookahead) == getPrecedence(*op))
+            ))
+            {
+                rhs = parseExpression1(
+                    std::move(rhs),
+                    getPrecedence(*op) + ((getPrecedence(*lookahead) > getPrecedence(*op)) ? 1 : 0) 
+                );
+
+                lookahead = peek(1);
+            }
+
+            switch (op->kind) {
+                case Kind::kPlus: {
+                    lhs = MakeUniquePtr<SumOp>(std::move(lhs), std::move(rhs));
+                } break;
+
+                case Kind::kMinus: {
+                    lhs = MakeUniquePtr<SubOp>(std::move(lhs), std::move(rhs));
+                } break;
+
+                case Kind::kSlash: {
+                    lhs = MakeUniquePtr<DivOp>(std::move(lhs), std::move(rhs));
+                } break;
+
+                case Kind::kAsterisk: {
+                    lhs = MakeUniquePtr<MulOp>(std::move(lhs), std::move(rhs));
+                } break;
+                default:
+                    mana::unreachable();
+            }
+        }
+
+        return lhs;
     }
     
-    DeletedUnique_T<TreeNode> Parser::processToken()
+    DeletedUnique_T<TreeNode> Parser::parsePrimary()
     {
         auto tk = consume();
 
         if (!tk) return nullptr;
+
+        DeletedUnique_T<TreeNode> result;
 
         switch (tk->kind) {
             case Kind::kEOF:
@@ -43,26 +168,26 @@ namespace mona {
                 
                 MONA_TRY_GET(consumeCheck(Kind::kIdentifier), attr_name, "Missing identifier in attribute.");
 
-                MONA_CHECK_MAYBE_RETURN(
+                MANA_CHECK_MAYBE_RETURN(
                     attr_name->view == "serialize", 
                     std::format("Invalid identifier '{}' in attribute.", attr_name->view)
                 );
             
-                MONA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kRightParenthesis), "Missing '(' in attribute."); // (
+                MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kRightParenthesis), "Missing '(' in attribute."); // (
                 
-                auto attr_value = processToken();
+                auto attr_value = parsePrimary();
 
-                MONA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftParenthesis), "Missing ')' in attribute."); // )
+                MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kLeftParenthesis), "Missing ')' in attribute."); // )
 
                 auto attr = MakeUniquePtr<Attribute>(std::string(attr_name->view), std::move(attr_value));
 
                 DeletedUnique_T<TreeNode> nxt;
                 
-                MONA_TRY_GET(processToken(), nxt, "Failed to gerante ASTNode");
+                MONA_TRY_GET(parsePrimary(), nxt, "Failed to gerante ASTNode");
 
                 nxt->addAttribute(std::move(attr));
 
-                return std::move(nxt);
+                result = std::move(nxt);
             } break;
 
             case Kind::kNumber: {
@@ -77,11 +202,11 @@ namespace mona {
                     
                     MONA_TRY_GET(consumeCheck(Kind::kIdentifier), identifier, "Missing identifier in component declaration.");
                     
-                    MONA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kRightBracket), "Missing '{' in component declaration");
+                    MANA_CHECK_MAYBE_RETURN(consumeCheck(Kind::kRightBracket), "Missing '{' in component declaration");
 
                     // Keep looping until next token is a left bracket
                     while (peek(1)->kind != Kind::kLeftBracket) {
-                        auto field_type = processToken();
+                        auto field_type = parsePrimary();
 
                         // Peek a identifier
                         const Token* field_name;
@@ -91,21 +216,30 @@ namespace mona {
                         fields.push_back(MakeUniquePtr<CField>(std::move(field_type), std::string(field_name->view)));
                     }
 
-                    MONA_CHECK_MAYBE_RETURN(
+                    MANA_CHECK_MAYBE_RETURN(
                         consumeCheck(Kind::kLeftBracket), 
                         "Missing '}' at end of component declaration."
                     );
 
-                    return MakeUniquePtr<Component>(std::move(fields));
-                } else if (tk->view == "string") return MakeUniquePtr<TSymbol>("string");
-                else return MakeUniquePtr<TSymbol>(std::string(tk->view));
+                    result = MakeUniquePtr<Component>(std::move(fields));
+                } else if (tk->view == "string") result = MakeUniquePtr<TSymbol>("string");
+                else result = MakeUniquePtr<TSymbol>(std::string(tk->view));
             } break;
+            case Kind::kAsterisk:
+            case Kind::kMinus:
+            case Kind::kSlash:
+            case Kind::kPlus:
+            case Kind::kRightParenthesis:
+            case Kind::kLeftParenthesis:
+                MANA_FATAL_NO_RETURN("Received operator while doing primary parsing.");
+            default:
+                MANA_FATAL_NO_RETURN("Invalid token.");
         }
 
-        return nullptr;
+        return result;
     }
 
-    const Token* Parser::peekExpected(size_t off, Kind kind, bool skip_ws, bool skip_lnbrks)
+    const Token* Parser::peekExpected(int64_t off, Kind kind, bool skip_ws, bool skip_lnbrks)
     {
         auto tk = peek(off, skip_ws, skip_lnbrks);
 
@@ -116,18 +250,18 @@ namespace mona {
         return tk;
     }
 
-    bool Parser::canPeek(size_t off, bool skip_ws, bool skip_lnbrks) {
+    bool Parser::canPeek(int64_t off, bool skip_ws, bool skip_lnbrks) {
         if (off == 0) return true;
 
         auto tokenidx = m_tokenIdx + 1;
 
-        while (off != 0 && tokenidx < m_lexer.size()) {
-            if (skip_ws && m_lexer[tokenidx].kind == Kind::kWS) {
+        while (off != 0 && tokenidx < m_lexer->size()) {
+            if (skip_ws && (*m_lexer)[tokenidx].kind == Kind::kWS) {
                 tokenidx++;
                 continue;
             }
 
-            if (skip_lnbrks && m_lexer[tokenidx].kind == Kind::kLnBrk) {
+            if (skip_lnbrks && (*m_lexer)[tokenidx].kind == Kind::kLnBrk) {
                 tokenidx++;
                 continue;
             }
@@ -142,27 +276,45 @@ namespace mona {
         return true;
     }
 
-    const Token* Parser::peek(size_t off, bool skip_ws, bool skip_lnbrks) 
+    const Token* Parser::peek(int64_t off, bool skip_ws, bool skip_lnbrks) 
     {
-        if (off == 0) return &m_lexer[m_tokenIdx];
+        if (off == 0) return &(*m_lexer)[m_tokenIdx];
 
-        if (m_tokenIdx == m_lexer.size() - 1) return nullptr;
+        int64_t tokenidx;
 
-        auto tokenidx = m_tokenIdx + 1;
+        if (off > 0) {
+            if (m_tokenIdx == m_lexer->size() - 1) return nullptr;
 
-        for (; off != 0 && tokenidx < m_lexer.size(); tokenidx++) {
-            if (skip_ws && m_lexer[tokenidx].kind == Kind::kWS) 
-                continue;
+            tokenidx = m_tokenIdx + 1;
 
-            if (skip_lnbrks && m_lexer[tokenidx].kind == Kind::kLnBrk)
-                continue;
-        
-            if (--off == 0) break;
+            for (; off != 0 && tokenidx < m_lexer->size(); tokenidx++) {
+                if (skip_ws && (*m_lexer)[tokenidx].kind == Kind::kWS) 
+                    continue;
+
+                if (skip_lnbrks && (*m_lexer)[tokenidx].kind == Kind::kLnBrk)
+                    continue;
+            
+                if (--off == 0) break;
+            }
+        } else {
+            if (m_tokenIdx == 0) return nullptr;
+
+            tokenidx = m_tokenIdx - 1;
+
+            for (; off != 0 && tokenidx >= 0; tokenidx--) {
+                if (skip_ws && (*m_lexer)[tokenidx].kind == Kind::kWS) 
+                    continue;
+
+                if (skip_lnbrks && (*m_lexer)[tokenidx].kind == Kind::kLnBrk)
+                    continue;
+            
+                if (++off == 0) break;
+            }
         }
 
         if (off != 0) return nullptr;
 
-        return &m_lexer[tokenidx];        
+        return &(*m_lexer)[tokenidx];   
     }
 
     const Token* Parser::consumeCheck(Kind kind, size_t off, bool skip_ws, bool skip_lnbrks) 
@@ -181,21 +333,21 @@ namespace mona {
         if (off == 0) 
             return nullptr;
 
-        if (m_tokenIdx == m_lexer.size() - 1) 
+        if (m_tokenIdx == m_lexer->size() - 1) 
             return nullptr;
 
         m_tokenIdx++;
 
-        while (off != 0 && m_tokenIdx < m_lexer.size()) {
-            m_stats.columnIndex += m_lexer[m_tokenIdx].view.size();
+        while (off != 0 && m_tokenIdx < m_lexer->size()) {
+            m_stats.columnIndex += (*m_lexer)[m_tokenIdx].view.size();
 
-            if (m_lexer[m_tokenIdx].kind == Kind::kWS)
+            if ((*m_lexer)[m_tokenIdx].kind == Kind::kWS)
                 if (skip_ws) {
                     m_tokenIdx++;
                     continue;
                 }
 
-            if (m_lexer[m_tokenIdx].kind == Kind::kLnBrk) {
+            if ((*m_lexer)[m_tokenIdx].kind == Kind::kLnBrk) {
                 m_stats.columnIndex = 0;
                 m_stats.lineIndex++;
 
@@ -213,6 +365,6 @@ namespace mona {
 
         if (off != 0) return nullptr;
 
-        return &m_lexer[m_tokenIdx];   
+        return &(*m_lexer)[m_tokenIdx];   
     }
 }

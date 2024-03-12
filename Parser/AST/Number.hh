@@ -12,6 +12,8 @@ namespace mona {
         Number(const std::string& identifier);
 
         DeletedUnique_T<TreeNode> clone() override;
+
+        void print(std::ostream& stream) override;
     private:
         std::string m_identifier;
     };

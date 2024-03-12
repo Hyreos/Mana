@@ -46,11 +46,11 @@ public:
 
                         std::cout << "[@] Generating..." << std::endl;
 
-                        auto parser = mona::Parser(data);
+                        auto parser = mona::Parser();
 
                         parser.registerErrorCallback(LogParserError);
 
-                        parser.parse();
+                        parser.parse(data); 
 
                         std::cout << "[@] Done." << std::endl;
                     }

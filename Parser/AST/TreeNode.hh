@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <iostream>
 
 #include "Helpers/Deleted.hh"
 
@@ -11,7 +12,13 @@ namespace mona {
         kComponent,
         kComponentField,
         kTSymbol,
-        kNumber
+        kNumber,
+        kAdd,
+        kSub,
+        kSlash,
+        kMul,
+        kMod,
+        kExpr
     };
 
     class TreeNode {
@@ -27,6 +34,13 @@ namespace mona {
 
             return static_cast<T*>(this);
         }
+
+        inline ASTKind kind() const
+        {
+            return m_kind;
+        }
+
+        virtual void print(std::ostream& stream) { stream << "TODO!"; }
 
         void addAttribute(DeletedUnique_T<TreeNode> attr);
 

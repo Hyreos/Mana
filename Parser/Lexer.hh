@@ -24,7 +24,7 @@ namespace mona {
         kLeftBracket, // {
         kRightBracket, // }
         kMod, // %
-        kDiv, // /
+        kSlash, // /
         kAt, // @
         kWS, // [ ]
         kLnBrk, // \n

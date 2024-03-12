@@ -55,6 +55,15 @@
         "unordered_map": "cpp",
         "xhash": "cpp",
         "string_view": "cpp",
-        "fstream": "cpp"
-    }
+        "fstream": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "algorithm": "cpp",
+        "optional": "cpp"
+    },
+    "cmake.configureOnOpen": false
 }

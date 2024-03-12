@@ -9,6 +9,11 @@ namespace mona {
 
     DeletedUnique_T<TreeNode> Number::clone()
     {
-    return MakeUniquePtr<Number>(m_identifier);
+        return MakeUniquePtr<Number>(m_identifier);
+    }
+
+    void Number::print(std::ostream& stream)
+    {
+        stream << m_identifier;
     }
 }
