@@ -183,7 +183,7 @@ namespace mana {
                 
                 MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), attr_name, "Missing identifier in attribute.");
 
-                MANA_CHECK_MAYBE_RETURN(attr_name->asStringView() == "serialize", "Invalid identifier in attribute.");
+                MANA_CHECK_MAYBE_RETURN(attr_name->match("serialize"), "Invalid identifier in attribute.");
             
                 MANA_CHECK_MAYBE_RETURN(consumeCheck (Token::Type::kLeftParen), "Missing '(' in attribute."); // (
                 
@@ -222,7 +222,7 @@ namespace mana {
                 break;
 
             case Token::Type::kIdentifier: {
-                if (tk->asStringView() == "component") {
+                if (tk->match("component")) {
                     std::vector<std::unique_ptr<TreeNode>> fields;
 
                     const Token* identifier;
@@ -240,6 +240,9 @@ namespace mana {
                         
                         MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), field_name, "Invalid token");
 
+                        for (auto& f : fields)
+                            MANA_CHECK_MAYBE_RETURN(!field_name->match(f->cast<CompFieldDecl>()->name()), "Fields of the same name within a component are not allowed.");
+
                         fields.push_back(std::make_unique<CompFieldDecl>(std::move(field_type), field_name->asString()));
                     }
 
@@ -249,6 +252,17 @@ namespace mana {
                     );
 
                     result = std::make_unique<CompDecl>(identifier->asString(), std::move(fields));
+                } else if (tk->match("export")) {
+                    result = parsePrimary();
+
+                    switch (result->kind()) {
+                        case ASTKind::kComponent: {
+                            auto* decl = result->cast<CompDecl>();
+                            decl->setExportStatus(true);
+                        } break;
+                        default:
+                            MANA_FATAL_NO_RETURN("Export is not allowed for this declaration.");
+                    }
                 } else {
                     bool isOptional = false;
 

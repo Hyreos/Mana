@@ -1,4 +1,4 @@
-component A {
+export component A {
     @serialize(0xFFFFus + 0xFFFFFFFFu / (-0xFFFFFFFFFFl + 0xFFFFFFFFFFFFFFFFul)) 
     str? p1
 

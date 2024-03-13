@@ -22,6 +22,8 @@ namespace mana {
 
     void CompDecl::print(std::ostream& stream, size_t ident)
     {
+        if (m_exported) stream << "export ";
+
         stream << "component " << m_name << " {" << std::endl;
 
         for (auto& f : m_fields) {
@@ -33,5 +35,15 @@ namespace mana {
         }
         
         stream << "}";
+    }
+
+    void CompDecl::setExportStatus(bool value)
+    {
+        m_exported = value;
+    }
+
+    bool CompDecl::isExported() const
+    {
+        return m_exported;
     }
 }

@@ -27,4 +27,9 @@ namespace mana {
 
         stream << m_name;
     }
+
+    const std::string& CompFieldDecl::name() const
+    {
+        return m_name;
+    }
 }

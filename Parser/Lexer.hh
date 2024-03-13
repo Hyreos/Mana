@@ -100,6 +100,18 @@ namespace mana {
 
             return static_cast<uint64_t>(std::get<int64_t>(value));
         }
+
+        inline bool match(const char* str) const {
+            CHECK(kind == Type::kIdentifier);
+
+            return std::get<std::string_view>(value) == str;
+        }
+
+        inline bool match(const std::string& str) const {
+            CHECK(kind == Type::kIdentifier);
+
+            return std::get<std::string_view>(value) == str;
+        }
     };
     
     class Lexer {
