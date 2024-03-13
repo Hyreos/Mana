@@ -263,10 +263,20 @@ namespace mana {
                     advance();
                     break;
                 case '-':
-                    tokens.push_back(Token {
-                        .kind = Token::Type::kMinus,
-                        .value = std::string_view { &m_code[m_offset], 1 }
-                    });
+                    if (matches(1, '-')) {
+                        tokens.push_back(Token {
+                            .kind = Token::Type::kDecrement,
+                            .value = std::string_view { &m_code[m_offset], 2 }
+                        });
+
+                        advance();
+                    } else {
+                        tokens.push_back(Token {
+                            .kind = Token::Type::kMinus,
+                            .value = std::string_view { &m_code[m_offset], 1 }
+                        });
+                    }
+                    
                     advance();
                     break;
                 case '*':

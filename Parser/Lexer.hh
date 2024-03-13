@@ -43,6 +43,7 @@ namespace mana {
             kAt, // @
             kWS, // [ ]
             kLnBrk, // \n
+            kDecrement, // --
             kEOF, // EOF
             kCount
         };
