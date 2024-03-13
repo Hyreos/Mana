@@ -267,49 +267,27 @@ namespace mana {
                 } else if (tk->match("import")) {                    
                     std::vector<std::filesystem::path> pathlist;
 
-                    std::cout << "IMPORT!" << std::endl;
-
                     if (matches(1, Token::Type::kLeftParen)) {
                         consume();
 
-                        do {
-                            std::filesystem::path path;
+                        while (!matches(1, Token::Type::kRightParen)) {
+                            const Token* path;
 
-                            size_t i = 0;
+                            MANA_TRY_GET(consumeCheck(Token::Type::kStrLit), path, "Expected a string literal in import statement.");
 
-                            do {
-                                if (i++ > 0) MANA_CHECK_MAYBE_RETURN(consumeCheck(Token::Type::kDot), "Missing dot after identifier.");
-
-                                const Token* next;
-                                
-                                MANA_TRY_GET(consumeCheck(Token::Type::kIdentifier), next, "Expected only identifiers when parsing import path.");
-
-                                path = path / next->asString();
-                            } while (!matches(1, Token::Type::kLnBrk, true, false) && !matches(1, Token::Type::kRightParen));
-
-                            pathlist.push_back(std::move(path));
-                        } while(!matches(1, Token::Type::kRightParen));
+                            pathlist.push_back(path->asString());
+                        }
 
                         MANA_CHECK_MAYBE_RETURN(consumeCheck(Token::Type::kRightParen), "Expected a ')' at end of import statement.");
                     } else {
-                        std::filesystem::path path;
-
-                        size_t i = 0;
-
-                        do {
-                            if (i++ > 0) MANA_CHECK_MAYBE_RETURN(consumeCheck(Token::Type::kDot), "Missing dot.");
-
-                            const Token* next;
+                        const Token* next;
                             
-                            MANA_TRY_GET(consumeCheck(Token::Type::kIdentifier), next, "Expected only identifiers when parsing import path.");
+                        MANA_TRY_GET(consumeCheck(Token::Type::kStrLit), next, "Expected only identifiers when parsing import path.");
 
-                            path = path / next->asString();
-                        } while (matches(1, Token::Type::kDot));
+                        std::filesystem::path path = next->asString();
 
                         pathlist.push_back(std::move(path));
                     }
-
-                    std::cout << "Pushing import stat..." << std::endl;
 
                     result = std::make_unique<ImportStat>(std::move(pathlist));
                 } else {

@@ -64,7 +64,13 @@
         "span": "cpp",
         "algorithm": "cpp",
         "optional": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "chrono": "cpp",
+        "filesystem": "cpp",
+        "forward_list": "cpp",
+        "iomanip": "cpp",
+        "ratio": "cpp",
+        "sstream": "cpp"
     },
     "cmake.configureOnOpen": false
 }

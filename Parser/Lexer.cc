@@ -228,7 +228,7 @@ namespace mana {
                         advance(); // /
                         advance(); // *
 
-                        while (!matches(0, '*') && !matches(1, '/')) 
+                        while (!(matches(0, '*') && matches(1, '/'))) 
                             advance();
 
                         advance(); // *
@@ -248,20 +248,25 @@ namespace mana {
                     });
                     advance();
                     break;
-                case '"':
-                    tokens.push_back(Token {
-                        .kind = Token::Type::kDoubleQuote,
-                        .value = std::string_view { &m_code[m_offset], 1 }
-                    });
-                    advance();
-                    break;
                 case '\'':
+                case '"': {
+                    advance(); // ignore "
+
+                    size_t start = m_offset;
+                    size_t count = 0;
+
+                    while (!matches(0, c) && peek(0) != static_cast<char>(EOF)) {
+                        count++;
+                        advance();
+                    }
+
+                    advance(); // ignore next "
+
                     tokens.push_back(Token {
-                        .kind = Token::Type::kSingleQuote,
-                        .value = std::string_view { &m_code[m_offset], 1 }
+                        .kind = Token::Type::kStrLit,
+                        .value = std::string_view { &m_code[start], count }
                     });
-                    advance();
-                    break;
+                } break;
                 case '+':
                     tokens.push_back(Token {
                         .kind = Token::Type::kPlus,
@@ -424,6 +429,8 @@ namespace mana {
 
     char Lexer::peek(size_t off)
     {
+        if (!canPeek(off)) return static_cast<char>(EOF);
+
         return m_code[m_offset + off];
     }
 

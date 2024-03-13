@@ -21,6 +21,7 @@ namespace mana {
             
             kF32Lit,
             kF64Lit,
+            kStrLit, // " / '
 
             kPlus, // +
             kMinus, // -
@@ -32,8 +33,6 @@ namespace mana {
             kEqual, // =
             kGreaterThan, // >
             kLessThan, // <
-            kSingleQuote, // '
-            kDoubleQuote, // "
             kComma, // ,
             kInv, // !
             kLeftBracket, // {
@@ -60,7 +59,7 @@ namespace mana {
 
         inline const std::string_view& asStringView() const
         {
-            CHECK(kind == Type::kIdentifier);
+            CHECK(kind == Type::kIdentifier || kind == Type::kStrLit);
             
             return std::get<std::string_view>(value);
         }

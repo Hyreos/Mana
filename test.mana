@@ -1,11 +1,8 @@
-import (
-    teste.test2.test348
-
-
-    
-    teste.test2.test341
-    teste.test2.test344
-)
+import /*(*/
+    "teste/test1"
+    /*"teste/test2"
+    "teste/test3"*/
+/*)*/
 
 export component A {
     @serialize(0xFFFFus + 0xFFFFFFFFu / (-0xFFFFFFFFFFl + 0xFFFFFFFFFFFFFFFFul)) 
