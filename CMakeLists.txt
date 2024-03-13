@@ -9,10 +9,6 @@ option(MANA_IS_VERBOSE "Enable verbose mode." OFF)
 option(MANA_BUILD_CLI "Enable command-line tool build." ON)
 option(MANA_IS_SHARED "Build Mana as a shared library." OFF)
 
-if (WIN32)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
-
 if (MANA_IS_SHARED)
     add_library(${PROJECT_NAME} SHARED)
 else()
@@ -37,6 +33,10 @@ endif()
 
 if (MANA_IS_SHARED)
     set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
+    if (WIN32)
+        set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    endif()
 else()
     set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
