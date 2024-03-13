@@ -9,7 +9,7 @@ namespace mana {
     public:
         static constexpr TreeNode::Type kind { TreeNode::Type::kTSymbol };
 
-        TSymbol(const std::string& identifier, bool isOptional);
+        TSymbol(const std::string& identifier, bool isOptional = false);
 
         std::unique_ptr<TreeNode> clone() override;
 

@@ -19,6 +19,7 @@ namespace mana {
             kSlash,
             kMul,
             kMod,
+            kScopeResolution,
 
             kImportStat,
 
@@ -54,6 +55,8 @@ namespace mana {
         {
             return m_kind;
         }
+
+        void pprint(std::ostream& stream, size_t ident);
 
         virtual void print(std::ostream& stream, size_t ident) = 0;
 

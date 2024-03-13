@@ -19,6 +19,7 @@
 #include "AST/SumOp.hh"
 #include "AST/MulOp.hh"
 #include "AST/DivOp.hh"
+#include "AST/ScopeResolutionOp.hh"
 
 #include "AST/UnaryMinus.hh"
 #include "AST/UnaryPlus.hh"
@@ -62,6 +63,8 @@ namespace mana {
         std::unique_ptr<TreeNode> parsePrimary();
 
         std::unique_ptr<TreeNode> parseExpression();
+
+        std::unique_ptr<Attribute> parseAttr();
 
         std::unique_ptr<TreeNode> parseExpression1(
             std::unique_ptr<TreeNode> lhs,

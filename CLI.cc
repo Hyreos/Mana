@@ -7,8 +7,7 @@
 
 void LogParserError(const std::string& msg) {
     std::cerr << "FATAL: " << msg << std::endl;
-
-    std::exit(1);
+    CHECK(false);
 }
 
 class CLIMain {

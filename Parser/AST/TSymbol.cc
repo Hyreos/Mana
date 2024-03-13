@@ -15,11 +15,6 @@ namespace mana {
 
     void TSymbol::print(std::ostream& stream, size_t ident)
     {
-        for (auto& attr : attributes()) {
-            attr->print(stream, ident);
-            stream << " ";
-        }
-
         stream << m_identifier;
 
         if (m_isOptional) stream << "?";

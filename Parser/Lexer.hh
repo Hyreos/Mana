@@ -27,7 +27,7 @@ namespace mana {
 
             kArrow, // ->
 
-            kNSAccessor, // ::
+            kDualColon, // ::
 
             kPlus, // +
             kMinus, // -

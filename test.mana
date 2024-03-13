@@ -4,12 +4,16 @@ import (
     "teste/test3"
 )
 
-export component Vec2 : cpp glm::vec2 {
+@cc import (
+    "glm/glm.hpp"
+)
+
+export component Vec2 : @cc glm::vec2, Foo {
     f32 x -> x
     f32 y -> y
 }
 
-export component Vec3 : cpp glm::vec3 {
+export component Vec3 : @cc glm::vec3 {
     f32 x -> x
     f32 y -> y
     f32 z -> z

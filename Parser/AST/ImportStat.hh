@@ -10,7 +10,8 @@ namespace mana {
         static constexpr TreeNode::Type kind { TreeNode::Type::kImportStat };
 
         ImportStat(
-            std::vector<std::filesystem::path> pathlist
+            std::vector<std::filesystem::path> pathlist,
+            bool is_cc = false
         );
 
         std::unique_ptr<TreeNode> clone() override;
@@ -18,5 +19,6 @@ namespace mana {
         void print(std::ostream& stream, size_t ident) override;
     private:
         std::vector<std::filesystem::path> m_pathlist;
+        bool m_isCc;
     };
 }

@@ -24,8 +24,8 @@ endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE -fno-asynchronous-unwind-tables -fno-exceptions)
 
-    if (MANA_IS_ASAN)
-        target_compile_options(${PROJECT_NAME} PRIVATE -O0)
+    if (MANA_IS_ASAN OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(${PROJECT_NAME} PRIVATE -O0 -g)
     elseif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_options(${PROJECT_NAME} PRIVATE -Ofast)
     endif()
@@ -86,6 +86,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/SumOp.cc
                                         Parser/AST/MulOp.cc
                                         Parser/AST/DivOp.cc
+                                        Parser/AST/ScopeResolutionOp.cc
                                         
                                         Parser/AST/UnaryMinus.cc
                                         Parser/AST/UnaryPlus.cc)

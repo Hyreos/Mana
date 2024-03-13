@@ -21,9 +21,9 @@ namespace mana {
     void CompFieldDecl::print(std::ostream& stream, size_t ident)
     {
         for (auto& attr : attributes())
-            attr->print(stream, ident);
+            attr->pprint(stream, ident);
 
-        m_type->print(stream, ident);
+        m_type->pprint(stream, ident);
 
         stream << " ";
 

@@ -44,7 +44,7 @@ namespace mana {
         stream << "AST Print:" << std::endl;
 
         for (auto& it : tr_nodes) {
-            it->print(stream, 0);
+            it->pprint(stream, 0);
             stream << std::endl;
         }
     }
@@ -59,6 +59,8 @@ namespace mana {
             case Token::Type::kSlash:
             case Token::Type::kMod:
                 return 3;
+            case Token::Type::kDualColon: // scope resolution
+                return 4;
             default:
                 return 0;
         }
@@ -70,6 +72,7 @@ namespace mana {
             case Token::Type::kPlus:
             case Token::Type::kAsterisk:
             case Token::Type::kSlash:
+            case Token::Type::kDualColon:
                 return Associativity::kLeft;
             default:
                 return Associativity::kRight;
@@ -89,6 +92,7 @@ namespace mana {
             case Token::Type::kSlash:
             case Token::Type::kPlus:
             case Token::Type::kMinus:
+            case Token::Type::kDualColon:
                 return true;
             default:
                 return false;
@@ -151,8 +155,12 @@ namespace mana {
                     case Token::Type::kAsterisk: {
                         lhs = std::make_unique<MulOp>(std::move(lhs), std::move(rhs));
                     } break;
+
+                    case Token::Type::kDualColon: {
+                        lhs = std::make_unique<ScopeResolutionOp>(std::move(lhs), std::move(rhs));
+                    } break;
                     default:
-                        mana::unreachable();
+                        MANA_FATAL_NO_RETURN("Invalid operator type.");
                 }
             }
 
@@ -160,6 +168,27 @@ namespace mana {
         } else {
             return lhs;
         }
+    }
+
+    std::unique_ptr<Attribute> Parser::parseAttr()
+    {
+        const mana::Token* attr_name;
+                
+        MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), attr_name, "Missing identifier in attribute.");
+
+        std::unique_ptr<TreeNode> node;
+
+        if (matches(1, Token::Type::kLeftParen)) {
+            consume();
+
+            node = parseExpression();
+
+            MANA_CHECK_MAYBE_RETURN(consumeCheck (Token::Type::kRightParen), "Missing ')' in attribute."); // )
+        }
+
+        auto attr = std::make_unique<Attribute>(attr_name->asString(), std::move(node));
+
+        return attr;
     }
     
     std::unique_ptr<TreeNode> Parser::parsePrimary()
@@ -180,23 +209,11 @@ namespace mana {
             case Token::Type::kEOF:
                 return nullptr;
             case Token::Type::kAt: {
-                const mana::Token* attr_name;
-                
-                MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), attr_name, "Missing identifier in attribute.");
-
-                MANA_CHECK_MAYBE_RETURN(attr_name->match("serialize"), "Invalid identifier in attribute.");
-            
-                MANA_CHECK_MAYBE_RETURN(consumeCheck (Token::Type::kLeftParen), "Missing '(' in attribute."); // (
-                
-                auto attr_value = parseExpression();
-
-                MANA_CHECK_MAYBE_RETURN(consumeCheck (Token::Type::kRightParen), "Missing ')' in attribute."); // )
-
-                auto attr = std::make_unique<Attribute>(attr_name->asString(), std::move(attr_value));
+                auto attr = parseAttr();
 
                 std::unique_ptr<TreeNode> nxt;
                 
-                MANA_TRY_GET(parsePrimary(), nxt, "Failed to gerante ASTNode");
+                MANA_TRY_GET(parseExpression(), nxt, "Failed to gerante ASTNode");
 
                 nxt->addAttribute(std::move(attr));
 
@@ -234,49 +251,30 @@ namespace mana {
                         "Missing identifier in component declaration."
                     );
 
-                    std::vector<std::string> inheritances, cpp_inheritances;
+                    std::vector<std::unique_ptr<TreeNode>> inhs;
 
                     // Check for inheritances
                     if (matches(1, Token::Type::kColon)) {
+                        consume(); // :
+
                         do {
-                            consume(); // :
+                            if (matches(1, Token::Type::kComma)) consume();
 
-                            bool inherits_from_cc_class = false;
-    
-                            if (canPeek(1) && peek(1)->match("cpp")) {
-                                inherits_from_cc_class = true;
+                            std::unique_ptr<TreeNode> attr;
 
-                                consume(); // cpp
+                            if (matches(1, Token::Type::kAt)) {
+                                consume();
+
+                                attr = parseAttr();
                             }
 
-                            std::string name;
-                            
-                            {
-                                size_t i = 0;
+                            std::unique_ptr<TreeNode> inh = parseExpression();
 
-                                do {
-                                    if (i++ > 0) {
-                                        consume();
-
-                                        name += "::";
-                                    }
-
-                                    const Token* name_tok;
-
-                                    MANA_TRY_GET(
-                                        consumeCheck(Token::Type::kIdentifier), 
-                                        name_tok, 
-                                        "Expected an identifier in component inheritances."
-                                    );
-
-                                    name += name_tok->asStringView();
-                                } while (matches(1, Token::Type::kNSAccessor));
+                            if (attr) {
+                                inh->addAttribute(std::move(attr));
                             }
 
-                            if (inherits_from_cc_class) 
-                                cpp_inheritances.push_back(name);
-                            else 
-                                inheritances.push_back(name);
+                            inhs.push_back(std::move(inh));
                         } while (matches(1, Token::Type::kComma));
                     }
                     
@@ -321,8 +319,7 @@ namespace mana {
                     result = std::make_unique<CompDecl>(
                         identifier->asString(), 
                         std::move(fields),
-                        inheritances,
-                        cpp_inheritances
+                        std::move(inhs)
                     );
                 } else if (tk->match("export")) {
                     result = parsePrimary();
@@ -335,7 +332,9 @@ namespace mana {
                         default:
                             MANA_FATAL_NO_RETURN("Export is not allowed for this declaration.");
                     }
-                } else if (tk->match("import")) {                    
+                } else if (tk->match("import")) {
+                    bool is_cc = false;
+                                                            
                     std::vector<std::filesystem::path> pathlist;
 
                     if (matches(1, Token::Type::kLeftParen)) {
@@ -360,7 +359,7 @@ namespace mana {
                         pathlist.push_back(std::move(path));
                     }
 
-                    result = std::make_unique<ImportStat>(std::move(pathlist));
+                    result = std::make_unique<ImportStat>(std::move(pathlist), is_cc);
                 } else {
                     bool isOptional = false;
                     if (matches(1, Token::Type::kQuestion)) {

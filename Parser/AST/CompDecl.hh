@@ -10,8 +10,7 @@ namespace mana {
         CompDecl(
             const std::string& name,
             std::vector<std::unique_ptr<TreeNode>> fields,
-            const std::vector<std::string>& inheritances,
-            const std::vector<std::string>& cpp_inheritances
+            std::vector<std::unique_ptr<TreeNode>> inheritances
         );
 
         std::unique_ptr<TreeNode> clone() override;
@@ -26,7 +25,7 @@ namespace mana {
 
         std::vector<std::unique_ptr<TreeNode>> m_fields;
 
-        std::vector<std::string> m_inheritances, m_cppInheritances;
+        std::vector<std::unique_ptr<TreeNode>> m_inheritances;
 
         std::string m_name;
     };

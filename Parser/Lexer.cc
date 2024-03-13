@@ -162,16 +162,6 @@ namespace mana {
                     .value = identifier
                 });
 
-                if (matches(0, ':') && matches(1, ':')) {
-                    tokens.push_back(Token {
-                        .kind = Token::Type::kNSAccessor,
-                        .value = std::string_view { &m_code[m_offset], 2 }
-                    });
-
-                    advance();
-                    advance();
-                }
-
                 continue;
             }
 
@@ -234,12 +224,22 @@ namespace mana {
                     advance();
                     break;
                 case ':':
-                    tokens.push_back(Token {
-                        .kind = Token::Type::kColon,
-                        .value = std::string_view { &m_code[m_offset], 1 }
-                    });
+                    if (matches(1, ':')) {
+                        tokens.push_back(Token {
+                            .kind = Token::Type::kDualColon,
+                            .value = std::string_view { &m_code[m_offset], 2 }
+                        });
+                        
+                        advance();
+                        advance();
+                    } else {
+                        tokens.push_back(Token {
+                            .kind = Token::Type::kColon,
+                            .value = std::string_view { &m_code[m_offset], 1 }
+                        });
 
-                    advance();
+                        advance();
+                    }
 
                     break;
                 case '/':

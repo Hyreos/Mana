@@ -17,11 +17,11 @@ namespace mana {
     {
         stream << "(";
 
-        m_lhs->print(stream, ident);
+        m_lhs->pprint(stream, ident);
 
         stream << " * ";
 
-        m_rhs->print(stream, ident);
+        m_rhs->pprint(stream, ident);
         
         stream << ")";
     }

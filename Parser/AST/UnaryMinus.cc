@@ -18,7 +18,7 @@ namespace mana {
 
         stream << "-";
 
-        m_operand->print(stream, ident);
+        m_operand->pprint(stream, ident);
 
         stream << ")";
     }
