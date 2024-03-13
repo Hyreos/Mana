@@ -267,6 +267,8 @@ namespace mana {
                 } else if (tk->match("import")) {                    
                     std::vector<std::filesystem::path> pathlist;
 
+                    std::cout << "IMPORT!" << std::endl;
+
                     if (matches(1, Token::Type::kLeftParen)) {
                         consume();
 

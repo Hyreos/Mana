@@ -18,10 +18,18 @@ public:
             std::string_view str = argv[i];
 
             if (str[0] == '-') {
+                const char* argname = "f";
+                size_t n = 1;
+                
+                if (str[1] == '-') {
+                    argname = "file";
+                    n = 2;
+                }
+
                 auto vsepp = str.find("=");
                 
                 if (vsepp != std::string_view::npos) {
-                    auto arg = str.substr(1, vsepp - 1);
+                    auto arg = str.substr(n, vsepp - n);
                     auto value = str.substr(vsepp + 1);
 
                     if (arg == "file" || arg == "f") {
