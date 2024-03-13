@@ -238,7 +238,12 @@ namespace mana {
             case Token::Type::kU64Lit:
                 result = std::make_unique<Uint64Lit>(tk->as64UInt());
                 break;
-
+            case Token::Type::kF64Lit:
+                result = std::make_unique<Fp64Lit>(tk->asFp64());
+                break;
+            case Token::Type::kF32Lit:
+                result = std::make_unique<Fp32Lit>(tk->asFp32());
+                break;
             case Token::Type::kIdentifier: {
                 if (tk->match("component")) {
                     std::vector<std::unique_ptr<TreeNode>> fields;
@@ -278,8 +283,8 @@ namespace mana {
                         } while (matches(1, Token::Type::kComma));
                     }
                     
-                    MANA_CHECK_MAYBE_RETURN(consumeCheck(
-                        Token::Type::kLeftBracket), 
+                    MANA_CHECK_MAYBE_RETURN(
+                        consumeCheck(Token::Type::kLeftBracket), 
                         "Missing '{' in component declaration"
                     );
 
@@ -300,15 +305,37 @@ namespace mana {
 
                             const Token* propCcName;
 
-                            MANA_TRY_GET(consumeCheck(Token::Type::kIdentifier), propCcName, "Can only receive an identifier as cpp property.");
+                            MANA_TRY_GET(
+                                consumeCheck(Token::Type::kIdentifier), 
+                                propCcName, 
+                                "Cpp property aliases can only receive an identifier."
+                            );
 
                             ccPropName = propCcName->asString();
                         }
 
-                        for (auto& f : fields)
-                            MANA_CHECK_MAYBE_RETURN(!field_name->match(f->cast<CompFieldDecl>()->name()), "Fields of the same name within a component are not allowed.");
+                        std::unique_ptr<TreeNode> defaultValue;
 
-                        fields.push_back(std::make_unique<CompFieldDecl>(std::move(field_type), field_name->asString(), ccPropName));
+                        if (matches(1, Token::Type::kEqual)) {
+                            consume();
+
+                            defaultValue = parseExpression();
+                        }
+
+                        for (auto& f : fields)
+                            MANA_CHECK_MAYBE_RETURN(
+                                !field_name->match(f->cast<CompFieldDecl>()->name()), 
+                                "Fields of the same name within a component are not allowed."
+                            );
+
+                        fields.push_back(
+                            std::make_unique<CompFieldDecl>(
+                                std::move(field_type), 
+                                field_name->asString(), 
+                                std::move(defaultValue),
+                                ccPropName
+                            )
+                        );
                     }
 
                     MANA_CHECK_MAYBE_RETURN(

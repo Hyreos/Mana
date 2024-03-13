@@ -21,6 +21,7 @@ namespace mana {
             
             kF32Lit,
             kF64Lit,
+
             kStrLit, // " / '
 
             kColon, // :
@@ -104,6 +105,18 @@ namespace mana {
             CHECK(kind == Type::kU64Lit);
 
             return static_cast<uint64_t>(std::get<int64_t>(value));
+        }
+
+        inline float asFp32() const {
+            CHECK(kind == Type::kF32Lit);
+
+            return static_cast<float>(std::get<double>(value));
+        }
+
+        inline double asFp64() const {
+            CHECK(kind == Type::kF64Lit);
+
+            return std::get<double>(value);
         }
 
         inline bool match(const char* str) const {

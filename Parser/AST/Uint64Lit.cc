@@ -14,6 +14,6 @@ namespace mana {
 
     void Uint64Lit::print(std::ostream& stream, size_t ident)
     {
-        stream << "(" << m_value << ")";
+        stream << "(" << m_value << "_u64" << ")";
     }
 }

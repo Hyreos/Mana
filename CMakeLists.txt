@@ -78,6 +78,9 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/Int32Lit.cc
                                         Parser/AST/Int64Lit.cc
 
+                                        Parser/AST/Fp32Lit.cc
+                                        Parser/AST/Fp64Lit.cc
+
                                         Parser/AST/Uint16Lit.cc
                                         Parser/AST/Uint32Lit.cc
                                         Parser/AST/Uint64Lit.cc

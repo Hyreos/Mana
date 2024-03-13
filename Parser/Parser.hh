@@ -9,6 +9,9 @@
 #include "AST/Int32Lit.hh"
 #include "AST/Int64Lit.hh"
 
+#include "AST/Fp32Lit.hh"
+#include "AST/Fp64Lit.hh"
+
 #include "AST/Uint16Lit.hh"
 #include "AST/Uint32Lit.hh"
 #include "AST/Uint64Lit.hh"

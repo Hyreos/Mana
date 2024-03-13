@@ -34,6 +34,9 @@ namespace mana {
             kUint32Lit,
             kUint16Lit,
 
+            kFp32Lit,
+            kFp64Lit,
+
             kExpr
         };
 

@@ -72,8 +72,48 @@ namespace mana {
                             advance();
                         }   
 
-                        // TODO: Parse float.
+                        double dvalue;
+
+                        auto [_, ec] = std::from_chars(
+                            number.data(),
+                            number.data() + number.size(),
+                            dvalue
+                        );
+
+                        if (ec != std::errc()) {
+                            if (ec == std::errc::invalid_argument) {
+                                MANA_FATAL_NO_RETURN("Failed to parse float64. Not a number.");
+                            } else if (ec == std::errc::result_out_of_range) {
+                                MANA_FATAL_NO_RETURN("Failed to parse float64. Number is larger than maximum limit.");
+                            } else {
+                                MANA_FATAL_NO_RETURN("Failed to parse float64.");
+                            }
+                        }
+
+                        if (matches(0, 'f')) {
+                            advance();
+
+                            if (mana::in_range<float>(dvalue)) {
+                                tokens.push_back(Token {
+                                    .kind = Token::Type::kF32Lit,
+                                    .value = dvalue
+                                });
+                            } else {
+                                MANA_FATAL_NO_RETURN("Number is larger than maximum float32 limit");
+                            }
+                        } else {
+                            if (matches(0, 'd')) 
+                                advance();
+
+                            tokens.push_back(Token {
+                                .kind = Token::Type::kF64Lit,
+                                .value = dvalue
+                            });
+                        }
+
+                        continue;
                     } else {
+                        // if it's not a fp value, then parse it to an uint64
                         auto [_, ec] = std::from_chars(number.data(), number.data() + number.length(), value, 10);
                     
                         if (ec != std::errc()) {
