@@ -3,6 +3,7 @@
 #include <iostream>
 #include <queue>
 #include <stack>
+#include <filesystem>
 
 namespace mana {
     Parser::Parser()
@@ -263,6 +264,52 @@ namespace mana {
                         default:
                             MANA_FATAL_NO_RETURN("Export is not allowed for this declaration.");
                     }
+                } else if (tk->match("import")) {                    
+                    std::vector<std::filesystem::path> pathlist;
+
+                    if (matches(1, Token::Type::kLeftParen)) {
+                        consume();
+
+                        do {
+                            std::filesystem::path path;
+
+                            size_t i = 0;
+
+                            do {
+                                if (i++ > 0) MANA_CHECK_MAYBE_RETURN(consumeCheck(Token::Type::kDot), "Missing dot after identifier.");
+
+                                const Token* next;
+                                
+                                MANA_TRY_GET(consumeCheck(Token::Type::kIdentifier), next, "Expected only identifiers when parsing import path.");
+
+                                path = path / next->asString();
+                            } while (!matches(1, Token::Type::kLnBrk, true, false) && !matches(1, Token::Type::kRightParen));
+
+                            pathlist.push_back(std::move(path));
+                        } while(!matches(1, Token::Type::kRightParen));
+
+                        MANA_CHECK_MAYBE_RETURN(consumeCheck(Token::Type::kRightParen), "Expected a ')' at end of import statement.");
+                    } else {
+                        std::filesystem::path path;
+
+                        size_t i = 0;
+
+                        do {
+                            if (i++ > 0) MANA_CHECK_MAYBE_RETURN(consumeCheck(Token::Type::kDot), "Missing dot.");
+
+                            const Token* next;
+                            
+                            MANA_TRY_GET(consumeCheck(Token::Type::kIdentifier), next, "Expected only identifiers when parsing import path.");
+
+                            path = path / next->asString();
+                        } while (matches(1, Token::Type::kDot));
+
+                        pathlist.push_back(std::move(path));
+                    }
+
+                    std::cout << "Pushing import stat..." << std::endl;
+
+                    result = std::make_unique<ImportStat>(std::move(pathlist));
                 } else {
                     bool isOptional = false;
 
@@ -302,7 +349,7 @@ namespace mana {
 
     bool Parser::matches(int64_t off, Token::Type token_type, bool skip_ws, bool skip_lnbrks)
     {
-        return (canPeek(off) && peek(off)->kind == token_type);
+        return (canPeek(off, skip_ws, skip_lnbrks) && peek(off, skip_ws, skip_lnbrks)->kind == token_type);
     }
 
     const Token* Parser::peekExpected(int64_t off, Token::Type kind, bool skip_ws, bool skip_lnbrks)

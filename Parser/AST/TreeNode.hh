@@ -20,6 +20,8 @@ namespace mana {
             kMul,
             kMod,
 
+            kImportStat,
+
             kUnaryMinus,
             kUnaryPlus,
 

@@ -72,6 +72,8 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/TreeNode.cc
                                         Parser/AST/TSymbol.cc
 
+                                        Parser/AST/ImportStat.cc
+
                                         Parser/AST/Int16Lit.cc
                                         Parser/AST/Int32Lit.cc
                                         Parser/AST/Int64Lit.cc

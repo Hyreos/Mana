@@ -14,6 +14,7 @@
 #include "AST/Uint64Lit.hh"
 
 #include "AST/TSymbol.hh"
+#include "AST/ImportStat.hh"
 #include "AST/SubOp.hh"
 #include "AST/SumOp.hh"
 #include "AST/MulOp.hh"
