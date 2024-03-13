@@ -7,7 +7,7 @@
 namespace mana {
     class CompFieldDecl : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kComponentField };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kComponentField };
 
         CompFieldDecl(
             std::unique_ptr<TreeNode> type,

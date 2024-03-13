@@ -7,7 +7,7 @@
 namespace mana {
     class DivOp : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kSlash };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kSlash };
 
         DivOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs);
 

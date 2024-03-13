@@ -8,7 +8,7 @@
 namespace mana {
     class Int16Lit : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kInt16Lit };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kInt16Lit };
 
         Int16Lit(int16_t value);
 

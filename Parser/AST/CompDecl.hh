@@ -5,7 +5,7 @@
 namespace mana {
     class CompDecl : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kComponent };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kComponent };
 
         CompDecl(
             const std::string& name,

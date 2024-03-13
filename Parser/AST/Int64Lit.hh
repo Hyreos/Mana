@@ -8,7 +8,7 @@
 namespace mana {
     class Int64Lit : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kInt64Lit };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kInt64Lit };
 
         Int64Lit(int64_t value);
 

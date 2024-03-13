@@ -7,7 +7,7 @@
 namespace mana {
     class SubOp : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kSub };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kSub };
 
         SubOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs);
 

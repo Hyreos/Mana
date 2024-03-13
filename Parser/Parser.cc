@@ -256,7 +256,7 @@ namespace mana {
                     result = parsePrimary();
 
                     switch (result->kind()) {
-                        case ASTKind::kComponent: {
+                        case TreeNode::Type::kComponent: {
                             auto* decl = result->cast<CompDecl>();
                             decl->setExportStatus(true);
                         } break;

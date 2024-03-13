@@ -7,34 +7,34 @@
 #include "Helpers/Deleted.hh"
 
 namespace mana {
-    enum class ASTKind {
-        kAttribute,
-        kComponent,
-        kComponentField,
-        kTSymbol,
-        kAdd,
-        kSub,
-        kSlash,
-        kMul,
-        kMod,
-
-        kUnaryMinus,
-        kUnaryPlus,
-
-        kInt64Lit,
-        kInt32Lit,
-        kInt16Lit,
-
-        kUint64Lit,
-        kUint32Lit,
-        kUint16Lit,
-
-        kExpr
-    };
-
     class TreeNode {
     public:
-        TreeNode(ASTKind kind);
+        enum class Type {
+            kAttribute,
+            kComponent,
+            kComponentField,
+            kTSymbol,
+            kAdd,
+            kSub,
+            kSlash,
+            kMul,
+            kMod,
+
+            kUnaryMinus,
+            kUnaryPlus,
+
+            kInt64Lit,
+            kInt32Lit,
+            kInt16Lit,
+
+            kUint64Lit,
+            kUint32Lit,
+            kUint16Lit,
+
+            kExpr
+        };
+
+        TreeNode(TreeNode::Type kind);
 
         virtual ~TreeNode() = default;
 
@@ -48,7 +48,7 @@ namespace mana {
             return static_cast<T*>(this);
         }
 
-        inline ASTKind kind() const
+        inline TreeNode::Type kind() const
         {
             return m_kind;
         }
@@ -59,7 +59,7 @@ namespace mana {
 
         std::vector<std::unique_ptr<TreeNode>>& attributes();
     private:
-        ASTKind m_kind;
+        TreeNode::Type m_kind;
 
         std::vector<std::unique_ptr<TreeNode>> m_attributes;
     };

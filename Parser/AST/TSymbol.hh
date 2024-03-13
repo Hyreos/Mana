@@ -7,7 +7,7 @@
 namespace mana {
     class TSymbol : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kTSymbol };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kTSymbol };
 
         TSymbol(const std::string& identifier, bool isOptional);
 

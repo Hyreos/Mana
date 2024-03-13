@@ -7,7 +7,7 @@
 namespace mana {
     class UnaryPlus : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kUnaryPlus };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kUnaryPlus };
 
         UnaryPlus(std::unique_ptr<TreeNode> operand);
 

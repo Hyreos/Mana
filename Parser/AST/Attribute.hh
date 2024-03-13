@@ -7,7 +7,7 @@
 namespace mana {
     class Attribute : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kAttribute };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kAttribute };
 
         Attribute(
             const std::string& name,

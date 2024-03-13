@@ -7,7 +7,7 @@
 namespace mana {
     class MulOp : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kMul };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kMul };
 
         MulOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs);
 

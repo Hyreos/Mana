@@ -1,7 +1,7 @@
 #include "TreeNode.hh"
 
 namespace mana {
-    TreeNode::TreeNode(ASTKind kind) 
+    TreeNode::TreeNode(TreeNode::Type kind) 
         : m_kind{ kind } 
     {
     }

@@ -7,7 +7,7 @@
 namespace mana {
     class SumOp : public TreeNode {
     public:
-        static constexpr ASTKind kind { ASTKind::kAdd };
+        static constexpr TreeNode::Type kind { TreeNode::Type::kAdd };
 
         SumOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs);
 
