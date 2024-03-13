@@ -5,11 +5,11 @@
 #include <string>
 
 namespace mana {
-    class CField : public TreeNode {
+    class CompFieldDecl : public TreeNode {
     public:
         static constexpr ASTKind kind { ASTKind::kComponentField };
 
-        CField(
+        CompFieldDecl(
             std::unique_ptr<TreeNode> type,
             const std::string& name
         );

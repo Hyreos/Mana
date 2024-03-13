@@ -67,8 +67,8 @@ endif()
 target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/Lexer.cc
                                         Parser/AST/Attribute.cc
-                                        Parser/AST/CField.cc
-                                        Parser/AST/Component.cc
+                                        Parser/AST/CompFieldDecl.cc
+                                        Parser/AST/CompDecl.cc
                                         Parser/AST/TreeNode.cc
                                         Parser/AST/TSymbol.cc
 

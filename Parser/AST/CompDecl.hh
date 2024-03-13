@@ -3,11 +3,11 @@
 #include "TreeNode.hh"
 
 namespace mana {
-    class Component : public TreeNode {
+    class CompDecl : public TreeNode {
     public:
         static constexpr ASTKind kind { ASTKind::kComponent };
 
-        Component(
+        CompDecl(
             const std::string& name,
             std::vector<std::unique_ptr<TreeNode>> fields
         );

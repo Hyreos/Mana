@@ -1,7 +1,7 @@
-#include "CField.hh"
+#include "CompFieldDecl.hh"
 
 namespace mana {
-    CField::CField(
+    CompFieldDecl::CompFieldDecl(
         std::unique_ptr<TreeNode> type,
         const std::string& name
     ) 
@@ -11,12 +11,12 @@ namespace mana {
     {
     }
 
-    std::unique_ptr<TreeNode> CField::clone()
+    std::unique_ptr<TreeNode> CompFieldDecl::clone()
     {
-        return std::make_unique<CField>(m_type->clone(), m_name);
+        return std::make_unique<CompFieldDecl>(m_type->clone(), m_name);
     }
 
-    void CField::print(std::ostream& stream, size_t ident)
+    void CompFieldDecl::print(std::ostream& stream, size_t ident)
     {
         for (auto& attr : attributes())
             attr->print(stream, ident);

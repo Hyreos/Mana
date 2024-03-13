@@ -240,7 +240,7 @@ namespace mana {
                         
                         MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), field_name, "Invalid token");
 
-                        fields.push_back(std::make_unique<CField>(std::move(field_type), field_name->asString()));
+                        fields.push_back(std::make_unique<CompFieldDecl>(std::move(field_type), field_name->asString()));
                     }
 
                     MANA_CHECK_MAYBE_RETURN(
@@ -248,9 +248,18 @@ namespace mana {
                         "Missing '}' at end of component declaration."
                     );
 
-                    result = std::make_unique<Component>(identifier->asString(), std::move(fields));
-                } else if (tk->asStringView() == "string") result = std::make_unique<TSymbol>("string");
-                else result = std::make_unique<TSymbol>(tk->asString());
+                    result = std::make_unique<CompDecl>(identifier->asString(), std::move(fields));
+                } else {
+                    bool isOptional = false;
+
+                    if (matches(1, Token::Type::kQMark)) {
+                        consume();
+
+                        isOptional = true;
+                    }
+
+                    result = std::make_unique<TSymbol>(tk->asString(), isOptional);                   
+                }
             } break;
             case Token::Type::kMinus: {
                 result = std::make_unique<UnaryMinus>(parsePrimary());
@@ -268,12 +277,18 @@ namespace mana {
             case Token::Type::kAsterisk:
             case Token::Type::kSlash:
             case Token::Type::kDecrement:
+            case Token::Type::kQMark:
                 MANA_FATAL_NO_RETURN("Received invalid operator while doing primary parsing.");
             default:
                 MANA_FATAL_NO_RETURN("Unrecognized token.");
         }
 
         return result;
+    }
+
+    bool Parser::matches(int64_t off, Token::Type token_type, bool skip_ws, bool skip_lnbrks)
+    {
+        return (canPeek(off) && peek(off)->kind == token_type);
     }
 
     const Token* Parser::peekExpected(int64_t off, Token::Type kind, bool skip_ws, bool skip_lnbrks)

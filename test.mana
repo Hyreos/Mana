@@ -1,15 +1,17 @@
 component A {
     @serialize(0xFFFFus + 0xFFFFFFFFu / (-0xFFFFFFFFFFl + 0xFFFFFFFFFFFFFFFFul)) 
-    string p1
+    str? p1
 
     @serialize(0x15 + 6 / 8 + 8 * 9) 
-    string p2
+    str? p2
+    i64 p3
+    i64 p4
 }
 
 component B {
     @serialize(1) 
-    string p1
+    str p1
 
     @serialize(2)
-    string p2
+    str p2
 }

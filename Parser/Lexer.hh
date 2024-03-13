@@ -44,6 +44,7 @@ namespace mana {
             kWS, // [ ]
             kLnBrk, // \n
             kDecrement, // --
+            kQMark, // ?
             kEOF, // EOF
             kCount
         };

@@ -2,8 +2,8 @@
 
 #include "AST/TreeNode.hh"
 #include "AST/Attribute.hh"
-#include "AST/CField.hh"
-#include "AST/Component.hh"
+#include "AST/CompFieldDecl.hh"
+#include "AST/CompDecl.hh"
 
 #include "AST/Int16Lit.hh"
 #include "AST/Int32Lit.hh"
@@ -43,6 +43,8 @@ namespace mana {
             kLeft,
             kRight
         };
+
+        bool matches(int64_t off, Token::Type token_type, bool skip_ws = true, bool skip_lnbrks = true);
 
         bool canPeek(int64_t off, bool skip_ws = true, bool skip_lnbrks = true);
 
