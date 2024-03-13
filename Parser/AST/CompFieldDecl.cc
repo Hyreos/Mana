@@ -5,19 +5,27 @@ namespace mana {
         std::unique_ptr<TreeNode> type,
         const std::string& name,
         std::unique_ptr<TreeNode> defaultValue,
+        bool isOptional,
         std::optional<std::string> propCppName
     ) 
         : TreeNode(kind),
             m_name{ name },
             m_type{ std::move(type) },
             m_defaultValue { std::move(defaultValue) },
-            m_cppPropName { propCppName }
+            m_cppPropName { propCppName },
+            m_isOptional { isOptional }
     {
     }
 
     std::unique_ptr<TreeNode> CompFieldDecl::clone()
     {
-        return std::make_unique<CompFieldDecl>(m_type->clone(), m_name, m_defaultValue->clone(), m_cppPropName);
+        return std::make_unique<CompFieldDecl>(
+            m_type->clone(), 
+            m_name, 
+            m_defaultValue->clone(), 
+            m_isOptional, 
+            m_cppPropName
+        );
     }
 
     void CompFieldDecl::print(std::ostream& stream, size_t ident)
@@ -26,6 +34,8 @@ namespace mana {
             attr->pprint(stream, ident);
 
         m_type->pprint(stream, ident);
+
+        if (m_isOptional) stream << "?";
 
         stream << " ";
 

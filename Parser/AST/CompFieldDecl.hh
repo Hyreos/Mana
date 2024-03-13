@@ -14,6 +14,7 @@ namespace mana {
             std::unique_ptr<TreeNode> type,
             const std::string& name,
             std::unique_ptr<TreeNode> defaultValue,
+            bool isOptional,
             std::optional<std::string> cppPropName = std::nullopt
         );
 
@@ -24,6 +25,7 @@ namespace mana {
         const std::string& name() const;
     private:
         std::string m_name;
+        bool m_isOptional;
         std::unique_ptr<TreeNode> m_type, m_defaultValue;
         std::optional<std::string> m_cppPropName;
     };

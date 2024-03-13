@@ -292,6 +292,14 @@ namespace mana {
                     while (canPeek(1) && peek(1)->kind != Token::Type::kRightBracket) {                        
                         auto field_type = parsePrimary();
 
+                        bool isOpt = false;
+
+                        if (matches(1, Token::Type::kQuestion)) {
+                            consume();
+                        
+                            isOpt = true;
+                        }
+
                         // Peek a identifier
                         const Token* field_name;
                         
@@ -333,6 +341,7 @@ namespace mana {
                                 std::move(field_type), 
                                 field_name->asString(), 
                                 std::move(defaultValue),
+                                isOpt,
                                 ccPropName
                             )
                         );
@@ -389,11 +398,7 @@ namespace mana {
                     result = std::make_unique<ImportStat>(std::move(pathlist), is_cc);
                 } else {
                     bool isOptional = false;
-                    if (matches(1, Token::Type::kQuestion)) {
-                        consume();
                     
-                        isOptional = true;
-                    }
                     result = std::make_unique<TSymbol>(tk->asString(), isOptional);                   
                 }
             } break;
