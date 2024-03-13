@@ -23,6 +23,12 @@ namespace mana {
             kF64Lit,
             kStrLit, // " / '
 
+            kColon, // :
+
+            kArrow, // ->
+
+            kNSAccessor, // ::
+
             kPlus, // +
             kMinus, // -
             kAsterisk, // *
@@ -43,7 +49,7 @@ namespace mana {
             kWS, // [ ]
             kLnBrk, // \n
             kDecrement, // --
-            kQMark, // ?
+            kQuestion, // ?
             kEOF, // EOF
             kCount
         };

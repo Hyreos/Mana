@@ -228,9 +228,62 @@ namespace mana {
 
                     const Token* identifier;
                     
-                    MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), identifier, "Missing identifier in component declaration.");
+                    MANA_TRY_GET(
+                        consumeCheck(Token::Type::kIdentifier), 
+                        identifier, 
+                        "Missing identifier in component declaration."
+                    );
+
+                    std::vector<std::string> inheritances, cpp_inheritances;
+
+                    // Check for inheritances
+                    if (matches(1, Token::Type::kColon)) {
+                        do {
+                            consume(); // :
+
+                            bool inherits_from_cc_class = false;
+    
+                            if (canPeek(1) && peek(1)->match("cpp")) {
+                                inherits_from_cc_class = true;
+
+                                consume(); // cpp
+                            }
+
+                            std::string name;
+                            
+                            {
+                                size_t i = 0;
+
+                                do {
+                                    if (i++ > 0) {
+                                        consume();
+
+                                        name += "::";
+                                    }
+
+                                    const Token* name_tok;
+
+                                    MANA_TRY_GET(
+                                        consumeCheck(Token::Type::kIdentifier), 
+                                        name_tok, 
+                                        "Expected an identifier in component inheritances."
+                                    );
+
+                                    name += name_tok->asStringView();
+                                } while (matches(1, Token::Type::kNSAccessor));
+                            }
+
+                            if (inherits_from_cc_class) 
+                                cpp_inheritances.push_back(name);
+                            else 
+                                inheritances.push_back(name);
+                        } while (matches(1, Token::Type::kComma));
+                    }
                     
-                    MANA_CHECK_MAYBE_RETURN(consumeCheck (Token::Type::kLeftBracket), "Missing '{' in component declaration");
+                    MANA_CHECK_MAYBE_RETURN(consumeCheck(
+                        Token::Type::kLeftBracket), 
+                        "Missing '{' in component declaration"
+                    );
 
                     // Keep looping until next token is a left bracket
                     while (canPeek(1) && peek(1)->kind != Token::Type::kRightBracket) {                        
@@ -241,10 +294,23 @@ namespace mana {
                         
                         MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), field_name, "Invalid token");
 
+                        std::optional<std::string> ccPropName = std::nullopt;
+
+                        // Check if we have an -> (alias to Cpp property)
+                        if (matches(1, Token::Type::kArrow)) {
+                            consume();
+
+                            const Token* propCcName;
+
+                            MANA_TRY_GET(consumeCheck(Token::Type::kIdentifier), propCcName, "Can only receive an identifier as cpp property.");
+
+                            ccPropName = propCcName->asString();
+                        }
+
                         for (auto& f : fields)
                             MANA_CHECK_MAYBE_RETURN(!field_name->match(f->cast<CompFieldDecl>()->name()), "Fields of the same name within a component are not allowed.");
 
-                        fields.push_back(std::make_unique<CompFieldDecl>(std::move(field_type), field_name->asString()));
+                        fields.push_back(std::make_unique<CompFieldDecl>(std::move(field_type), field_name->asString(), ccPropName));
                     }
 
                     MANA_CHECK_MAYBE_RETURN(
@@ -252,7 +318,12 @@ namespace mana {
                         "Missing '}' at end of component declaration."
                     );
 
-                    result = std::make_unique<CompDecl>(identifier->asString(), std::move(fields));
+                    result = std::make_unique<CompDecl>(
+                        identifier->asString(), 
+                        std::move(fields),
+                        inheritances,
+                        cpp_inheritances
+                    );
                 } else if (tk->match("export")) {
                     result = parsePrimary();
 
@@ -292,16 +363,15 @@ namespace mana {
                     result = std::make_unique<ImportStat>(std::move(pathlist));
                 } else {
                     bool isOptional = false;
-
-                    if (matches(1, Token::Type::kQMark)) {
+                    if (matches(1, Token::Type::kQuestion)) {
                         consume();
-
+                    
                         isOptional = true;
                     }
-
                     result = std::make_unique<TSymbol>(tk->asString(), isOptional);                   
                 }
             } break;
+
             case Token::Type::kMinus: {
                 result = std::make_unique<UnaryMinus>(parsePrimary());
             } break;
@@ -318,7 +388,7 @@ namespace mana {
             case Token::Type::kAsterisk:
             case Token::Type::kSlash:
             case Token::Type::kDecrement:
-            case Token::Type::kQMark:
+            case Token::Type::kQuestion:
                 MANA_FATAL_NO_RETURN("Received invalid operator while doing primary parsing.");
             default:
                 MANA_FATAL_NO_RETURN("Unrecognized token.");

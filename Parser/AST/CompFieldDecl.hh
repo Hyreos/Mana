@@ -2,6 +2,7 @@
 
 #include "TreeNode.hh"
 
+#include <optional>
 #include <string>
 
 namespace mana {
@@ -11,7 +12,8 @@ namespace mana {
 
         CompFieldDecl(
             std::unique_ptr<TreeNode> type,
-            const std::string& name
+            const std::string& name,
+            std::optional<std::string> cppPropName = std::nullopt
         );
 
         std::unique_ptr<TreeNode> clone() override;
@@ -22,5 +24,6 @@ namespace mana {
     private:
         std::string m_name;
         std::unique_ptr<TreeNode> m_type;
+        std::optional<std::string> m_cppPropName;
     };
 }

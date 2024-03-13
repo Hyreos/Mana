@@ -162,6 +162,16 @@ namespace mana {
                     .value = identifier
                 });
 
+                if (matches(0, ':') && matches(1, ':')) {
+                    tokens.push_back(Token {
+                        .kind = Token::Type::kNSAccessor,
+                        .value = std::string_view { &m_code[m_offset], 2 }
+                    });
+
+                    advance();
+                    advance();
+                }
+
                 continue;
             }
 
@@ -175,7 +185,7 @@ namespace mana {
                     break;
                 case '?':
                     tokens.push_back(Token {
-                        .kind = Token::Type::kQMark,
+                        .kind = Token::Type::kQuestion,
                         .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
@@ -222,6 +232,15 @@ namespace mana {
                         .value = std::string_view { &m_code[m_offset], 1 }
                     });
                     advance();
+                    break;
+                case ':':
+                    tokens.push_back(Token {
+                        .kind = Token::Type::kColon,
+                        .value = std::string_view { &m_code[m_offset], 1 }
+                    });
+
+                    advance();
+
                     break;
                 case '/':
                     if (matches(1, '/')) {
@@ -284,6 +303,13 @@ namespace mana {
                     if (matches(1, '-')) {
                         tokens.push_back(Token {
                             .kind = Token::Type::kDecrement,
+                            .value = std::string_view { &m_code[m_offset], 2 }
+                        });
+
+                        advance();
+                    } else if (matches(1, '>')) {
+                        tokens.push_back(Token {
+                            .kind = Token::Type::kArrow,
                             .value = std::string_view { &m_code[m_offset], 2 }
                         });
 
