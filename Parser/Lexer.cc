@@ -224,7 +224,13 @@ namespace mana {
                     advance();
                     break;
                 case '/':
-                    if (matches(1, '*')) {
+                    if (matches(1, '/')) {
+                        advance(); advance(); // '//'
+
+                        while (!matches(0, '\n')) advance();
+
+                        advance(); // \n
+                    } else if (matches(1, '*')) {
                         advance(); // /
                         advance(); // *
 
