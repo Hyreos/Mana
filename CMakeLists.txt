@@ -10,6 +10,16 @@ option(MANA_BUILD_CLI "Enable command-line tool build." ON)
 option(MANA_IS_SHARED "Build Mana as a shared library." OFF)
 
 if (MANA_IS_SHARED)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
+    if (WIN32)
+        set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    endif()
+else()
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
+if (MANA_IS_SHARED)
     add_library(${PROJECT_NAME} SHARED)
 else()
     add_library(${PROJECT_NAME} STATIC)
@@ -31,16 +41,16 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     endif()
 endif()
 
-if (MANA_IS_SHARED)
-    set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+set(ABSL_FIND_GOOGLETEST OFF)
+set(ABSL_PROPAGATE_CXX_STD ON)
 
-    if (WIN32)
-        set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    endif()
-else()
-    set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+if (WIN32)
+    add_compile_definitions(_DISABLE_STRING_ANNOTATION=1 _DISABLE_VECTOR_ANNOTATION=1)
 endif()
 
+add_subdirectory(ThirdParty/abseil)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE absl::strings)
 
 if (MANA_IS_ASAN)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
@@ -56,9 +66,10 @@ if (MANA_IS_ASAN)
     endif()
 endif()
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}
+                                                    ${CMAKE_CURRENT_LIST_DIR}/ThirdParty/abseil)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
 if (MANA_IS_VERBOSE)
     target_compile_definitions(${PROJECT_NAME} PRIVATE MANA_IS_VERBOSE)
@@ -97,7 +108,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
 if (MANA_BUILD_CLI)
     add_executable(manac)
 
-    set_target_properties(manac PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+    set_target_properties(manac PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
     if (MANA_IS_ASAN)
         target_compile_options(manac PRIVATE -fsanitize=address)
@@ -115,15 +126,9 @@ if (MANA_BUILD_CLI)
         endif()
     endif()
 
-    if (MANA_IS_SHARED)
-        set_target_properties(manac PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-    else()
-        set_target_properties(manac PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    endif()
-
     target_link_libraries(manac PRIVATE ${PROJECT_NAME})
 
-    target_include_directories(manac PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+    target_include_directories(manac PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/ThirdParty/abseil)
 
     target_sources(manac PRIVATE CLI.cc)
 endif()

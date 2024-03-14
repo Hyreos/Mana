@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <string_view>
-#include <variant>
+#include <absl/types/variant.h>
 
 #include "Helpers/Macros.hh"
 
@@ -57,7 +57,7 @@ namespace mana {
 
         Type kind;
 
-        std::variant<std::string_view, double, int64_t> value;
+        absl::variant<std::string_view, double, int64_t> value;
 
         inline const std::string asString() const
         {

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 
+#include <absl/strings/charconv.h>
 #include "Helpers/Macros.hh"
 
 namespace mana {
@@ -75,16 +76,18 @@ namespace mana {
                             advance();
                         }   
 
-                        std::cout << "NSTR: " << number << std::endl;
-
                         double dvalue;
 
-                        auto ss = std::istringstream(std::string(number));
-
-                        std::cout << "NSTR2: " << dvalue << std::endl;
-
-                        if (!(ss >> dvalue)) {
-                             MANA_FATAL_NO_RETURN("Failed to parse float64. Not a number.");
+                        auto [_, ec] = absl::from_chars(number.data(), number.data() + number.length(), dvalue);
+                    
+                        if (ec != std::errc()) {
+                            if (ec == std::errc::invalid_argument) {
+                                MANA_FATAL_NO_RETURN("Failed to parse fp64. Not a number.");
+                            } else if (ec == std::errc::result_out_of_range) {
+                                MANA_FATAL_NO_RETURN("Failed to parse fp64. Number is larger than the maximum limit.");
+                            } else {
+                                MANA_FATAL_NO_RETURN("Failed to parse fp64.");
+                            }
                         }
 
                         if (matches(0, 'f')) {
@@ -141,14 +144,14 @@ namespace mana {
                         if (mana::in_range<uint16_t>(value)) {
                             tokens.push_back(Token {
                                 .kind = Token::Type::kU16Lit,
-                                .value = static_cast<uint16_t>(value)
+                                .value =  static_cast<int64_t>(value)
                             });
                         } else MANA_FATAL_NO_RETURN("Value overflows u16 limits.");
                     } else {
                         if (mana::in_range<uint32_t>(value)) {
                             tokens.push_back(Token {
                                 .kind = Token::Type::kU32Lit,
-                                .value = static_cast<uint32_t>(value)
+                                .value =  static_cast<int64_t>(value)
                             });
                         } else MANA_FATAL_NO_RETURN("Value overflows u32 limits.");
                     }
@@ -158,7 +161,7 @@ namespace mana {
                     if (mana::in_range<int64_t>(value)) {
                         tokens.push_back(Token {
                             .kind = Token::Type::kI64Lit,
-                            .value = static_cast<int64_t>(value)
+                            .value =  static_cast<int64_t>(value)
                         });
                     } else {                        
                         MANA_FATAL_NO_RETURN("Value overflows i64 limits."); }
@@ -168,14 +171,14 @@ namespace mana {
                     if (mana::in_range<int16_t>(value)) {
                         tokens.push_back(Token {
                             .kind = Token::Type::kI16Lit,
-                            .value = static_cast<int16_t>(value)
+                            .value =  static_cast<int64_t>(value)
                         });
                     } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
                 } else {
                     if (mana::in_range<int32_t>(value)) {
                         tokens.push_back(Token {
                             .kind = Token::Type::kI32Lit,
-                            .value = static_cast<int32_t>(value)
+                            .value =  static_cast<int64_t>(value)
                         });
                     } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
                 }
