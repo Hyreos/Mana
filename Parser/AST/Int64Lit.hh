@@ -5,16 +5,18 @@
 #include <string>
 #include <variant>
 
-namespace mana {
-    class Int64Lit : public TreeNode {
-    public:
-        static constexpr TreeNode::Type kind { TreeNode::Type::kInt64Lit };
+#include "Literal.hh"
 
+namespace mana {
+    class Int64Lit : public Literal {
+    public:
         Int64Lit(int64_t value);
 
         std::unique_ptr<TreeNode> clone() override;
 
         void print(std::ostream& stream, size_t ident) override;
+
+        void accept(TreeVisitor* visitor) override;
     private:
         int64_t m_value;
     };

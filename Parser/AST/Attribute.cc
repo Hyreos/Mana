@@ -1,5 +1,7 @@
 #include "Attribute.hh"
 
+#include "TreeTransverser.hh"
+
 namespace mana {
     Attribute::Attribute(
         const std::string& name,
@@ -25,5 +27,10 @@ namespace mana {
             m_value->pprint(stream, ident);
             stream << ")";
         } 
+    }
+
+    void Attribute::accept(TreeVisitor* visitor)
+    {
+        visitor->visitAttribute(this);
     }
 }

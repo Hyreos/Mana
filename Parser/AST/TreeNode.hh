@@ -7,6 +7,8 @@
 #include "Helpers/Deleted.hh"
 
 namespace mana {
+    class TreeVisitor;
+
     class TreeNode {
     public:
         enum class Type {
@@ -14,11 +16,9 @@ namespace mana {
             kComponent,
             kComponentField,
             kTSymbol,
-            kAdd,
-            kSub,
-            kSlash,
-            kMul,
-            kMod,
+            
+            kBinaryOp,
+
             kScopeResolution,
 
             kImportStat,
@@ -26,16 +26,7 @@ namespace mana {
             kUnaryMinus,
             kUnaryPlus,
 
-            kInt64Lit,
-            kInt32Lit,
-            kInt16Lit,
-
-            kUint64Lit,
-            kUint32Lit,
-            kUint16Lit,
-
-            kFp32Lit,
-            kFp64Lit,
+            kLiteral,
 
             kExpr
         };
@@ -59,13 +50,15 @@ namespace mana {
             return m_kind;
         }
 
-        void pprint(std::ostream& stream, size_t ident);
-
         virtual void print(std::ostream& stream, size_t ident) = 0;
+
+        void pprint(std::ostream& stream, size_t ident);
 
         void addAttribute(std::unique_ptr<TreeNode> attr);
 
         std::vector<std::unique_ptr<TreeNode>>& attributes();
+
+        virtual void accept(TreeVisitor* visitor) = 0;
     private:
         TreeNode::Type m_kind;
 

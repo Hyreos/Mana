@@ -17,6 +17,8 @@ namespace mana {
         std::unique_ptr<TreeNode> clone() override;
 
         void print(std::ostream& stream, size_t ident) override;
+
+        void accept(TreeVisitor* visitor) override;
     private:
         std::string m_name;
         std::unique_ptr<TreeNode> m_value;

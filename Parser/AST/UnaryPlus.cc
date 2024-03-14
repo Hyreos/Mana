@@ -1,5 +1,7 @@
 #include "UnaryPlus.hh"
 
+#include "TreeTransverser.hh"
+
 namespace mana {
     UnaryPlus::UnaryPlus(std::unique_ptr<TreeNode> operand)
         : TreeNode(kind),
@@ -21,5 +23,10 @@ namespace mana {
         m_operand->pprint(stream, ident);
 
         stream << ")";
+    }
+
+    void UnaryPlus::accept(TreeVisitor* visitor)
+    {
+        visitor->visitOperator(this);
     }
 }

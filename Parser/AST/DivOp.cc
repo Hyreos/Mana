@@ -1,8 +1,10 @@
 #include "DivOp.hh"
 
+#include "TreeTransverser.hh"
+
 namespace mana {
     DivOp::DivOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs)
-        : TreeNode(kind), m_lhs { std::move(lhs) }, m_rhs { std::move(rhs) }
+        : BinaryOp(kind, std::move(lhs), std::move(rhs))
     {
     }
 
@@ -22,5 +24,10 @@ namespace mana {
         m_rhs->pprint(stream, ident);
 
         stream << ")";
+    }
+
+    void DivOp::accept(TreeVisitor* visitor)
+    {
+        visitor->visitOperator(this);
     }
 }

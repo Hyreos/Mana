@@ -1,5 +1,7 @@
 #include "CompFieldDecl.hh"
 
+#include "TreeTransverser.hh"
+
 namespace mana {
     CompFieldDecl::CompFieldDecl(
         std::unique_ptr<TreeNode> type,
@@ -55,4 +57,9 @@ namespace mana {
     {
         return m_name;
     }
+
+    void CompFieldDecl::accept(TreeVisitor* visitor)
+    {
+        visitor->visitDeclaration(this);
+    };
 }

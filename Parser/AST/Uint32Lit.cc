@@ -1,8 +1,10 @@
 #include "Uint32Lit.hh"
 
+#include "TreeTransverser.hh"
+
 namespace mana {
     Uint32Lit::Uint32Lit(uint32_t value) 
-        : TreeNode(kind),
+        : Literal(value),
             m_value { value }
     {
     }
@@ -15,5 +17,10 @@ namespace mana {
     void Uint32Lit::print(std::ostream& stream, size_t ident)
     {
         stream << "(" << m_value << "_u32" << ")";
+    }
+
+    void Uint32Lit::accept(TreeVisitor* visitor)
+    {
+        visitor->visitLiteral(this);
     }
 }

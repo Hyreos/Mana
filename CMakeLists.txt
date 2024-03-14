@@ -106,7 +106,11 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/Uint16Lit.cc
                                         Parser/AST/Uint32Lit.cc
                                         Parser/AST/Uint64Lit.cc
-                                        
+
+                                        Parser/AST/Literal.cc
+
+                                        Parser/AST/BinaryOp.cc
+
                                         Parser/AST/SubOp.cc
                                         Parser/AST/SumOp.cc
                                         Parser/AST/MulOp.cc

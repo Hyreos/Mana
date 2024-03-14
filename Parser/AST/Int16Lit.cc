@@ -1,8 +1,10 @@
 #include "Int16Lit.hh"
 
+#include "TreeTransverser.hh"
+
 namespace mana {
     Int16Lit::Int16Lit(int16_t value) 
-        : TreeNode(kind),
+        : Literal(value),
             m_value { value }
     {
     }
@@ -15,5 +17,10 @@ namespace mana {
     void Int16Lit::print(std::ostream& stream, size_t ident)
     {
         stream << "(" << m_value << "_i16" << ")";
+    }
+
+    void Int16Lit::accept(TreeVisitor* visitor)
+    {
+        visitor->visitLiteral(this);
     }
 }

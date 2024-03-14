@@ -1,5 +1,7 @@
 #include "ScopeResolutionOp.hh"
 
+#include "TreeTransverser.hh"
+
 namespace mana {
     ScopeResolutionOp::ScopeResolutionOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs)
         : TreeNode(kind),
@@ -24,5 +26,10 @@ namespace mana {
         m_rhs->pprint(stream, ident);
 
         stream << ")";
+    }
+
+    void ScopeResolutionOp::accept(TreeVisitor* visitor)
+    {
+        visitor->visitOperator(this);
     }
 }

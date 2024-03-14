@@ -17,6 +17,8 @@ inline ErrorCallback_T g_errorCallback;
 
 #define MANA_CHECK_MAYBE_RETURN(X, MSG) { if (!(X)) { if (g_errorCallback) g_errorCallback(std::string("(") + std::to_string(m_stats.lineIndex) + ":" + std::to_string(m_stats.columnIndex) + "): " + MSG); return {}; } }
 
+#define MANA_CHECK_NO_RETURN(X, MSG) { if (!(X)) { if (g_errorCallback) g_errorCallback(MSG); } }
+
 #define MANA_TRY_GET(X, PTR, MSG) { PTR = X; if (!PTR) { if (g_errorCallback) g_errorCallback(MSG); return {}; } }
 
 #define MANA_FATAL(MSG) { if (g_errorCallback) g_errorCallback(MSG); return {} };

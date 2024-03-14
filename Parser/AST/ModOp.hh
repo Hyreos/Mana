@@ -5,11 +5,11 @@
 #include <string>
 
 namespace mana {
-    class DivOp : public BinaryOp {
+    class ModOp : public BinaryOp {
     public:
-        static constexpr BinaryOp::TypeMask::Enum kind { BinaryOp::TypeMask::kDiv };
+        static constexpr BinaryOp::TypeMask::Enum kind { BinaryOp::TypeMask::kMod };
 
-        DivOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs);
+        ModOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs);
 
         std::unique_ptr<TreeNode> clone() override;
 

@@ -1,5 +1,7 @@
 #include "TSymbol.hh"
 
+#include "TreeTransverser.hh"
+
 namespace mana {
     TSymbol::TSymbol(const std::string& identifier) 
         : TreeNode(kind),
@@ -15,5 +17,10 @@ namespace mana {
     void TSymbol::print(std::ostream& stream, size_t ident)
     {
         stream << m_identifier;
+    }
+
+    void TSymbol::accept(TreeVisitor* visitor)
+    {
+        visitor->visitSymbol(this);
     }
 }

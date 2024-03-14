@@ -1,5 +1,7 @@
 #include "ImportStat.hh"
 
+#include "TreeTransverser.hh"
+
 namespace mana {
     ImportStat::ImportStat(
         std::vector<std::filesystem::path> pathlist,
@@ -25,5 +27,10 @@ namespace mana {
         }
 
         stream << ")" << std::endl;
+    }
+
+    void ImportStat::accept(TreeVisitor* visitor)
+    {
+        visitor->visitStatement(this);
     }
 }

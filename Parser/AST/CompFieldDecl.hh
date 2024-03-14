@@ -23,6 +23,8 @@ namespace mana {
         void print(std::ostream& stream, size_t ident) override;
 
         const std::string& name() const;
+
+        void accept(TreeVisitor* visitor) override;
     private:
         std::string m_name;
         bool m_isOptional;

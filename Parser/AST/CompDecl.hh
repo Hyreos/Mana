@@ -20,6 +20,8 @@ namespace mana {
         void setExportStatus(bool value);
 
         bool isExported() const;
+
+        void accept(TreeVisitor* visitor) override;
     private:
         bool m_exported { false };
 

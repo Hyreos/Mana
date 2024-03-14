@@ -1,5 +1,7 @@
 #include "CompDecl.hh"
 
+#include "TreeTransverser.hh"
+
 namespace mana {
     CompDecl::CompDecl(
         const std::string& name,
@@ -58,5 +60,10 @@ namespace mana {
     bool CompDecl::isExported() const
     {
         return m_exported;
+    }
+
+    void CompDecl::accept(TreeVisitor* visitor)
+    {
+        visitor->visitDeclaration(this);
     }
 }
