@@ -20,6 +20,8 @@ namespace mana {
 
     void ImportStat::print(std::ostream& stream, size_t ident)
     {
+        TreeNode::print(stream, ident);
+
         stream << "import ("<< std::endl;
 
         for (auto i = 0; i < m_pathlist.size(); i++) {

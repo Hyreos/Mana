@@ -32,10 +32,12 @@ namespace mana {
 
     void CompFieldDecl::print(std::ostream& stream, size_t ident)
     {
-        for (auto& attr : attributes())
-            attr->pprint(stream, ident);
+        TreeNode::print(stream, ident);
 
-        m_type->pprint(stream, ident);
+        for (auto& attr : attributes())
+            attr->print(stream, ident);
+
+        m_type->print(stream, ident);
 
         if (m_isOptional) stream << "?";
 
@@ -49,7 +51,7 @@ namespace mana {
         if (m_defaultValue) {
             stream << " = ";
 
-            m_defaultValue->pprint(stream, ident);
+            m_defaultValue->print(stream, ident);
         }
     }
 

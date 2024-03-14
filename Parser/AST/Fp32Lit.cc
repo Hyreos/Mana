@@ -16,6 +16,8 @@ namespace mana {
 
     void Fp32Lit::print(std::ostream& stream, size_t ident)
     {
+        TreeNode::print(stream, ident);
+
         stream << "(" << m_value << "_f32" << ")";
     }
 

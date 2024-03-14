@@ -15,14 +15,4 @@ namespace mana {
     {
         return m_attributes;
     }
-
-    void TreeNode::pprint(std::ostream& stream, size_t ident)
-    {
-        for (auto& attr : m_attributes) attr->print(stream, ident);
-
-        if (!m_attributes.empty())
-            stream << " ";
-
-        print(stream, ident);
-    }
 }

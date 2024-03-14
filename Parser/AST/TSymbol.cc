@@ -16,6 +16,8 @@ namespace mana {
 
     void TSymbol::print(std::ostream& stream, size_t ident)
     {
+        TreeNode::print(stream, ident);
+
         stream << m_identifier;
     }
 

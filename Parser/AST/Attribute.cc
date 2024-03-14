@@ -20,11 +20,13 @@ namespace mana {
 
     void Attribute::print(std::ostream& stream, size_t ident)
     {
+        TreeNode::print(stream, ident);
+
         stream << "@" << m_name;
         
         if (m_value) {
             stream << "(";
-            m_value->pprint(stream, ident);
+            m_value->print(stream, ident);
             stream << ")";
         } 
     }

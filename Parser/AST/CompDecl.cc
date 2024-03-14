@@ -28,6 +28,8 @@ namespace mana {
 
     void CompDecl::print(std::ostream& stream, size_t ident)
     {
+        TreeNode::print(stream, ident);
+
         if (m_exported) stream << "export ";
 
         stream << "component " << m_name;
@@ -36,7 +38,7 @@ namespace mana {
 
         for (auto i = 0; i < m_inheritances.size(); i++) {
             if (i > 0) stream << ", ";
-            m_inheritances[i]->pprint(stream, ident);
+            m_inheritances[i]->print(stream, ident);
         }
         
         stream << " {" << std::endl;
@@ -44,7 +46,7 @@ namespace mana {
         for (auto& f : m_fields) {
             std::cout << std::string(2 * ident + 2, ' ');
             
-            f->pprint(stream, ident + 1);
+            f->print(stream, ident + 1);
 
             stream << std::endl;
         }

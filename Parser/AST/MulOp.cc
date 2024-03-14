@@ -15,13 +15,15 @@ namespace mana {
 
     void MulOp::print(std::ostream& stream, size_t ident)
     {
+        TreeNode::print(stream, ident);
+
         stream << "(";
 
-        m_lhs->pprint(stream, ident);
+        m_lhs->print(stream, ident);
 
         stream << " * ";
 
-        m_rhs->pprint(stream, ident);
+        m_rhs->print(stream, ident);
         
         stream << ")";
     }

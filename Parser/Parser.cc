@@ -44,7 +44,7 @@ namespace mana {
         stream << "AST Print:" << std::endl;
 
         for (auto& it : tr_nodes) {
-            it->pprint(stream, 0);
+            it->print(stream, 0);
             stream << std::endl;
         }
     }

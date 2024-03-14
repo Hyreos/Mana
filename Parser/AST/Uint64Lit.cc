@@ -16,6 +16,8 @@ namespace mana {
 
     void Uint64Lit::print(std::ostream& stream, size_t ident)
     {
+        TreeNode::print(stream, ident);
+
         stream << "(" << m_value << "_u64" << ")";
     }
 

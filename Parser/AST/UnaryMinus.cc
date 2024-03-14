@@ -16,11 +16,13 @@ namespace mana {
 
     void UnaryMinus::print(std::ostream& stream, size_t ident)
     {
+        TreeNode::print(stream, ident);
+
         stream << "(";
 
         stream << "-";
 
-        m_operand->pprint(stream, ident);
+        m_operand->print(stream, ident);
 
         stream << ")";
     }

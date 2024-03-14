@@ -50,9 +50,12 @@ namespace mana {
             return m_kind;
         }
 
-        virtual void print(std::ostream& stream, size_t ident) = 0;
+        virtual void print(std::ostream& stream, size_t ident) {
+            for (auto& attr : m_attributes) attr->print(stream, ident);
 
-        void pprint(std::ostream& stream, size_t ident);
+            if (!m_attributes.empty())
+                stream << " ";
+        }
 
         void addAttribute(std::unique_ptr<TreeNode> attr);
 
