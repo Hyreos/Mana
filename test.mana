@@ -7,7 +7,7 @@ import (
     "glm/glm.hpp"
 )
 
-export component Vec2 : @cc glm::vec2, Foo {
+export component Vec2 : @cc glm::vec2 {
     f32 x -> x
     f32 y -> y
 }
@@ -19,7 +19,7 @@ export component Vec3 : @cc glm::vec3 {
 }
 
 export component A {
-    @serialize(0xFFFFus + 0xFFFFFFFFu / (-0xFFFFFFFFFFl + 0xFFFFFFFFFFFFFFFFul)) 
+    @serialize(0xFFFFus / (0xFF + 0xFF, 5 * 0xFFFFFFFFu + 0xFF) / (-0xFFFFFFFFFFl + 0xFFFFFFFFFFFFFFFFul)) 
     str? p1
 
     @serialize(0x15 + 6 / 8 + 8 * 9) 

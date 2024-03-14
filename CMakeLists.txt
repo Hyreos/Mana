@@ -115,6 +115,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/SumOp.cc
                                         Parser/AST/MulOp.cc
                                         Parser/AST/DivOp.cc
+                                        Parser/AST/CommaOp.cc
                                         Parser/AST/ScopeResolutionOp.cc
                                         
                                         Parser/AST/UnaryMinus.cc

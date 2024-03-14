@@ -19,5 +19,7 @@ namespace mana
         virtual bool visitOperator(TreeNode* literal) { return true; }
 
         virtual bool visitStatement(TreeNode* statement) { return true; }
+
+        virtual bool visitExpression(TreeNode* expression) { return true; }
     };
 } 

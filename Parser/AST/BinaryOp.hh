@@ -17,7 +17,8 @@ namespace mana {
                 kDiv = 0x2,
                 kMod = 0x4,
                 kMul = 0x8,
-                kSub = 0x10
+                kSub = 0x10,
+                kComma = 0x20
             };
         };
 

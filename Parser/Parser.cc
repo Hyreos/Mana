@@ -51,6 +51,8 @@ namespace mana {
 
     size_t Parser::getPrecedence(const Token& tk) {
         switch (tk.kind) {
+            case Token::Type::kComma:
+                return 0;
             case Token::Type::kMinus:
             case Token::Type::kPlus:
                 return 1;
@@ -73,6 +75,7 @@ namespace mana {
             case Token::Type::kAsterisk:
             case Token::Type::kSlash:
             case Token::Type::kDualColon:
+            case Token::Type::kComma:
                 return Associativity::kLeft;
             default:
                 return Associativity::kRight;
@@ -81,11 +84,15 @@ namespace mana {
         mana::unreachable();
     }
 
-    std::unique_ptr<TreeNode> Parser::parseExpression() {
-        return parseExpression1(parsePrimary(), 1ull);
+    std::unique_ptr<TreeNode> Parser::parseExpression(bool isExpr) {
+        std::unique_ptr<TreeNode> result = parsePrimary();;
+
+        result = parseExpression1(std::move(result), 0ull, isExpr);
+
+        return result;
     }
 
-    bool Parser::isOperator(const Token& tok)
+    bool Parser::isOperator(const Token& tok, bool isWithinExpr)
     {
         switch (tok.kind) {
             case Token::Type::kAsterisk:
@@ -94,6 +101,9 @@ namespace mana {
             case Token::Type::kMinus:
             case Token::Type::kDualColon:
                 return true;
+            case Token::Type::kComma:
+                if (isWithinExpr) return true;
+                else MANA_FATAL_NO_RETURN("COMMA IS NOT AN OPERATOR");
             default:
                 return false;
         }
@@ -103,20 +113,21 @@ namespace mana {
 
     std::unique_ptr<TreeNode> Parser::parseExpression1(
         std::unique_ptr<TreeNode> lhs,
-        size_t min_precedence
+        size_t min_precedence,
+        bool isExpr
     )
     {
         if (!canPeek(1)) return lhs;
 
         auto* lookahead = peek(1);
 
-        if (isOperator(*lookahead)) {
-            consume();
-
+        if (lookahead && isOperator(*lookahead, isExpr)) {
             MANA_CHECK_MAYBE_RETURN(lookahead, "Trying to consume end of stream.");
 
-            while (lookahead && isOperator(*lookahead) && getPrecedence(*lookahead) >= min_precedence) {
+            while (lookahead && isOperator(*lookahead, isExpr) && getPrecedence(*lookahead) >= min_precedence) {
                 auto op = lookahead;
+
+                consume();
 
                 auto rhs = parsePrimary();
 
@@ -125,15 +136,16 @@ namespace mana {
                 lookahead = peek(1);
 
                 while (lookahead && (
-                    isOperator(*lookahead) 
-                    && getPrecedence(*lookahead) >= getPrecedence(*op) 
-                    || (getAssociativity(*lookahead) == Associativity::kRight 
-                        && getPrecedence(*lookahead) == getPrecedence(*op))
+                    isOperator(*lookahead, isExpr) 
+                    && (getPrecedence(*lookahead) >= getPrecedence(*op) 
+                            || (getAssociativity(*lookahead) == Associativity::kRight 
+                                    && getPrecedence(*lookahead) == getPrecedence(*op)))
                 ))
                 {
                     rhs = parseExpression1(
                         std::move(rhs),
-                        getPrecedence(*op) + ((getPrecedence(*lookahead) > getPrecedence(*op)) ? 1 : 0) 
+                        getPrecedence(*op) + ((getPrecedence(*lookahead) > getPrecedence(*op)) ? 1 : 0),
+                        isExpr 
                     );
 
                     lookahead = peek(1);
@@ -159,6 +171,11 @@ namespace mana {
                     case Token::Type::kDualColon: {
                         lhs = std::make_unique<ScopeResolutionOp>(std::move(lhs), std::move(rhs));
                     } break;
+
+                    case Token::Type::kComma: {
+                        lhs = std::make_unique<CommaOp>(std::move(lhs), std::move(rhs));
+                    } break;
+
                     default:
                         MANA_FATAL_NO_RETURN("Invalid operator type.");
                 }
@@ -388,7 +405,10 @@ namespace mana {
                             pathlist.push_back(path->asString());
                         }
 
-                        MANA_CHECK_MAYBE_RETURN(consumeCheck(Token::Type::kRightParen), "Expected a ')' at end of import statement.");
+                        MANA_CHECK_MAYBE_RETURN(
+                            consumeCheck(Token::Type::kRightParen), 
+                            "Expected a ')' at end of import statement."
+                        );
                     } else {
                         const Token* next;
                             
@@ -410,7 +430,8 @@ namespace mana {
             } break;
 
             case Token::Type::kLeftParen:
-                result = parseExpression();
+                result = parseExpression(true);
+
                 MANA_CHECK_MAYBE_RETURN(
                     consumeCheck(Token::Type::kRightParen),
                     "Expected ')' at end of expression group."

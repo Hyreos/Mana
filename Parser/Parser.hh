@@ -23,6 +23,7 @@
 #include "AST/MulOp.hh"
 #include "AST/DivOp.hh"
 #include "AST/ScopeResolutionOp.hh"
+#include "AST/CommaOp.hh"
 
 #include "AST/UnaryMinus.hh"
 #include "AST/UnaryPlus.hh"
@@ -57,7 +58,7 @@ namespace mana {
 
         const Token* consume(size_t off = 1, bool skip_ws = true, bool skip_lnbrks = true);
 
-        bool isOperator(const Token& tok);
+        bool isOperator(const Token& tok, bool isWithinExpr);
 
         Associativity getAssociativity(const Token& tk);
 
@@ -65,13 +66,14 @@ namespace mana {
 
         std::unique_ptr<TreeNode> parsePrimary();
 
-        std::unique_ptr<TreeNode> parseExpression();
+        std::unique_ptr<TreeNode> parseExpression(bool isExpr = false);
 
         std::unique_ptr<Attribute> parseAttr();
 
         std::unique_ptr<TreeNode> parseExpression1(
             std::unique_ptr<TreeNode> lhs,
-            size_t min_precedence
+            size_t min_precedence,
+            bool isExpr = false
         );
 
         const Token* peekExpected(int64_t off, Token::Type kind, bool skip_ws = true, bool skip_lnbrks = true);
