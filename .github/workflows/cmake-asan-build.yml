@@ -65,6 +65,7 @@ jobs:
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -DMANA_BUILD_CLI=ON
+        -DMANA_USE_PIC=ON
         -DMANA_IS_ASAN=ON
         -S ${{ github.workspace }}
 
