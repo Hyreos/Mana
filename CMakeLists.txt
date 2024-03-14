@@ -9,6 +9,9 @@ option(MANA_IS_VERBOSE "Enable verbose mode." OFF)
 option(MANA_BUILD_CLI "Enable command-line tool build." ON)
 option(MANA_IS_SHARED "Build Mana as a shared library." OFF)
 
+list( APPEND LLVM_FLAGS "-fPIC" )
+list( APPEND GCC_FLAGS "-fPIC" )
+
 if (MANA_IS_SHARED)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 else()
