@@ -11,10 +11,6 @@ option(MANA_IS_SHARED "Build Mana as a shared library." OFF)
 
 if (MANA_IS_SHARED)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-
-    if (WIN32)
-        set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    endif()
 else()
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
@@ -23,6 +19,12 @@ if (MANA_IS_SHARED)
     add_library(${PROJECT_NAME} SHARED)
 else()
     add_library(${PROJECT_NAME} STATIC)
+endif()
+
+if (MANA_IS_SHARED)
+    if (WIN32)
+        set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    endif()
 endif()
 
 if (MANA_IS_ASAN)
