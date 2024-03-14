@@ -16,7 +16,8 @@ namespace mana {
             kComponent,
             kComponentField,
             kTSymbol,
-            
+
+            kType,
             kBinaryOp,
 
             kScopeResolution,

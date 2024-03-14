@@ -17,13 +17,15 @@
 #include "AST/Uint64Lit.hh"
 
 #include "AST/TSymbol.hh"
-#include "AST/ImportStat.hh"
+#include "AST/ImportDecl.hh"
 #include "AST/SubOp.hh"
 #include "AST/SumOp.hh"
 #include "AST/MulOp.hh"
 #include "AST/DivOp.hh"
 #include "AST/ScopeResolutionOp.hh"
 #include "AST/CommaOp.hh"
+
+#include "AST/Type.hh"
 
 #include "AST/UnaryMinus.hh"
 #include "AST/UnaryPlus.hh"

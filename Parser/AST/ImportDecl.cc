@@ -1,9 +1,9 @@
-#include "ImportStat.hh"
+#include "ImportDecl.hh"
 
 #include "TreeTransverser.hh"
 
 namespace mana {
-    ImportStat::ImportStat(
+    ImportDecl::ImportDecl(
         std::vector<std::filesystem::path> pathlist,
         bool iscc
     ) 
@@ -13,12 +13,12 @@ namespace mana {
     {
     }
 
-    std::unique_ptr<TreeNode> ImportStat::clone()
+    std::unique_ptr<TreeNode> ImportDecl::clone()
     {
-        return std::make_unique<ImportStat>(m_pathlist, m_isCc);
+        return std::make_unique<ImportDecl>(m_pathlist, m_isCc);
     }
 
-    void ImportStat::print(std::ostream& stream, size_t ident)
+    void ImportDecl::print(std::ostream& stream, size_t ident)
     {
         TreeNode::print(stream, ident);
 
@@ -31,7 +31,7 @@ namespace mana {
         stream << ")" << std::endl;
     }
 
-    void ImportStat::accept(TreeVisitor* visitor)
+    void ImportDecl::accept(TreeVisitor* visitor)
     {
         visitor->visitStatement(this);
     }

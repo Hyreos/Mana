@@ -94,7 +94,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/TreeNode.cc
                                         Parser/AST/TSymbol.cc
 
-                                        Parser/AST/ImportStat.cc
+                                        Parser/AST/ImportDecl.cc
 
                                         Parser/AST/Int16Lit.cc
                                         Parser/AST/Int32Lit.cc
@@ -107,6 +107,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/Uint32Lit.cc
                                         Parser/AST/Uint64Lit.cc
 
+                                        Parser/AST/Type.cc
                                         Parser/AST/Literal.cc
 
                                         Parser/AST/BinaryOp.cc

@@ -5,11 +5,11 @@
 #include <filesystem>
 
 namespace mana {
-    class ImportStat : public TreeNode {
+    class ImportDecl : public TreeNode {
     public:
         static constexpr TreeNode::Type kind { TreeNode::Type::kImportStat };
 
-        ImportStat(
+        ImportDecl(
             std::vector<std::filesystem::path> pathlist,
             bool is_cc = false
         );

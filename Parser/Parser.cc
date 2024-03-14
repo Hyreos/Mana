@@ -419,8 +419,22 @@ namespace mana {
                         pathlist.push_back(std::move(path));
                     }
 
-                    result = std::make_unique<ImportStat>(std::move(pathlist), is_cc);
-                } else {                    
+                    result = std::make_unique<ImportDecl>(std::move(pathlist), is_cc);
+                } else if (tk->match("str")) {
+                    result = std::make_unique<Type>(Type::Kind::kStr);
+                } else if (tk->match("i64")) {
+                    result = std::make_unique<Type>(Type::Kind::kI64);
+                } else if (tk->match("i32")) {
+                    result = std::make_unique<Type>(Type::Kind::kI32);
+                } else if (tk->match("i16")) {
+                    result = std::make_unique<Type>(Type::Kind::kI16);
+                } else if (tk->match("u64")) {
+                    result = std::make_unique<Type>(Type::Kind::kU64);
+                } else if (tk->match("u32")) {
+                    result = std::make_unique<Type>(Type::Kind::kU32);
+                } else if (tk->match("u16")) {
+                    result = std::make_unique<Type>(Type::Kind::kU16);
+                } else {
                     result = std::make_unique<TSymbol>(tk->asString());                   
                 }
             } break;
