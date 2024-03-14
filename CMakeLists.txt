@@ -11,7 +11,7 @@ option(MANA_IS_SHARED "Build Mana as a shared library." OFF)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-fPIC)
-elseif ()
+endif()
 
 if (MANA_IS_SHARED)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
