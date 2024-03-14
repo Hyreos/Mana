@@ -1,7 +1,10 @@
 #include "Lexer.hh"
 
-#include <iostream>
 #include <charconv>
+#include <limits>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 #include "Helpers/Macros.hh"
 
@@ -72,22 +75,16 @@ namespace mana {
                             advance();
                         }   
 
+                        std::cout << "NSTR: " << number << std::endl;
+
                         double dvalue;
 
-                        auto [_, ec] = std::from_chars(
-                            number.data(),
-                            number.data() + number.size(),
-                            dvalue
-                        );
+                        auto ss = std::istringstream(std::string(number));
 
-                        if (ec != std::errc()) {
-                            if (ec == std::errc::invalid_argument) {
-                                MANA_FATAL_NO_RETURN("Failed to parse float64. Not a number.");
-                            } else if (ec == std::errc::result_out_of_range) {
-                                MANA_FATAL_NO_RETURN("Failed to parse float64. Number is larger than maximum limit.");
-                            } else {
-                                MANA_FATAL_NO_RETURN("Failed to parse float64.");
-                            }
+                        std::cout << "NSTR2: " << dvalue << std::endl;
+
+                        if (!(ss >> dvalue)) {
+                             MANA_FATAL_NO_RETURN("Failed to parse float64. Not a number.");
                         }
 
                         if (matches(0, 'f')) {

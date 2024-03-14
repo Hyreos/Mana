@@ -303,7 +303,11 @@ namespace mana {
                         // Peek a identifier
                         const Token* field_name;
                         
-                        MANA_TRY_GET(consumeCheck (Token::Type::kIdentifier), field_name, "Invalid token");
+                        MANA_TRY_GET(
+                            consumeCheck(Token::Type::kIdentifier), 
+                            field_name, 
+                            "Missing identifier in component field declaration."
+                        );
 
                         std::optional<std::string> ccPropName = std::nullopt;
 
@@ -396,10 +400,8 @@ namespace mana {
                     }
 
                     result = std::make_unique<ImportStat>(std::move(pathlist), is_cc);
-                } else {
-                    bool isOptional = false;
-                    
-                    result = std::make_unique<TSymbol>(tk->asString(), isOptional);                   
+                } else {                    
+                    result = std::make_unique<TSymbol>(tk->asString());                   
                 }
             } break;
 

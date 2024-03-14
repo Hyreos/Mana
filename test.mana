@@ -33,6 +33,7 @@ export component A {
 component B : A {
     @serialize(1) 
     str p1
+    f64 random_float_field = 55655.45554
 
     @serialize(2)
     str p2
