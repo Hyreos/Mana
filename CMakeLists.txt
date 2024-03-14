@@ -69,7 +69,7 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}
                                                     ${CMAKE_CURRENT_LIST_DIR}/ThirdParty/abseil)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 
 if (MANA_IS_VERBOSE)
     target_compile_definitions(${PROJECT_NAME} PRIVATE MANA_IS_VERBOSE)
@@ -108,7 +108,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
 if (MANA_BUILD_CLI)
     add_executable(manac)
 
-    set_target_properties(manac PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+    set_target_properties(manac PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 
     if (MANA_IS_ASAN)
         target_compile_options(manac PRIVATE -fsanitize=address)
