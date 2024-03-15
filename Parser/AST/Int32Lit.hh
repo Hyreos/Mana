@@ -7,7 +7,7 @@
 
 #include "Literal.hh"
 
-namespace mana {
+namespace mana::ast {
     class Int32Lit : public Literal {
     public:
         Int32Lit(int32_t value);

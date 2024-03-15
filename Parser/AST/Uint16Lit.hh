@@ -7,7 +7,7 @@
 
 #include "Literal.hh"
 
-namespace mana {
+namespace mana::ast {
     class Uint16Lit : public Literal {
     public:
         Uint16Lit(uint16_t value);

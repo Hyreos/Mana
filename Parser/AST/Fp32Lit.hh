@@ -7,7 +7,7 @@
 
 #include "Literal.hh"
 
-namespace mana {
+namespace mana::ast {
     class Fp32Lit : public Literal {
     public:
         Fp32Lit(float value);

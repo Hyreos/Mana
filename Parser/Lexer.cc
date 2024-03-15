@@ -412,6 +412,13 @@ namespace mana {
                     });
                     advance();
                     break;
+                case ';':
+                    tokens.push_back(Token {
+                        .kind = Token::Type::kSemicolon,
+                        .value = std::string_view { &m_code[m_offset], 1 }
+                    });
+                    advance();
+                    break;
                 case '}':
                     tokens.push_back(Token {
                         .kind = Token::Type::kRightBracket,

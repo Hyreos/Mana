@@ -8,7 +8,7 @@
 #include <variant>
 #include <absl/types/variant.h>
 
-namespace mana {
+namespace mana::ast {
     class BinaryOp : public TreeNode {
     public:
         struct TypeMask {
@@ -18,11 +18,12 @@ namespace mana {
                 kMod = 0x4,
                 kMul = 0x8,
                 kSub = 0x10,
-                kComma = 0x20
+                kComma = 0x20,
+                kScopeRes = 0x40
             };
         };
 
-        static constexpr TreeNode::Type kind = TreeNode::Type::kBinaryOp;
+        static constexpr TreeNode::Type baseType = TreeNode::Type::kBinaryOp;
 
         BinaryOp(
             TypeMask::Enum type,

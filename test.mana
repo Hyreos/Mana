@@ -24,7 +24,7 @@ export component A {
 
     @serialize(0x15 + 6 / 8 + 8 * 9) 
     str? p2
-    i64 p3
+    readonly i64 p3
     i64 p4
     f64 p5 = 0.45555555
     f32 p6 = 0.42222f

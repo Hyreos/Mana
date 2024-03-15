@@ -3,13 +3,14 @@
 #include "TreeNode.hh"
 
 #include <string>
+#include <variant>
+
+#include "Literal.hh"
 
 namespace mana::ast {
-    class Expr : public TreeNode {
+    class StrLit : public Literal {
     public:
-        static constexpr TreeNode::Type baseType { TreeNode::Type::kExpr };
-
-        Expr(std::unique_ptr<TreeNode> operand);
+        StrLit(const std::string& str);
 
         std::unique_ptr<TreeNode> clone() override;
 
@@ -17,6 +18,6 @@ namespace mana::ast {
 
         void accept(TreeVisitor* visitor) override;
     private:
-        std::unique_ptr<TreeNode> m_operand;;
+        std::string m_value;
     };
 }

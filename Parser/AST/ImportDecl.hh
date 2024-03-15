@@ -1,14 +1,13 @@
 #pragma once
 
 #include "TreeNode.hh"
+#include "Declaration.hh"
 
 #include <filesystem>
 
-namespace mana {
-    class ImportDecl : public TreeNode {
+namespace mana::ast {
+    class ImportDecl : public Declaration {
     public:
-        static constexpr TreeNode::Type kind { TreeNode::Type::kImportStat };
-
         ImportDecl(
             std::vector<std::filesystem::path> pathlist,
             bool is_cc = false

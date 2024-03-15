@@ -7,7 +7,7 @@
 
 #include "Literal.hh"
 
-namespace mana {
+namespace mana::ast {
     class Fp64Lit : public Literal {
     public:
         Fp64Lit(double value);

@@ -2,7 +2,7 @@
 
 #include "TreeTransverser.hh"
 
-namespace mana {
+namespace mana::ast {
     CommaOp::CommaOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs)
         : BinaryOp(kind, std::move(lhs), std::move(rhs))
     {
@@ -30,6 +30,6 @@ namespace mana {
 
     void CommaOp::accept(TreeVisitor* visitor)
     {
-        visitor->visitOperator(this);
+        visitor->visit(this);
     }
 }

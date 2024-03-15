@@ -2,11 +2,9 @@
 
 #include "TreeTransverser.hh"
 
-namespace mana {
+namespace mana::ast {
     ScopeResolutionOp::ScopeResolutionOp(std::unique_ptr<TreeNode> lhs, std::unique_ptr<TreeNode> rhs)
-        : TreeNode(kind),
-            m_lhs{std::move(lhs)},
-            m_rhs{std::move(rhs)}
+        : BinaryOp { BinaryOp::TypeMask::kScopeRes, std::move(lhs), std::move(rhs) }
     {
     }
 
@@ -32,6 +30,6 @@ namespace mana {
 
     void ScopeResolutionOp::accept(TreeVisitor* visitor)
     {
-        visitor->visitOperator(this);
+        visitor->visit(static_cast<BinaryOp*>(this));
     }
 }

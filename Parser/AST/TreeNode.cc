@@ -1,8 +1,8 @@
 #include "TreeNode.hh"
 
-namespace mana {
-    TreeNode::TreeNode(TreeNode::Type kind) 
-        : m_kind{ kind } 
+namespace mana::ast {
+    TreeNode::TreeNode(TreeNode::Type baseType) 
+        : m_kind{ baseType } 
     {
     }
 

@@ -1,21 +1,23 @@
-#include "CompDecl.hh"
+#include "ComponentDecl.hh"
 
 #include "TreeTransverser.hh"
 
-namespace mana {
-    CompDecl::CompDecl(
+namespace mana::ast {
+    ComponentDecl::ComponentDecl(
         const std::string& name,
         std::vector<std::unique_ptr<TreeNode>> fields,
-        std::vector<std::unique_ptr<TreeNode>> inheritances
+        std::vector<std::unique_ptr<TreeNode>> inheritances,
+        bool isExported
     ) 
-        : TreeNode(kind),
+        : Declaration(Declaration::Kind::kComponent),
             m_fields{ std::move(fields) },
             m_inheritances { std::move(inheritances) },
-            m_name{ name }
+            m_name{ name },
+            m_exported { isExported }
     {
     }
 
-    std::unique_ptr<TreeNode> CompDecl::clone()
+    std::unique_ptr<TreeNode> ComponentDecl::clone()
     {
         std::vector<std::unique_ptr<TreeNode>> cfields, cinheritances;
 
@@ -23,10 +25,15 @@ namespace mana {
 
         for (auto& h : m_inheritances) cinheritances.push_back(h->clone());
 
-        return std::make_unique<CompDecl>(m_name, std::move(cfields), std::move(cinheritances));
+        return std::make_unique<ComponentDecl>(
+            m_name, 
+            std::move(cfields), 
+            std::move(cinheritances), 
+            m_exported
+        );
     }
 
-    void CompDecl::print(std::ostream& stream, size_t ident)
+    void ComponentDecl::print(std::ostream& stream, size_t ident)
     {
         TreeNode::print(stream, ident);
 
@@ -54,18 +61,18 @@ namespace mana {
         stream << "}";
     }
 
-    void CompDecl::setExportStatus(bool value)
+    void ComponentDecl::setExportStatus(bool value)
     {
         m_exported = value;
     }
 
-    bool CompDecl::isExported() const
+    bool ComponentDecl::isExported() const
     {
         return m_exported;
     }
 
-    void CompDecl::accept(TreeVisitor* visitor)
+    void ComponentDecl::accept(TreeVisitor* visitor)
     {
-        visitor->visitDeclaration(this);
+        visitor->visit(this);
     }
 }

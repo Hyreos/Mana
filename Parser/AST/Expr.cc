@@ -2,10 +2,10 @@
 
 #include "TreeTransverser.hh"
 
-namespace mana {
+namespace mana::ast {
     Expr::Expr(std::unique_ptr<TreeNode> operand)
-        : TreeNode(kind),
-            m_operand{std::move(operand)}
+        : TreeNode(baseType),
+            m_operand{ std::move(operand) }
     {
     }
 
@@ -27,6 +27,6 @@ namespace mana {
 
     void Expr::accept(TreeVisitor* visitor)
     {
-        visitor->visitExpression(this);
+        visitor->visit(this);
     }
 }

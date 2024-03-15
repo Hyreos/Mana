@@ -2,9 +2,9 @@
 
 #include "TreeTransverser.hh"
 
-namespace mana {
+namespace mana::ast {
     TSymbol::TSymbol(const std::string& identifier) 
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_identifier { identifier }
     {
     }
@@ -23,6 +23,6 @@ namespace mana {
 
     void TSymbol::accept(TreeVisitor* visitor)
     {
-        visitor->visitSymbol(this);
+        visitor->visit(this);
     }
 }

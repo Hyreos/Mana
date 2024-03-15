@@ -89,10 +89,15 @@ endif()
 target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/Lexer.cc
                                         Parser/AST/Attribute.cc
-                                        Parser/AST/CompFieldDecl.cc
-                                        Parser/AST/CompDecl.cc
+                                        Parser/AST/MemberDecl.cc
+                                        Parser/AST/ComponentDecl.cc
                                         Parser/AST/TreeNode.cc
                                         Parser/AST/TSymbol.cc
+                                        Parser/AST/Expr.cc
+
+                                        Parser/AST/Declaration.cc
+
+                                        Parser/AST/Unary.cc
 
                                         Parser/AST/ImportDecl.cc
 
@@ -102,6 +107,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
 
                                         Parser/AST/Fp32Lit.cc
                                         Parser/AST/Fp64Lit.cc
+                                        Parser/AST/StrLit.cc
 
                                         Parser/AST/Uint16Lit.cc
                                         Parser/AST/Uint32Lit.cc
@@ -113,6 +119,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/BinaryOp.cc
 
                                         Parser/AST/SubOp.cc
+                                        Parser/AST/Qual.cc
                                         Parser/AST/SumOp.cc
                                         Parser/AST/MulOp.cc
                                         Parser/AST/DivOp.cc

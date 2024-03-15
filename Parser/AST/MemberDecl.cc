@@ -1,16 +1,16 @@
-#include "CompFieldDecl.hh"
+#include "MemberDecl.hh"
 
 #include "TreeTransverser.hh"
 
-namespace mana {
-    CompFieldDecl::CompFieldDecl(
+namespace mana::ast {
+    MemberDecl::MemberDecl(
         std::unique_ptr<TreeNode> type,
         const std::string& name,
         std::unique_ptr<TreeNode> defaultValue,
         bool isOptional,
         std::optional<std::string> propCppName
     ) 
-        : TreeNode(kind),
+        : Declaration(Declaration::Kind::kMember),
             m_name{ name },
             m_type{ std::move(type) },
             m_defaultValue { std::move(defaultValue) },
@@ -19,9 +19,9 @@ namespace mana {
     {
     }
 
-    std::unique_ptr<TreeNode> CompFieldDecl::clone()
+    std::unique_ptr<TreeNode> MemberDecl::clone()
     {
-        return std::make_unique<CompFieldDecl>(
+        return std::make_unique<MemberDecl>(
             m_type->clone(), 
             m_name, 
             m_defaultValue->clone(), 
@@ -30,7 +30,7 @@ namespace mana {
         );
     }
 
-    void CompFieldDecl::print(std::ostream& stream, size_t ident)
+    void MemberDecl::print(std::ostream& stream, size_t ident)
     {
         TreeNode::print(stream, ident);
 
@@ -55,13 +55,13 @@ namespace mana {
         }
     }
 
-    const std::string& CompFieldDecl::name() const
+    const std::string& MemberDecl::name() const
     {
         return m_name;
     }
 
-    void CompFieldDecl::accept(TreeVisitor* visitor)
+    void MemberDecl::accept(TreeVisitor* visitor)
     {
-        visitor->visitDeclaration(this);
+        visitor->visit(this);
     };
 }

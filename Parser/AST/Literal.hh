@@ -8,7 +8,7 @@
 #include <variant>
 #include <absl/types/variant.h>
 
-namespace mana {
+namespace mana::ast {
     class Literal : public TreeNode {
     public:
         struct TypeMask {
@@ -25,7 +25,7 @@ namespace mana {
             };
         };
 
-        static constexpr TreeNode::Type kind = TreeNode::Type::kLiteral;
+        static constexpr TreeNode::Type baseType = TreeNode::Type::kLiteral;
 
         explicit Literal(int64_t value);
 
@@ -42,6 +42,8 @@ namespace mana {
         explicit Literal(float value);
 
         explicit Literal(double value);
+
+        explicit Literal(const std::string& str);
 
         double  asFp64() const;
 

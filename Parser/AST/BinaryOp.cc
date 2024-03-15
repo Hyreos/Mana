@@ -4,13 +4,13 @@
 
 #include "Helpers/Macros.hh"
 
-namespace mana {
+namespace mana::ast {
     BinaryOp::BinaryOp(
         TypeMask::Enum type,
         std::unique_ptr<TreeNode> lhs, 
         std::unique_ptr<TreeNode> rhs
     )
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_lhs{ std::move(lhs) },
             m_rhs{ std::move(rhs) },
             m_type{ type }

@@ -2,15 +2,16 @@
 
 #include "TreeNode.hh"
 
-namespace mana {
-    class CompDecl : public TreeNode {
-    public:
-        static constexpr TreeNode::Type kind { TreeNode::Type::kComponent };
+#include "Declaration.hh"
 
-        CompDecl(
+namespace mana::ast {
+    class ComponentDecl : public  Declaration {
+    public:
+        ComponentDecl(
             const std::string& name,
             std::vector<std::unique_ptr<TreeNode>> fields,
-            std::vector<std::unique_ptr<TreeNode>> inheritances
+            std::vector<std::unique_ptr<TreeNode>> inheritances,
+            bool isExported
         );
 
         std::unique_ptr<TreeNode> clone() override;

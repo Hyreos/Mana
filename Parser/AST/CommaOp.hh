@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace mana {
+namespace mana::ast {
     class CommaOp : public BinaryOp {
     public:
         static constexpr BinaryOp::TypeMask::Enum kind { BinaryOp::TypeMask::kComma };

@@ -2,7 +2,7 @@
 
 #include "TreeTransverser.hh"
 
-namespace mana {
+namespace mana::ast {
     Fp32Lit::Fp32Lit(float value) 
         : Literal(value),
             m_value { value }
@@ -23,6 +23,6 @@ namespace mana {
 
     void Fp32Lit::accept(TreeVisitor* visitor)
     {
-        visitor->visitLiteral(this);
+        visitor->visit(static_cast<Literal*>(this));
     }
 }

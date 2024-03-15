@@ -2,12 +2,12 @@
 
 #include "TreeTransverser.hh"
 
-namespace mana {
+namespace mana::ast {
     ImportDecl::ImportDecl(
         std::vector<std::filesystem::path> pathlist,
         bool iscc
     ) 
-        : TreeNode(kind),
+        : Declaration(Declaration::Kind::kImport),
             m_pathlist{ std::move(pathlist) },
             m_isCc { iscc }
     {
@@ -33,6 +33,6 @@ namespace mana {
 
     void ImportDecl::accept(TreeVisitor* visitor)
     {
-        visitor->visitStatement(this);
+        visitor->visit(this);
     }
 }

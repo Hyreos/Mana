@@ -2,9 +2,9 @@
 
 #include "TreeTransverser.hh"
 
-namespace mana {
+namespace mana::ast {
     Type::Type(Kind identifier) 
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_kind { identifier }
     {
     }
@@ -51,6 +51,6 @@ namespace mana {
 
     void Type::accept(TreeVisitor* visitor)
     {
-        visitor->visitType(this);
+        visitor->visit(this);
     }
 }

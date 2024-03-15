@@ -2,12 +2,12 @@
 
 #include "TreeTransverser.hh"
 
-namespace mana {
+namespace mana::ast {
     Attribute::Attribute(
         const std::string& name,
         std::unique_ptr<TreeNode> value
     ) 
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_name { name },
             m_value { std::move(value) } 
     {
@@ -33,6 +33,6 @@ namespace mana {
 
     void Attribute::accept(TreeVisitor* visitor)
     {
-        visitor->visitAttribute(this);
+        visitor->visit(this);
     }
 }

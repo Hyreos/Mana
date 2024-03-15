@@ -2,7 +2,7 @@
 
 #include "TreeTransverser.hh"
 
-namespace mana {
+namespace mana::ast {
     Uint16Lit::Uint16Lit(uint16_t value) 
         : Literal(value),
             m_value { value }
@@ -23,6 +23,6 @@ namespace mana {
 
     void Uint16Lit::accept(TreeVisitor* visitor)
     {
-        visitor->visitLiteral(this);
+        visitor->visit(static_cast<Literal*>(this));
     }
 }

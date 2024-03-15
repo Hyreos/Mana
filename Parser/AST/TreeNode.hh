@@ -6,23 +6,21 @@
 
 #include "Helpers/Deleted.hh"
 
-namespace mana {
+namespace mana::ast {
     class TreeVisitor;
 
     class TreeNode {
     public:
         enum class Type {
             kAttribute,
-            kComponent,
-            kComponentField,
             kTSymbol,
+            kDeclaration,
+            kUnary,
+
+            kQualifier,
 
             kType,
             kBinaryOp,
-
-            kScopeResolution,
-
-            kImportStat,
 
             kUnaryMinus,
             kUnaryPlus,
@@ -32,7 +30,7 @@ namespace mana {
             kExpr
         };
 
-        TreeNode(TreeNode::Type kind);
+        TreeNode(TreeNode::Type baseType);
 
         virtual ~TreeNode() = default;
 
@@ -41,14 +39,9 @@ namespace mana {
         template<typename T>
         T* cast() 
         {
-            if (m_kind != T::kind) return nullptr;
+            if (m_kind != T::baseType) return nullptr;
 
             return static_cast<T*>(this);
-        }
-
-        inline TreeNode::Type kind() const
-        {
-            return m_kind;
         }
 
         virtual void print(std::ostream& stream, size_t ident) {

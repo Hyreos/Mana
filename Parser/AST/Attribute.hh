@@ -4,10 +4,10 @@
 
 #include <string>
 
-namespace mana {
+namespace mana::ast {
     class Attribute : public TreeNode {
     public:
-        static constexpr TreeNode::Type kind { TreeNode::Type::kAttribute };
+        static constexpr TreeNode::Type baseType { TreeNode::Type::kAttribute };
 
         Attribute(
             const std::string& name,

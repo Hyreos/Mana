@@ -1,16 +1,14 @@
 #pragma once
 
-#include "TreeNode.hh"
+#include "Declaration.hh"
 
 #include <optional>
 #include <string>
 
-namespace mana {
-    class CompFieldDecl : public TreeNode {
+namespace mana::ast {
+    class MemberDecl : public Declaration {
     public:
-        static constexpr TreeNode::Type kind { TreeNode::Type::kComponentField };
-
-        CompFieldDecl(
+        MemberDecl(
             std::unique_ptr<TreeNode> type,
             const std::string& name,
             std::unique_ptr<TreeNode> defaultValue,

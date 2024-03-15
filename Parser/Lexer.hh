@@ -50,6 +50,7 @@ namespace mana {
             kWS, // [ ]
             kLnBrk, // \n
             kDecrement, // --
+            kSemicolon, // ;
             kQuestion, // ?
             kEOF, // EOF
             kCount
@@ -126,6 +127,12 @@ namespace mana {
         }
 
         inline bool match(const std::string& str) const {
+            CHECK(kind == Type::kIdentifier);
+
+            return std::get<std::string_view>(value) == str;
+        }
+
+        inline bool match(const std::string_view& str) const {
             CHECK(kind == Type::kIdentifier);
 
             return std::get<std::string_view>(value) == str;

@@ -4,10 +4,10 @@
 
 #include <string>
 
-namespace mana {
+namespace mana::ast {
     class TSymbol : public TreeNode {
     public:
-        static constexpr TreeNode::Type kind { TreeNode::Type::kTSymbol };
+        static constexpr TreeNode::Type baseType { TreeNode::Type::kTSymbol };
 
         TSymbol(const std::string& identifier);
 

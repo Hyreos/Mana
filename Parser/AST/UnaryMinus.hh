@@ -1,14 +1,12 @@
 #pragma once
 
-#include "TreeNode.hh"
+#include "Unary.hh"
 
 #include <string>
 
-namespace mana {
-    class UnaryMinus : public TreeNode {
+namespace mana::ast {
+    class UnaryMinus : public Unary {
     public:
-        static constexpr TreeNode::Type kind { TreeNode::Type::kUnaryMinus };
-
         UnaryMinus(std::unique_ptr<TreeNode> operand);
 
         std::unique_ptr<TreeNode> clone() override;

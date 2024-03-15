@@ -2,24 +2,36 @@
 
 #include "TreeNode.hh"
 
-namespace mana
+#include "Type.hh"
+#include "TSymbol.hh"
+#include "Declaration.hh"
+#include "BinaryOp.hh"
+#include "Expr.hh"
+#include "Qual.hh"
+#include "Literal.hh"
+#include "Attribute.hh"
+#include "Unary.hh"
+
+namespace mana::ast
 {
     class TreeVisitor {
     public:
-        virtual bool visitSymbol(TreeNode* symbol) { return true; }
+        virtual bool visit(TSymbol* symbol) { return true; }
 
-        virtual bool visitType(TreeNode* type) { return true; };
+        virtual bool visit(Type* type) { return true; };
     
-        virtual bool visitDeclaration(TreeNode* literal) { return true; }
+        virtual bool visit(Declaration* literal) { return true; }
 
-        virtual bool visitAttribute(TreeNode* attribute) { return true; }
+        virtual bool visit(Attribute* attribute) { return true; }
 
-        virtual bool visitLiteral(TreeNode* literal) { return true; }
+        virtual bool visit(Literal* literal) { return true; }
 
-        virtual bool visitOperator(TreeNode* literal) { return true; }
+        virtual bool visit(BinaryOp* op) { return true; }
 
-        virtual bool visitStatement(TreeNode* statement) { return true; }
+        virtual bool visit(Expr* expression) { return true; }
 
-        virtual bool visitExpression(TreeNode* expression) { return true; }
+        virtual bool visit(Qualifier* expression) { return true; }
+
+        virtual bool visit(Unary* unary) { return true; }
     };
 } 

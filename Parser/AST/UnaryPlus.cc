@@ -2,10 +2,10 @@
 
 #include "TreeTransverser.hh"
 
-namespace mana {
+namespace mana::ast {
     UnaryPlus::UnaryPlus(std::unique_ptr<TreeNode> operand)
-        : TreeNode(kind),
-            m_operand{std::move(operand)}
+        : Unary { Unary::Kind::kPlus },
+            m_operand{ std::move(operand) }
     {
     }
 
@@ -29,6 +29,6 @@ namespace mana {
 
     void UnaryPlus::accept(TreeVisitor* visitor)
     {
-        visitor->visitOperator(this);
+        visitor->visit(this);
     }
 }

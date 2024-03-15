@@ -4,60 +4,67 @@
 
 #include "Helpers/Macros.hh"
 
-namespace mana {
+namespace mana::ast {
     Literal::Literal(int64_t value)
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_value{ static_cast<uint64_t>(value) },
             m_type{ TypeMask::kInt64Lit }
     {
     }
 
     Literal::Literal(int32_t value)
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_value{ static_cast<uint64_t>(value) },
             m_type{ TypeMask::kInt32Lit }
     {
     }
 
     Literal::Literal(int16_t value)
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_value{ static_cast<uint64_t>(value) },
             m_type{ TypeMask::kInt16Lit }
     {
     }
 
     Literal::Literal(uint64_t value)
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_value{ value },
             m_type{ TypeMask::kUint64Lit }
     {
     }
 
     Literal::Literal(uint32_t value)
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_value{ static_cast<uint64_t>(value) },
             m_type{ TypeMask::kUint32Lit }
     {
     }
 
     Literal::Literal(uint16_t value)
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_value{ static_cast<uint64_t>(value) },
             m_type{ TypeMask::kUint16Lit }
     {
     }
 
     Literal::Literal(double value)
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_value{ value },
             m_type{ TypeMask::kFp64Lit }
     {
     }
 
     Literal::Literal(float value)
-        : TreeNode(kind),
+        : TreeNode(baseType),
             m_value{ static_cast<double>(value) },
             m_type{ TypeMask::kFp32Lit }
+    {
+    }
+
+    Literal::Literal(const std::string& str)
+        : TreeNode(baseType),
+            m_value{ str },
+            m_type{ TypeMask::kStrLit }
     {
     }
 

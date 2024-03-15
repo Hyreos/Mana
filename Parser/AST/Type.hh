@@ -4,10 +4,10 @@
 
 #include <string>
 
-namespace mana {
+namespace mana::ast {
     class Type : public TreeNode {
     public:
-        static constexpr TreeNode::Type kind { TreeNode::Type::kType };
+        static constexpr TreeNode::Type baseType { TreeNode::Type::kType };
 
         enum class Kind {
             kI16,
