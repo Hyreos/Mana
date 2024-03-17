@@ -2,21 +2,12 @@
 
 #include "TreeNode.hh"
 
+#include "Utils/RTTI.hh"
+
 namespace mana::ast {
-    class Declaration : public TreeNode {
-    public:
-        static constexpr Type baseType = Type::kDeclaration;
-
-        enum class Kind {
-            kComponent,
-            kImport,
-            kMember
-        };
-
-        Declaration(Kind kind);
-
-        Kind kind() const;
-    private:
-        Kind m_kind;
+    class Declaration : public rtti::Castable<Declaration, TreeNode> 
+    { 
     };
 }
+
+MANA_RTTI_TYPE(mana::ast::Declaration)

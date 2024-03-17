@@ -1,26 +1,19 @@
 #pragma once
 
 #include "TreeNode.hh"
+#include "Utils/RTTI.hh"
 
 #include <string>
 
 namespace mana::ast {
-    class Attribute : public TreeNode {
+    class Attribute : public rtti::Castable<Attribute, TreeNode> {
     public:
-        static constexpr TreeNode::Type baseType { TreeNode::Type::kAttribute };
+        Attribute(const std::string& name);
 
-        Attribute(
-            const std::string& name,
-            std::unique_ptr<TreeNode> value
-        );
-
-        std::unique_ptr<TreeNode> clone() override;
-
-        void print(std::ostream& stream, size_t ident) override;
-
-        void accept(TreeVisitor* visitor) override;
+        const std::string& name() const;
     private:
         std::string m_name;
-        std::unique_ptr<TreeNode> m_value;
     };
 }
+
+MANA_RTTI_TYPE(mana::ast::Attribute)

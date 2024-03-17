@@ -26,17 +26,13 @@ namespace mana {
 
         if (m_lexer->size() > 0)
             if ((*m_lexer)[0].kind == Token::Type::kWS || (*m_lexer)[0].kind == Token::Type::kLnBrk) {
-                advance();
-
-                m_tokenIdx--;
+                    m_tokenIdx--;
             }
 
         std::vector<std::unique_ptr<ast::TreeNode>> tr_nodes;
         
         while (continueParsing()) {
-            auto r = parseExpression();
-
-            if (r) tr_nodes.push_back(std::move(r));
+            globalDeclaration();
         }
 
         std::ostream& stream { std::cout };
@@ -84,10 +80,42 @@ namespace mana {
         unreachable();
     }
 
-    std::unique_ptr<ast::TreeNode> Parser::parseExpression(bool isExpr) {
-        std::unique_ptr<ast::TreeNode> result = parsePrimary();;
+    Result<const ast::Expression*> Parser::primaryExpression()
+    {
+        auto expr = expression();
 
-        result = parseExpression1(std::move(result), 0ull, isExpr);
+        if (expr.errored) {
+            return Failure::kError;
+        } 
+
+        if (expr.matched) {
+            return expr;
+        }
+
+        return Failure::kNoMatch;
+    }
+
+    Result<const ast::Expression*> Parser::expression()
+    {
+        auto lit = literal();
+
+        if (lit.errored) {
+            return Failure::kError;
+        }
+
+        if (lit.matched) {
+            return lit;
+        }
+
+        return Failure::kNoMatch;
+    }
+
+    Result<const ast::Expression*> Parser::expectExpression(bool isExpr) {
+        auto result = primaryExpression();
+
+        if (!result.matched || result.errored) return Failure::kError;
+
+        result = parseExpression1(result.unwrap(), 0ull, isExpr);
 
         return result;
     }
@@ -111,8 +139,8 @@ namespace mana {
         unreachable();
     }
 
-    std::unique_ptr<ast::TreeNode> Parser::parseExpression1(
-        std::unique_ptr<ast::TreeNode> lhs,
+    Result<const ast::Expression*> Parser::parseExpression1(
+        const ast::Expression* lhs,
         size_t min_precedence,
         bool isExpr
     )
@@ -127,9 +155,13 @@ namespace mana {
 
                 advance();
 
-                auto rhs = parsePrimary();
+                auto rhs_expr = primaryExpression();
 
-                MANA_CHECK_MAYBE_RETURN(rhs, "Error while parsing token.");
+                if (rhs_expr.errored || !rhs_expr.matched) {
+                    return Failure::kError;
+                }
+
+                auto* rhs = rhs_expr.unwrap();
 
                 lookahead = peek(1);
 
@@ -140,38 +172,68 @@ namespace mana {
                                     && getPrecedence(*lookahead) == getPrecedence(*op)))
                 ))
                 {
-                    rhs = parseExpression1(
-                        std::move(rhs),
+                    auto rhs_expr2 = parseExpression1(
+                        rhs,
                         getPrecedence(*op) + ((getPrecedence(*lookahead) > getPrecedence(*op)) ? 1 : 0),
-                        isExpr 
+                        isExpr
                     );
+
+                    if (rhs_expr2.errored || !rhs_expr2.matched) {
+                        return Failure::kError;
+                    }
+
+                    rhs = rhs_expr2.unwrap();
 
                     lookahead = peek(1);
                 }
 
                 switch (op->kind) {
                     case Token::Type::kPlus: {
-                        lhs = std::make_unique<ast::SumOp>(std::move(lhs), std::move(rhs));
+                        lhs = m_ctx.create<ast::BinaryExpression>(
+                            std::move(lhs), 
+                            ast::BinaryExpression::OpType::kAdd,
+                            std::move(rhs)
+                        );
                     } break;
 
                     case Token::Type::kMinus: {
-                        lhs = std::make_unique<ast::SubOp>(std::move(lhs), std::move(rhs));
+                        lhs = m_ctx.create<ast::BinaryExpression>(
+                            std::move(lhs), 
+                            ast::BinaryExpression::OpType::kSubtract, 
+                            std::move(rhs)
+                        );
                     } break;
 
                     case Token::Type::kSlash: {
-                        lhs = std::make_unique<ast::DivOp>(std::move(lhs), std::move(rhs));
+                        lhs = m_ctx.create<ast::BinaryExpression>(
+                            std::move(lhs),
+                            ast::BinaryExpression::OpType::kDivide, 
+                            std::move(rhs)
+                        );
                     } break;
 
                     case Token::Type::kAsterisk: {
-                        lhs = std::make_unique<ast::MulOp>(std::move(lhs), std::move(rhs));
+                        lhs = m_ctx.create<ast::BinaryExpression>(
+                            std::move(lhs),
+                            ast::BinaryExpression::OpType::kMultiply, 
+                            std::move(rhs)
+                        );
                     } break;
 
                     case Token::Type::kDualColon: {
-                        lhs = std::make_unique<ast::ScopeResolutionOp>(std::move(lhs), std::move(rhs));
+                        lhs = m_ctx.create<ast::BinaryExpression>(
+                            std::move(lhs),
+                            ast::BinaryExpression::OpType::kScopeResolution,
+                            std::move(rhs)
+                        );
                     } break;
 
                     case Token::Type::kComma: {
-                        lhs = std::make_unique<ast::CommaOp>(std::move(lhs), std::move(rhs));
+                        lhs = m_ctx.create<ast::BinaryExpression>(
+                            std::move(lhs),
+                            ast::BinaryExpression::OpType::kComma, 
+                            std::move(rhs)
+                        );
                     } break;
 
                     default:
@@ -185,14 +247,12 @@ namespace mana {
         }
     }
 
-    std::vector<std::unique_ptr<ast::Attribute>> Parser::attributes()
+    Result<std::vector<const ast::Attribute*>> Parser::attributes()
     {
-        std::vector<std::unique_ptr<ast::Attribute>> ats;
+        std::vector<const ast::Attribute*> ats;
 
         while (continueParsing()) {
-            if (!matches(1, Token::Type::kAt)) break;
-            advance();
-
+            if (!match(1, Token::Type::kAt)) break;
             auto a = parseAttribute();
 
             if (a.errored) {
@@ -200,118 +260,73 @@ namespace mana {
                 continue;
             }
 
-            ats.push_back(std::move(*a.value));
+            if (a.matched) {
+                ats.push_back(a.unwrap());
+            }
         }
 
         return ats;
     }
 
-    ASTResult_T<ast::Literal> Parser::checkLiteral()
+    Result<const ast::LiteralExpression*> Parser::literal()
     {
-        if (auto* tok = matches(1, Token::Type::kI16Lit)) {
-            advance();
-            return ResultOk<ast::Literal>(std::make_unique<ast::Int16Lit>(tok->as16Int()));
-        } else if (auto* tok = matches(1, Token::Type::kI32Lit)) {
-            advance();
-            return ResultOk<ast::Literal>(std::make_unique<ast::Int32Lit>(tok->as32Int()));
-        } else if (auto* tok = matches(1, Token::Type::kI64Lit)) {
-            advance();
-            return ResultOk<ast::Literal>(std::make_unique<ast::Int64Lit>(tok->as64Int()));
-        } else if (auto* tok = matches(1, Token::Type::kU16Lit)) {
-            advance();
-            return ResultOk<ast::Literal>(std::make_unique<ast::Uint16Lit>(tok->as16UInt()));
-        } else if (auto* tok = matches(1, Token::Type::kU32Lit)) {
-            advance();
-            return ResultOk<ast::Literal>(std::make_unique<ast::Uint32Lit>(tok->as32UInt()));
-        } else if (auto* tok = matches(1, Token::Type::kU64Lit)) {
-            advance();
-            return ResultOk<ast::Literal>(std::make_unique<ast::Uint64Lit>(tok->as64UInt()));
-        } else if (auto *tok = matches(1, Token::Type::kF32Lit)) {
-            advance();
-            return ResultOk<ast::Literal>(std::make_unique<ast::Fp32Lit>(tok->asFp32()));
-        } else if (auto *tok = matches(1, Token::Type::kF64Lit)) {
-            advance();
-            return ResultOk<ast::Literal>(std::make_unique<ast::Fp64Lit>(tok->asFp64()));
-        } else if (auto *tok = matches(1, Token::Type::kStrLit)) {
-            advance();
-            return ResultOk<ast::Literal>(std::make_unique<ast::StrLit>(tok->asString()));
-        }
+        if (auto* tok = match(1, Token::Type::kInteger))
+            return m_ctx.create<ast::IntegerLiteralExpression>(
+                ast::IntegerLiteralExpression::Sign::kSigned,
+                tok->asInteger()
+            );
+        else if (auto* tok = match(1, Token::Type::kStrLit))
+            return m_ctx.create<ast::StringLiteralExpression>(tok->asString());
+        else if (auto* tok = match(1, "true")) 
+            return m_ctx.create<ast::BoolLiteralExpression>(true);
+        else if (auto* tok = match(1, "false"))
+            return m_ctx.create<ast::BoolLiteralExpression>(false);
 
-        return {};
+        return Failure::kNoMatch;
     }
 
-    ASTResult_T<ast::TreeNode> Parser::typeOrSymbol()
+    Result<const ast::IdentifierExpression*> Parser::identifierExpression()
     {
-        if (matches(1, "str")) {
-            advance();
+        auto* token = match(1, Token::Type::kIdentifier);
 
-            return ResultOk<ast::TreeNode>(std::make_unique<ast::Type>(ast::Type::Kind::kStr));
-        } else if (matches(1, "i64")) {
-            advance();
+        if (token)
+            return m_ctx.create<ast::IdentifierExpression>(token->asString());
 
-            return ResultOk<ast::TreeNode>(std::make_unique<ast::Type>(ast::Type::Kind::kI64));           
-        } else if (matches(1, "i32")) {
-            advance();
-
-            return ResultOk<ast::TreeNode>(std::make_unique<ast::Type>(ast::Type::Kind::kI32));
-        } else if (matches(1, "i16")) {
-            advance();
-
-            return ResultOk<ast::TreeNode>(std::make_unique<ast::Type>(ast::Type::Kind::kI16));
-        } else if (matches(1, "u64")) {
-            advance();
-
-            return ResultOk<ast::TreeNode>(std::make_unique<ast::Type>(ast::Type::Kind::kU64));
-        } else if (matches(1, "u32")) {
-            advance();
-
-            return ResultOk<ast::TreeNode>(std::make_unique<ast::Type>(ast::Type::Kind::kU32));
-        } else if (matches(1, "u16")) {
-            advance();
-
-            return ResultOk<ast::TreeNode>(std::make_unique<ast::Type>(ast::Type::Kind::kU16));
-        }
-        
-        auto* token = matches(1, Token::Type::kIdentifier);
-        
-        advance();
-
-        return ResultOk<ast::TreeNode>(std::make_unique<ast::TSymbol>(token->asString()));        
+        return Failure::kNoMatch;
     }
 
-    ASTResult_T<ast::Attribute> Parser::parseAttribute()
+    Result<const ast::Attribute*> Parser::parseAttribute()
     {
         while (continueParsing()) {
             // TODO: Important to review this later
-            if (!matches(0, Token::Type::kAt)) break;
+            if (!match(0, Token::Type::kAt)) break;
 
-            auto* attr_name = matches(1, Token::Type::kIdentifier);
+            auto* attr_name = match(1, Token::Type::kIdentifier);
 
             if (!attr_name) {
                 // TODO: Handle error here
-                return ResultFail<ast::Attribute>();
+                return Failure::kError;
             }
 
-            advance();
+            const ast::Expression* node;
 
-            std::unique_ptr<ast::TreeNode> node;
+            if (match(1, Token::Type::kLeftParen)) {
+                auto expr = expectExpression();
 
-            if (matches(1, Token::Type::kLeftParen)) {
-                advance();
+                if (expr.matched) node = expr.unwrap(); 
 
-                node = parseExpression();
-
-                if (!matches(1, Token::Type::kRightParen)) {
+                if (!match(1, Token::Type::kRightParen)) {
                     // TODO: Handle error here
-                    return ResultFail<ast::Attribute>();
+                    return Failure::kError;
                 }
-
-                advance();
             }
 
-            auto attr = std::make_unique<ast::Attribute>(attr_name->asString(), std::move(node));
+            /*auto ap = m_ctx.create<ast::Attribute>(
+                attr_name->asString(), 
+                std::move(node)
+            );
 
-            return ResultOk(std::move(attr));
+            return std::move(ap);*/
         }
 
         return {};
@@ -326,226 +341,206 @@ namespace mana {
         return false;
     }
 
-    ASTResult_T<ast::UnaryMinus> Parser::checkUnary()
+    Result<const ast::UnaryExpression*> Parser::unaryExpression()
     {
-        if (matches(1, Token::Type::kMinus)) {
-            advance();
+        if (match(1, Token::Type::kMinus)) {
+            
+        } else if (match(1, Token::Type::kPlus)) {
 
-            return ResultOk(std::make_unique<ast::UnaryMinus>(parsePrimary()));
         }
 
         return {};
     }
 
-    ASTResult_T<ast::Expr> Parser::checkExpr()
+    Result<const ast::Expression*> Parser::expectGroup(bool isExpr)
     {
-        if (matches(1, Token::Type::kLeftParen)) {
-            advance();
+        if (match(1, Token::Type::kLeftParen)) {
+            auto expr = expectExpression();
 
-            auto expr = parseExpression();
-
-            if (!matches(1, Token::Type::kRightParen)) {
+            if (!match(1, Token::Type::kRightParen)) {
                 // Handle error here
-                return ResultFail<ast::Expr>();
+                return Failure::kError;
             }
 
-            advance();
-
-            return ResultOk(std::make_unique<ast::Expr>(std::move(expr)));
+            return std::move(expr);
         }
 
         return {};
     }
 
-    ASTResult_T<ast::ComponentDecl> Parser::componentDecl()
+    Result<const ast::ComponentDeclaration*> Parser::componentDeclaration()
     {
         bool is_component_exported = false;
 
         auto as = attributes();
 
-        if (matches(1, "export")) {
-            advance();
-
+        if (match(1, "export")) {
             is_component_exported = true;
         }
 
-        if (!matches(1, "component")) return {};
+        if (!match(1, "component")) return {};
 
-        advance();
-
-        auto decl_name = matches(1, Token::Type::kIdentifier);
+        auto decl_name = match(1, Token::Type::kIdentifier);
 
         if (!decl_name) {
             // TODO: Add error message here                
-            return ResultFail<ast::ComponentDecl>();
+            return Failure::kError;
         }
 
-        std::vector<std::unique_ptr<ast::TreeNode>> inheritances;
+        std::vector<const ast::IdentifierExpression*> inheritances;
 
-        if (matches(1, Token::Type::kColon)) {
-            advance();
-
+        if (match(1, Token::Type::kColon)) {
             do {
-                if (matches(1, Token::Type::kComma)) 
-                    advance();
+                if (!match(1, Token::Type::kComma)) 
+                    return Failure::kError;
 
                 auto iasl = attributes();
+                auto unwrapped = iasl.unwrap();
 
-                std::unique_ptr<ast::TreeNode> inheritance = parseExpression();
+                auto inh = identifierExpression();
+                auto inh_unwrapped = inh.unwrap();
 
-                for (auto& a : iasl)
-                    inheritance->addAttribute(std::move(a));
+                /*for (auto& a : unwrapped)
+                    inh_unwrapped->addAttribute(a);*/
 
-                inheritances.push_back(std::move(inheritance));
-            } while (matches(1, Token::Type::kComma));
+                inheritances.push_back(inh_unwrapped);
+            } while (match(1, Token::Type::kComma));
         }
 
-        if (!matches(1, Token::Type::kLeftBracket)) {
+        if (!match(1, Token::Type::kLeftBracket)) {
             // TODO: Handle error here                
-            return ResultFail<ast::ComponentDecl>();
+            return Failure::kError;
         }
 
-        advance();
+        ;
 
-        std::vector<std::unique_ptr<ast::TreeNode>> members;
+        std::vector<const ast::Declaration*> members;
 
-        while (!matches(1, Token::Type::kRightBracket)) {
+        while (!match(1, Token::Type::kRightBracket)) {
             auto as = attributes();
 
-            auto type = typeOrSymbol();
+            auto type = identifierExpression();
 
             bool is_optional = false;
 
-            if (matches(1, Token::Type::kQuestion)) {
-                advance();
-
-                is_optional = true;
+            if (match(1, Token::Type::kQuestion)) {
+                    is_optional = true;
             }
 
-            auto* field_name = matches(1, Token::Type::kIdentifier);
+            auto* field_name = match(1, Token::Type::kIdentifier);
 
             if (!field_name) {
                 // TODO: Handle error here
-                return ResultFail<ast::ComponentDecl>();
+                return Failure::kError;
             }
-
-            advance();
 
             std::string la;
 
-            if (matches(1, Token::Type::kArrow)) {
-                advance();
-
-                auto prop_name = matches(1, Token::Type::kIdentifier);
+            if (match(1, Token::Type::kArrow)) {
+                    auto prop_name = match(1, Token::Type::kIdentifier);
 
                 if (!prop_name) {
                     // TODO: Handle error here
-                    return ResultFail<ast::ComponentDecl>();
+                    return Failure::kError;
                 }
 
-                advance();
-
-                la = prop_name->asString();
+                    la = prop_name->asString();
             }
 
-            std::unique_ptr<ast::TreeNode> field_default_value;
+            const ast::Expression* field_default_value;
 
-            if (matches(1, Token::Type::kEqual)) {
-                advance();
+            if (match(1, Token::Type::kEqual)) {
+                auto expr = expectExpression();
 
-                field_default_value = parseExpression();
+                if (expr.errored) {
+                    return Failure::kError;
+                }
+
+                field_default_value = expr.unwrap();
             }
 
             for (auto& m : members) {
-                auto* decl = m->cast<ast::Declaration>();
-
-                if (decl->kind() == ast::Declaration::Kind::kMember) {
-                    auto* member = static_cast<ast::MemberDecl*>(decl); 
+                if (m->match<ast::MemberDeclaration>()) {
+                    auto* member = static_cast<const ast::MemberDeclaration*>(m); 
 
                     if (field_name->match(member->name())) {
                         // TODO: Handle error here
-                        return ResultFail<ast::ComponentDecl>();
+                        return Failure::kError;
                     }
                 }
             }
 
+            auto vuw = type.unwrap();
+
+            auto tree_ = static_cast<const ast::TreeNode*>(vuw);
+
             members.push_back(
-                std::make_unique<ast::MemberDecl>(
-                    std::move(*type),
+                m_ctx.create<ast::MemberDeclaration>(
+                    std::move(vuw),
                     field_name->asString(),
                     std::move(field_default_value),
-                    is_optional,
-                    la
+                    is_optional
                 )
             );
 
-            for (auto& a : as) members.back()->addAttribute(std::move(a));
+            //for (auto& a : as) members.back()->addAttribute(std::move(a));
         }
 
-        if (!matches(1, Token::Type::kRightBracket)) {
+        if (!match(1, Token::Type::kRightBracket)) {
             // TODO: Handle error here
-            return ResultFail<ast::ComponentDecl>();
+            return Failure::kError;
         }
 
-        advance();
-
-        auto comp_decl = std::make_unique<ast::ComponentDecl>(
+        auto comp_decl = m_ctx.create<ast::ComponentDeclaration>(
             decl_name->asString(),
             std::move(members),
             std::move(inheritances),
             is_component_exported
         );
 
-        for (auto& a : as) comp_decl->addAttribute(std::move(a));
+        //for (auto& a : as) comp_decl->addAttribute(std::move(a));
 
-        return ResultOk(std::move(comp_decl));
+        return comp_decl;
     }
 
-    ASTResult_T<ast::ImportDecl> Parser::importDecl() {
-        if (!matches(1, "import")) return {};
+    Result<const ast::ImportDeclaration*> Parser::importDeclaration() {
+        if (!match(1, "import")) return {};
         
-        advance();
-
         bool is_cc = false;
                                                 
         std::vector<std::filesystem::path> pathlist;
 
-        if (matches(1, Token::Type::kLeftParen)) {
-            advance();
-
-            while (!matches(1, Token::Type::kRightParen)) {
-                auto* path = matches(1, Token::Type::kStrLit);
+        if (match(1, Token::Type::kLeftParen)) {
+            while (!match(1, Token::Type::kRightParen)) {
+                auto* path = match(1, Token::Type::kStrLit);
 
                 if (!path) {
                     // TODO: Handle error here
-                    return ResultFail<ast::ImportDecl>();
+                    return Failure::kError;
                 }
-
-                advance();
 
                 pathlist.push_back(path->asString());
             }
 
-            if (!matches(1, Token::Type::kRightParen)) {
+            if (!match(1, Token::Type::kRightParen)) {
                 // TODO: Handle error here.
-                return ResultFail<ast::ImportDecl>();
+                return Failure::kError;
             }
-
-            advance();
         } else {
-            const Token* next = matches(1, Token::Type::kStrLit);
+            const Token* next = match(1, Token::Type::kStrLit);
 
             if (!next) {
                 // TODO: Handle error here.
-                return ResultFail<ast::ImportDecl>();
+                return Failure::kError;
             }
-
-            advance();
 
             pathlist.push_back(next->asString());
         }
 
-        return ResultOk(std::make_unique<ast::ImportDecl>(std::move(pathlist), is_cc));
+        return m_ctx.create<ast::ImportDeclaration>(
+            std::move(pathlist),
+            is_cc
+        );
     }
 
     bool Parser::continueParsing()
@@ -553,64 +548,66 @@ namespace mana {
         return (m_tokenIdx + 1 < m_lexer->size());
     }
 
-    void Parser::globalDecl()
+    void Parser::globalDeclaration()
     {
-        sync(Token::Type::kRightBracket, [&]() -> ParseStatus {
-            auto cd = componentDecl();
+        auto decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ComponentDeclaration*> {
+            auto cd = componentDeclaration();
 
-            if (cd.errored)
-                return ParseStatus::kError;
-
-            if (cd.matched) {
-                // TODO: Add this to AST builder
-                cd.unwrap()->print(std::cout, 0);
-            
-                return ParseStatus::kSuccess;
+            if (cd.errored) {
+                // TODO: add error to a list
+                return Failure::kError;
             }
 
-            auto id = importDecl();
+            if (cd.matched)
+                return cd; 
+
+            return Failure::kNoMatch;
+        });
+
+        if (decl.matched) {
+            decl->print(std::cout, 0);
+        }
+
+        auto import_decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ImportDeclaration*> {
+            auto id = importDeclaration();
 
             if (id.errored)
-                return ParseStatus::kError;
+                return Failure::kError;
 
             if (id.matched) {
                 // TODO: Add this to AST builder
-                id.unwrap()->print(std::cout, 0);
-            
-                return ParseStatus::kSuccess;
+                return id;
             }
 
-            return ParseStatus::kContinue;
+            return {};
         });
+
+        if (import_decl.matched) {
+            return import_decl->print(std::cout, 0);
+        }
     }
 
     void Parser::checkAttribute()
     {
         auto as = attributes();
 
-        if (as.empty()) return;
+        /*if (as.empty()) return;*/
 
-        auto nxt = componentDecl();
+        auto nxt = componentDeclaration();
 
         if (nxt.errored) {
             // TODO: Handle error here
             return;
         }
 
-        if (nxt.matched) {
-            for (auto& a : as) nxt.unwrap()->addAttribute(std::move(a));
-            return;
-        }
+        /*if (nxt.matched) {
+            for (auto& a : as) 
+                nxt->addAttribute(std::move(a));
+        }*/
     }
     
-    std::unique_ptr<ast::TreeNode> Parser::parsePrimary()
+    void Parser::doParse()
     {
-        auto tk = advance();
-
-        if (!tk) return nullptr;
-
-        std::unique_ptr<ast::TreeNode> result;
-
 #       ifdef MANA_IS_VERBOSE
             std::visit([](auto&& arg) {
                 std::cout << "Processing token: " << arg << std::endl;
@@ -618,30 +615,32 @@ namespace mana {
 #       endif
 
         while (continueParsing()) {
-            globalDecl();
+            globalDeclaration();
 
             checkAttribute();
         }
-
-        return result;
     }
 
-    const Token* Parser::matches(int64_t off, Token::Type token_type, bool skip_ws, bool skip_lnbrks)
+    const Token* Parser::match(int64_t off, Token::Type token_type, bool skip_ws, bool skip_lnbrks)
     {
         auto* token = peek(off, skip_ws, skip_lnbrks);
 
-        if (!token || token->kind != token_type) return nullptr;
+        if (token && token->kind == token_type) {
+            return token;
+        }
 
-        return token;
+        return nullptr;
     }
 
-    const Token* Parser::matches(int64_t off, std::string_view str, bool skip_ws, bool skip_lnbrks)
+    const Token* Parser::match(int64_t off, std::string_view str, bool skip_ws, bool skip_lnbrks)
     {
         auto* token = peek(off, skip_ws, skip_lnbrks);
 
         if (!token || token->kind != Token::Type::kIdentifier) return nullptr;
 
-        if (token->match(str)) return token;
+        if (token->match(str)) {
+            return token;
+        }
 
         return nullptr;
     }

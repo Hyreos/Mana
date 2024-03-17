@@ -1,6 +1,6 @@
 import (
-    "teste/test1"
-    "teste/test3"
+    "test/test1"
+    "test/test3"
 )
 
 @cc import (

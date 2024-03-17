@@ -10,17 +10,8 @@
 namespace mana {    
     struct Token {
         enum class Type {
-            kI32Lit,
-            kU32Lit,
-            
-            kI64Lit,
-            kU64Lit,
-            
-            kI16Lit,
-            kU16Lit,
-            
-            kF32Lit,
-            kF64Lit,
+            kInteger,
+            kFloat,
 
             kStrLit, // " / '
 
@@ -72,51 +63,11 @@ namespace mana {
             return std::get<std::string_view>(value);
         }
 
-        inline int16_t as16Int() const {
-            CHECK(kind == Type::kI16Lit);
-
-            return static_cast<int16_t>(std::get<int64_t>(value));
-        }
-
-        inline int32_t as32Int() const {
-            CHECK(kind == Type::kI32Lit);
-
-            return static_cast<int32_t>(std::get<int64_t>(value));
-        }
-
-        inline int64_t as64Int() const {
-            //CHECK(kind == Type::kI64Lit);
-
+        inline int64_t asInteger() const {
             return std::get<int64_t>(value);
         }
 
-        inline uint16_t as16UInt() const {
-            CHECK(kind == Type::kU16Lit);
-
-            return static_cast<uint16_t>(std::get<int64_t>(value));
-        }
-
-        inline uint32_t as32UInt() const {
-            CHECK(kind == Type::kU32Lit);
-
-            return static_cast<uint32_t>(std::get<int64_t>(value));
-        }
-
-        inline uint64_t as64UInt() const {
-            CHECK(kind == Type::kU64Lit);
-
-            return static_cast<uint64_t>(std::get<int64_t>(value));
-        }
-
-        inline float asFp32() const {
-            CHECK(kind == Type::kF32Lit);
-
-            return static_cast<float>(std::get<double>(value));
-        }
-
-        inline double asFp64() const {
-            CHECK(kind == Type::kF64Lit);
-
+        inline double asDouble() const {
             return std::get<double>(value);
         }
 

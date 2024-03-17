@@ -95,7 +95,7 @@ namespace mana {
 
                             if (mana::in_range<float>(dvalue)) {
                                 tokens.push_back(Token {
-                                    .kind = Token::Type::kF32Lit,
+                                    .kind = Token::Type::kFloat,
                                     .value = dvalue
                                 });
                             } else {
@@ -106,7 +106,7 @@ namespace mana {
                                 advance();
 
                             tokens.push_back(Token {
-                                .kind = Token::Type::kF64Lit,
+                                .kind = Token::Type::kFloat,
                                 .value = dvalue
                             });
                         }
@@ -135,7 +135,7 @@ namespace mana {
                         advance();
 
                         tokens.push_back(Token {
-                            .kind = Token::Type::kU64Lit,
+                            .kind = Token::Type::kInteger,
                             .value = static_cast<int64_t>(value)
                         });
                     } else if (matches(0, 's')) {
@@ -143,14 +143,14 @@ namespace mana {
 
                         if (mana::in_range<uint16_t>(value)) {
                             tokens.push_back(Token {
-                                .kind = Token::Type::kU16Lit,
+                                .kind = Token::Type::kInteger,
                                 .value =  static_cast<int64_t>(value)
                             });
                         } else MANA_FATAL_NO_RETURN("Value overflows u16 limits.");
                     } else {
                         if (mana::in_range<uint32_t>(value)) {
                             tokens.push_back(Token {
-                                .kind = Token::Type::kU32Lit,
+                                .kind = Token::Type::kInteger,
                                 .value =  static_cast<int64_t>(value)
                             });
                         } else MANA_FATAL_NO_RETURN("Value overflows u32 limits.");
@@ -160,7 +160,7 @@ namespace mana {
 
                     if (mana::in_range<int64_t>(value)) {
                         tokens.push_back(Token {
-                            .kind = Token::Type::kI64Lit,
+                            .kind = Token::Type::kInteger,
                             .value =  static_cast<int64_t>(value)
                         });
                     } else {                        
@@ -170,14 +170,14 @@ namespace mana {
 
                     if (mana::in_range<int16_t>(value)) {
                         tokens.push_back(Token {
-                            .kind = Token::Type::kI16Lit,
+                            .kind = Token::Type::kInteger,
                             .value =  static_cast<int64_t>(value)
                         });
                     } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");
                 } else {
                     if (mana::in_range<int32_t>(value)) {
                         tokens.push_back(Token {
-                            .kind = Token::Type::kI32Lit,
+                            .kind = Token::Type::kInteger,
                             .value =  static_cast<int64_t>(value)
                         });
                     } else MANA_FATAL_NO_RETURN("Value overflows unsigned integer limits.");

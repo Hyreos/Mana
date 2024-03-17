@@ -88,46 +88,23 @@ endif()
 
 target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/Lexer.cc
+                                        Parser/AST/CloneContext.cc
                                         Parser/AST/Attribute.cc
-                                        Parser/AST/MemberDecl.cc
-                                        Parser/AST/ComponentDecl.cc
+                                        Parser/AST/BinaryExpression.cc
+                                        Parser/AST/BoolLiteralExpression.cc
+                                        Parser/AST/ComponentDeclaration.cc
+                                        Parser/AST/FloatLiteralExpression.cc
+                                        Parser/AST/GroupExpression.cc
+                                        Parser/AST/IdentifierExpression.cc
+                                        Parser/AST/ImportDeclaration.cc
+                                        Parser/AST/IntegerLiteralExpression.cc
+                                        Parser/AST/MemberDeclaration.cc
+                                        Parser/AST/Qualifier.cc
+                                        Parser/AST/StringLiteralExpression.cc
                                         Parser/AST/TreeNode.cc
-                                        Parser/AST/TSymbol.cc
-                                        Parser/AST/Expr.cc
-
-                                        Parser/AST/Declaration.cc
-
-                                        Parser/AST/Unary.cc
-
-                                        Parser/AST/ImportDecl.cc
-
-                                        Parser/AST/Int16Lit.cc
-                                        Parser/AST/Int32Lit.cc
-                                        Parser/AST/Int64Lit.cc
-
-                                        Parser/AST/Fp32Lit.cc
-                                        Parser/AST/Fp64Lit.cc
-                                        Parser/AST/StrLit.cc
-
-                                        Parser/AST/Uint16Lit.cc
-                                        Parser/AST/Uint32Lit.cc
-                                        Parser/AST/Uint64Lit.cc
-
-                                        Parser/AST/Type.cc
-                                        Parser/AST/Literal.cc
-
-                                        Parser/AST/BinaryOp.cc
-
-                                        Parser/AST/SubOp.cc
-                                        Parser/AST/Qual.cc
-                                        Parser/AST/SumOp.cc
-                                        Parser/AST/MulOp.cc
-                                        Parser/AST/DivOp.cc
-                                        Parser/AST/CommaOp.cc
-                                        Parser/AST/ScopeResolutionOp.cc
-                                        
-                                        Parser/AST/UnaryMinus.cc
-                                        Parser/AST/UnaryPlus.cc)
+                                        Parser/AST/TypeDeclaration.cc
+                                        Parser/AST/UnaryExpression.cc
+                                        Utils/RTTI.cc)
 
 if (MANA_BUILD_CLI)
     add_executable(manac)

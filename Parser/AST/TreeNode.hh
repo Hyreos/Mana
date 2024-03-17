@@ -5,60 +5,31 @@
 #include <iostream>
 
 #include "Helpers/Deleted.hh"
+#include "CloneContext.hh"
+
+#include "Utils/RTTI.hh"
 
 namespace mana::ast {
     class TreeVisitor;
 
-    class TreeNode {
+    class Attribute;
+
+    class TreeNode : public rtti::Castable<TreeNode, rtti::Base> {
     public:
-        enum class Type {
-            kAttribute,
-            kTSymbol,
-            kDeclaration,
-            kUnary,
-
-            kQualifier,
-
-            kType,
-            kBinaryOp,
-
-            kUnaryMinus,
-            kUnaryPlus,
-
-            kLiteral,
-
-            kExpr
-        };
-
-        TreeNode(TreeNode::Type baseType);
+        TreeNode();
 
         virtual ~TreeNode() = default;
 
-        virtual std::unique_ptr<TreeNode> clone() = 0;
+        virtual const TreeNode* clone(CloneContext& ctx) const = 0;
         
-        template<typename T>
-        T* cast() 
-        {
-            if (m_kind != T::baseType) return nullptr;
+        virtual void print(std::ostream& stream, size_t ident) const;
 
-            return static_cast<T*>(this);
-        }
+        void addAttribute(const Attribute* attr);
 
-        virtual void print(std::ostream& stream, size_t ident) {
-            for (auto& attr : m_attributes) attr->print(stream, ident);
-
-            if (!m_attributes.empty())
-                stream << " ";
-        }
-
-        void addAttribute(std::unique_ptr<TreeNode> attr);
-
-        std::vector<std::unique_ptr<TreeNode>>& attributes();
-
-        virtual void accept(TreeVisitor* visitor) = 0;
+        std::vector<const Attribute*>& attributes();
     private:
-        TreeNode::Type m_kind;
-
-        std::vector<std::unique_ptr<TreeNode>> m_attributes;
+        std::vector<const Attribute*> m_attributes;
     };
 }
+
+MANA_RTTI_TYPE(mana::ast::TreeNode);
