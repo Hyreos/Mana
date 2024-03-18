@@ -134,6 +134,8 @@ namespace mana {
 
         Result<std::vector<const ast::Attribute*>> attributes();
 
+        Result<std::vector<const ast::Expression*>> expectExpressionList();
+
         Result<std::vector<const ast::Expression*>> expressionList();
 
         Result<const ast::IdentifierExpression*> identifierExpression();

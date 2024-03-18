@@ -129,8 +129,6 @@ namespace mana {
         auto* lookahead = peek(1);
 
         if (lookahead && isOperator(*lookahead)) {
-            MANA_CHECK_MAYBE_RETURN(lookahead, "Trying to consume end of stream.");
-
             while (lookahead && isOperator(*lookahead) && getPrecedence(*lookahead) >= min_precedence) {
                 auto op = lookahead;
 
@@ -227,23 +225,27 @@ namespace mana {
         }
     }
 
+    Result<std::vector<const ast::Expression*>> Parser::expectExpressionList()
+    {
+        auto expression_list = expressionList();
+
+        if (!expression_list.matched || expression_list.errored) return Failure::kError;
+
+        return expression_list;
+    }
+
     Result<std::vector<const ast::Expression*>> Parser::expressionList()
     {
         std::vector<const ast::Expression*> expression_list;
 
         for (size_t i = 0; continueParsing(); i++) {
             if (i > 0)
-                if (!match(Token::Type::kComma)) {
-                    std::cerr << "missing ',' when parsing expression list." << std::endl;
-                    
-                    return Failure::kError;
-                }
+                if (!match(Token::Type::kComma)) 
+                    break;
 
             auto expr = expression();
 
-            if (!expr.matched) break;
-
-            if (expr.errored) return Failure::kError;
+            if (expr.errored || !expr.matched) return Failure::kError;
 
             expression_list.push_back(expr.value);
         }
@@ -297,16 +299,32 @@ namespace mana {
     Result<const ast::Attribute*> Parser::attribute()
     {
         if (match(Token::Type::kAt)) {
-            if (match("cc")) {
-                // 'cc' does not accept any parameters.
-                // TODO: This is dumb, check using some other function to parse an expression list.
-                if (match(Token::Type::kLeftParen) && !match(Token::Type::kRightParen))
-                    return Failure::kError;
+            const Token* name_token = nullptr;
+
+            if (name_token = match("cc")) {
+                if (match(Token::Type::kLeftParen)) {
+                    auto expr_list = expressionList();
+
+                    if (expr_list.errored) return Failure::kError;
+
+                    if (!match(Token::Type::kRightParen)) {
+                        std::cerr << "missing ')' at end of expression list when parsing attribute params." << std::endl;
+                        return Failure::kError;
+                    }
+
+                    if (expr_list.value.size() > 0) {
+                        std::cerr << "builtin attribute '@cc' doesn't accept any parameters." << std::endl;
+                        return Failure::kError;
+                    }
+                }
                 
                 return m_ctx.create<ast::CCAttribute>();
             }
 
-            // TODO: show error of unrecognized attribute.
+            std::visit([&](auto& v) {
+                std::cerr << "unrecognized attribute named '" << v << "'" << std::endl;
+            }, name_token->value);
+            
             return Failure::kError;
         }
 
