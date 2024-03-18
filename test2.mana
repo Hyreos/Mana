@@ -3,13 +3,38 @@ import (
     "test/test3"
 )
 
-@cc import "module/file.mn"
-
 @cc import (
     "glm/glm.hpp"
 )
 
-@cc(556565)
-component A {
-    @cc str? p1 = 78
+export component Vec2 : @cc glm::vec2 {
+    f32 x -> x
+    f32 y -> y
+}
+
+export component Vec3 : @cc glm::vec3 {
+    f32 x -> x
+    f32 y -> y
+    f32 z -> z
+}
+
+export component A {
+    @serialize(0xFFFFus / (0xFF + 0xFF, 5 * 0xFFFFFFFFu + 0xFF) / (-0xFFFFFFFFFFl + 0xFFFFFFFFFFFFFFFFul)) 
+    str? p1
+
+    @serialize(0x15 + 6 / 8 + 8 * 9) 
+    str? p2
+    readonly i64 p3
+    i64 p4
+    f64 p5 = 0.45555555
+    f32 p6 = 0.42222f
+}
+
+component B : A {
+    @serialize(1) 
+    str p1
+    f64 random_float_field = 555.45554
+
+    @serialize(2)
+    str p2
 }

@@ -20,10 +20,12 @@
 #include "AST/TypeDeclaration.hh"
 #include "AST/UnaryExpression.hh"
 #include "AST/CCAttribute.hh"
+#include "AST/SerializeAttribute.hh"
 
 #include "Helpers/Deleted.hh"
 #include "Helpers/Macros.hh"
 
+#include <array>
 #include <queue>
 #include <stack>
 #include <span>

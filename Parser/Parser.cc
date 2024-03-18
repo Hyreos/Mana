@@ -301,33 +301,61 @@ namespace mana {
     Result<const ast::Attribute*> Parser::attribute()
     {
         if (match(Token::Type::kAt)) {
-            const Token* name_token = nullptr;
+            static std::array<std::string_view, 2> kAttributeList = {
+                "cc",
+                "serialize"
+            };
 
-            if (name_token = match("cc")) {
-                if (match(Token::Type::kLeftParen)) {
-                    auto expr_list = expressionList();
+            auto name_token = match(kAttributeList);
 
-                    if (expr_list.errored) return Failure::kError;
-
-                    if (!match(Token::Type::kRightParen)) {
-                        std::cerr << "missing ')' at end of expression list when parsing attribute params." << std::endl;
-                        return Failure::kError;
-                    }
-
-                    if (expr_list.value.size() > 0) {
-                        std::cerr << "builtin attribute '@cc' doesn't accept any parameters." << std::endl;
-                        return Failure::kError;
-                    }
-                }
+            if (!name_token) {
+                std::cerr << "unrecognized attribute named '";
                 
-                return m_ctx.create<ast::CCAttribute>();
+                std::visit([](const auto& v) {
+                    std::cerr << v;
+                }, peek(1)->value);
+
+                std::cerr << "'." << std::endl;
+                
+                return Failure::kError;
             }
 
-            std::visit([&](auto& v) {
-                std::cerr << "unrecognized attribute named '" << v << "'" << std::endl;
-            }, name_token->value);
+            mana::Result<std::vector<const ast::Expression*>> expr_list;
+
+            if (match(Token::Type::kLeftParen)) {
+                expr_list = expressionList();
+
+                if (expr_list.errored) return Failure::kError;
+
+                if (!match(Token::Type::kRightParen)) {
+                    std::cerr << "missing ')' at end of expression list when parsing attribute params." << std::endl;
+                    
+                    return Failure::kError;
+                }
+            }
+
+            if (name_token->match("cc")) {
+                if (expr_list.value.size() > 0) {
+                    std::cerr << "builtin attribute '@cc' doesn't accept any parameters." << std::endl;
+                    return Failure::kError;
+                }
             
-            return Failure::kError;
+                return m_ctx.create<ast::CCAttribute>();
+            } else if (name_token->match("serialize")) {
+                if (expr_list.value.size() == 0) {
+                    std::cerr << "builtin attribute '@serialize' needs at least one parameter." << std::endl;
+                    
+                    return Failure::kError;
+                } else if (expr_list.value.size() > 1) {
+                    std::cerr << "builtin attribute '@serialize' can only accept a single parameter." << std::endl;
+                    
+                    return Failure::kError;
+                }
+                
+                return m_ctx.create<ast::SerializeAttribute>(expr_list.value[0]);
+            }
+
+            CHECK(false);
         }
 
         return Failure::kNoMatch;
@@ -606,7 +634,7 @@ namespace mana {
     }
 
     const Token* Parser::match(std::span<std::string_view> list, bool skip_ws, bool skip_lnbrks)
-    {
+    {       
         for (auto& str : list) {
             if (auto tok = match(str, skip_ws, skip_lnbrks))
                 return tok;
