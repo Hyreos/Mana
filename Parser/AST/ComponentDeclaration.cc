@@ -5,34 +5,35 @@ namespace mana::ast {
         const std::string& name,
         std::vector<const Declaration*> fields,
         std::vector<const IdentifierExpression*> inheritances,
-        bool isExported
+        bool isExported,
+        std::vector<const Attribute*> attributes
     ) 
         : m_fields{ std::move(fields) },
             m_inheritances { std::move(inheritances) },
-            m_exported { isExported }
+            m_exported { isExported },
+            m_attributes { attributes }
     {
         m_name = name;
     }
 
     const ComponentDeclaration* ComponentDeclaration::clone(CloneContext& ctx) const
     {
-        std::vector<const Declaration*> cfields;
-        std::vector<const IdentifierExpression*> cinheritances;
-
-        for (auto& f : m_fields) cfields.push_back(ctx.clone(f));
-        for (auto& h : m_inheritances) cinheritances.push_back(ctx.clone(h));
-
         return ctx.create<ComponentDeclaration>(
             m_name, 
-            std::move(cfields), 
-            std::move(cinheritances), 
-            m_exported
+            ctx.clone(m_fields), 
+            ctx.clone(m_inheritances), 
+            m_exported,
+            ctx.clone(m_attributes)
         );
     }
 
     void ComponentDeclaration::print(std::ostream& stream, size_t ident) const
     {
-        TreeNode::print(stream, ident);
+        for (auto& attr : m_attributes) {
+            attr->print(stream, ident);
+            
+            stream << " ";
+        }
 
         if (m_exported) stream << "export ";
 

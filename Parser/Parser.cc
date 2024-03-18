@@ -24,16 +24,9 @@ namespace mana {
 
         m_lexer = std::make_unique<Lexer>(code);
 
-        if (m_lexer->size() > 0)
-            if ((*m_lexer)[0].kind == Token::Type::kWS || (*m_lexer)[0].kind == Token::Type::kLnBrk) {
-                    m_tokenIdx--;
-            }
-
         std::vector<std::unique_ptr<ast::TreeNode>> tr_nodes;
         
-        while (continueParsing()) {
-            globalDeclaration();
-        }
+        doParse();
 
         std::ostream& stream { std::cout };
 
@@ -249,37 +242,32 @@ namespace mana {
 
     Result<std::vector<const ast::Attribute*>> Parser::attributes()
     {
-        std::vector<const ast::Attribute*> ats;
+        std::vector<const ast::Attribute*> attrs;
 
         while (continueParsing()) {
-            if (!match(1, Token::Type::kAt)) break;
-            auto a = parseAttribute();
+            auto a = attribute();
 
-            if (a.errored) {
-                // TODO: Handle error and return
-                continue;
-            }
+            if (a.errored) return Failure::kError;
 
-            if (a.matched) {
-                ats.push_back(a.unwrap());
-            }
+            if (a.matched) attrs.push_back(a.unwrap());
+            else break;
         }
 
-        return ats;
+        return attrs;
     }
 
     Result<const ast::LiteralExpression*> Parser::literal()
     {
-        if (auto* tok = match(1, Token::Type::kInteger))
+        if (auto* tok = match(Token::Type::kInteger))
             return m_ctx.create<ast::IntegerLiteralExpression>(
                 ast::IntegerLiteralExpression::Sign::kSigned,
                 tok->asInteger()
             );
-        else if (auto* tok = match(1, Token::Type::kStrLit))
+        else if (auto* tok = match(Token::Type::kStrLit))
             return m_ctx.create<ast::StringLiteralExpression>(tok->asString());
-        else if (auto* tok = match(1, "true")) 
+        else if (auto* tok = match("true")) 
             return m_ctx.create<ast::BoolLiteralExpression>(true);
-        else if (auto* tok = match(1, "false"))
+        else if (auto* tok = match("false"))
             return m_ctx.create<ast::BoolLiteralExpression>(false);
 
         return Failure::kNoMatch;
@@ -287,7 +275,7 @@ namespace mana {
 
     Result<const ast::IdentifierExpression*> Parser::identifierExpression()
     {
-        auto* token = match(1, Token::Type::kIdentifier);
+        auto* token = match(Token::Type::kIdentifier);
 
         if (token)
             return m_ctx.create<ast::IdentifierExpression>(token->asString());
@@ -295,41 +283,24 @@ namespace mana {
         return Failure::kNoMatch;
     }
 
-    Result<const ast::Attribute*> Parser::parseAttribute()
+    Result<const ast::Attribute*> Parser::attribute()
     {
-        while (continueParsing()) {
-            // TODO: Important to review this later
-            if (!match(0, Token::Type::kAt)) break;
-
-            auto* attr_name = match(1, Token::Type::kIdentifier);
-
-            if (!attr_name) {
-                // TODO: Handle error here
-                return Failure::kError;
-            }
-
-            const ast::Expression* node;
-
-            if (match(1, Token::Type::kLeftParen)) {
-                auto expr = expectExpression();
-
-                if (expr.matched) node = expr.unwrap(); 
-
-                if (!match(1, Token::Type::kRightParen)) {
-                    // TODO: Handle error here
+        if (match(Token::Type::kAt)) {
+            if (match("cc")) {
+                // 'cc' does not accept any parameters.
+                // TODO: This is dumb, check using some other function to parse an expression list.
+                if (match(Token::Type::kLeftParen) && !match(Token::Type::kRightParen)) {
                     return Failure::kError;
                 }
+                
+                return m_ctx.create<ast::CCAttribute>();
             }
 
-            /*auto ap = m_ctx.create<ast::Attribute>(
-                attr_name->asString(), 
-                std::move(node)
-            );
-
-            return std::move(ap);*/
+            // TODO: show error of unrecognized attribute.
+            return Failure::kError;
         }
 
-        return {};
+        return Failure::kNoMatch;
     }
 
     bool Parser::isQualifier(Token tok) const
@@ -343,9 +314,9 @@ namespace mana {
 
     Result<const ast::UnaryExpression*> Parser::unaryExpression()
     {
-        if (match(1, Token::Type::kMinus)) {
+        if (match(Token::Type::kMinus)) {
             
-        } else if (match(1, Token::Type::kPlus)) {
+        } else if (match(Token::Type::kPlus)) {
 
         }
 
@@ -354,10 +325,10 @@ namespace mana {
 
     Result<const ast::Expression*> Parser::expectGroup(bool isExpr)
     {
-        if (match(1, Token::Type::kLeftParen)) {
+        if (match(Token::Type::kLeftParen)) {
             auto expr = expectExpression();
 
-            if (!match(1, Token::Type::kRightParen)) {
+            if (!match(Token::Type::kRightParen)) {
                 // Handle error here
                 return Failure::kError;
             }
@@ -372,15 +343,17 @@ namespace mana {
     {
         bool is_component_exported = false;
 
-        auto as = attributes();
+        auto component_attrs = attributes();
 
-        if (match(1, "export")) {
+        if (component_attrs.errored)
+            return Failure::kError;
+
+        if (match("export"))
             is_component_exported = true;
-        }
 
-        if (!match(1, "component")) return {};
+        if (!match("component")) return {};
 
-        auto decl_name = match(1, Token::Type::kIdentifier);
+        auto decl_name = match(Token::Type::kIdentifier);
 
         if (!decl_name) {
             // TODO: Add error message here                
@@ -389,58 +362,53 @@ namespace mana {
 
         std::vector<const ast::IdentifierExpression*> inheritances;
 
-        if (match(1, Token::Type::kColon)) {
+        if (match(Token::Type::kColon)) {
             do {
-                if (!match(1, Token::Type::kComma)) 
-                    return Failure::kError;
-
-                auto iasl = attributes();
-                auto unwrapped = iasl.unwrap();
-
                 auto inh = identifierExpression();
-                auto inh_unwrapped = inh.unwrap();
 
-                /*for (auto& a : unwrapped)
-                    inh_unwrapped->addAttribute(a);*/
+                if (inh.errored) return Failure::kError;
 
-                inheritances.push_back(inh_unwrapped);
-            } while (match(1, Token::Type::kComma));
+                if (inh.matched)
+                    inheritances.push_back(inh.unwrap());
+            } while (match(Token::Type::kComma));
         }
 
-        if (!match(1, Token::Type::kLeftBracket)) {
-            // TODO: Handle error here                
+        if (!match(Token::Type::kLeftBracket)) {
+            std::cerr << "missing token '{' in component declaration." << std::endl;
+            
             return Failure::kError;
         }
 
-        ;
-
         std::vector<const ast::Declaration*> members;
 
-        while (!match(1, Token::Type::kRightBracket)) {
-            auto as = attributes();
+        while (!match(Token::Type::kRightBracket)) {
+            std::vector<const ast::Attribute*> attrs;
+            
+            if (auto a = attributes(); a.matched)
+                attrs = a.unwrap();
 
             auto type = identifierExpression();
 
+            if (type.errored || !type.matched) return Failure::kError;
+
             bool is_optional = false;
+            if (match(Token::Type::kQuestion)) is_optional = true;
 
-            if (match(1, Token::Type::kQuestion)) {
-                    is_optional = true;
-            }
-
-            auto* field_name = match(1, Token::Type::kIdentifier);
+            auto* field_name = match(Token::Type::kIdentifier);
 
             if (!field_name) {
-                // TODO: Handle error here
+                std::cerr << "missing identifier in field name." << std::endl;
                 return Failure::kError;
             }
 
             std::string la;
 
-            if (match(1, Token::Type::kArrow)) {
-                    auto prop_name = match(1, Token::Type::kIdentifier);
+            if (match(Token::Type::kArrow)) {
+                auto prop_name = match(Token::Type::kIdentifier);
 
                 if (!prop_name) {
-                    // TODO: Handle error here
+                    std::cerr << "missing identifier after '->' in cross language alias." << std::endl;
+
                     return Failure::kError;
                 }
 
@@ -449,12 +417,10 @@ namespace mana {
 
             const ast::Expression* field_default_value;
 
-            if (match(1, Token::Type::kEqual)) {
+            if (match(Token::Type::kEqual)) {
                 auto expr = expectExpression();
 
-                if (expr.errored) {
-                    return Failure::kError;
-                }
+                if (expr.errored) return Failure::kError;
 
                 field_default_value = expr.unwrap();
             }
@@ -464,7 +430,8 @@ namespace mana {
                     auto* member = static_cast<const ast::MemberDeclaration*>(m); 
 
                     if (field_name->match(member->name())) {
-                        // TODO: Handle error here
+                        std::cerr << "error when declaring member, identifier '" 
+                            << field_name->asString() << "' already exists in this component." << std::endl;
                         return Failure::kError;
                     }
                 }
@@ -479,40 +446,33 @@ namespace mana {
                     std::move(vuw),
                     field_name->asString(),
                     std::move(field_default_value),
-                    is_optional
+                    is_optional,
+                    attrs
                 )
             );
-
-            //for (auto& a : as) members.back()->addAttribute(std::move(a));
-        }
-
-        if (!match(1, Token::Type::kRightBracket)) {
-            // TODO: Handle error here
-            return Failure::kError;
         }
 
         auto comp_decl = m_ctx.create<ast::ComponentDeclaration>(
             decl_name->asString(),
             std::move(members),
             std::move(inheritances),
-            is_component_exported
+            is_component_exported,
+            component_attrs.unwrap()
         );
-
-        //for (auto& a : as) comp_decl->addAttribute(std::move(a));
-
+        
         return comp_decl;
     }
 
     Result<const ast::ImportDeclaration*> Parser::importDeclaration() {
-        if (!match(1, "import")) return {};
+        if (!match("import")) return {};
         
         bool is_cc = false;
                                                 
         std::vector<std::filesystem::path> pathlist;
 
-        if (match(1, Token::Type::kLeftParen)) {
-            while (!match(1, Token::Type::kRightParen)) {
-                auto* path = match(1, Token::Type::kStrLit);
+        if (match(Token::Type::kLeftParen)) {
+            while (!match(Token::Type::kRightParen)) {
+                auto* path = match(Token::Type::kStrLit);
 
                 if (!path) {
                     // TODO: Handle error here
@@ -522,15 +482,15 @@ namespace mana {
                 pathlist.push_back(path->asString());
             }
 
-            if (!match(1, Token::Type::kRightParen)) {
+            if (!match(Token::Type::kRightParen)) {
                 // TODO: Handle error here.
                 return Failure::kError;
             }
         } else {
-            const Token* next = match(1, Token::Type::kStrLit);
+            const Token* next = match(Token::Type::kStrLit);
 
             if (!next) {
-                // TODO: Handle error here.
+                std::cerr << "error when declaring import, missing string literal." << std::endl;
                 return Failure::kError;
             }
 
@@ -545,18 +505,16 @@ namespace mana {
 
     bool Parser::continueParsing()
     {
-        return (m_tokenIdx + 1 < m_lexer->size());
+        return (m_tokenIdx + 1 < m_lexer->size() && !match(Token::Type::kEOF));
     }
 
     void Parser::globalDeclaration()
     {
-        auto decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ComponentDeclaration*> {
+        auto decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ComponentDeclaration*> {   
             auto cd = componentDeclaration();
 
-            if (cd.errored) {
-                // TODO: add error to a list
+            if (cd.errored) 
                 return Failure::kError;
-            }
 
             if (cd.matched)
                 return cd; 
@@ -617,32 +575,60 @@ namespace mana {
         while (continueParsing()) {
             globalDeclaration();
 
-            checkAttribute();
+            //checkAttribute();
         }
     }
 
-    const Token* Parser::match(int64_t off, Token::Type token_type, bool skip_ws, bool skip_lnbrks)
+    const Token* Parser::match(Token::Type token_type, bool skip_ws, bool skip_lnbrks)
     {
-        auto* token = peek(off, skip_ws, skip_lnbrks);
+        auto* token = peek(1, skip_ws, skip_lnbrks);
 
         if (token && token->kind == token_type) {
+            advance(1, skip_ws, skip_lnbrks);
+
             return token;
         }
 
         return nullptr;
     }
 
-    const Token* Parser::match(int64_t off, std::string_view str, bool skip_ws, bool skip_lnbrks)
+    const Token* Parser::match(std::string_view str, bool skip_ws, bool skip_lnbrks)
     {
-        auto* token = peek(off, skip_ws, skip_lnbrks);
+        auto* token = peek(1, skip_ws, skip_lnbrks);
 
         if (!token || token->kind != Token::Type::kIdentifier) return nullptr;
 
         if (token->match(str)) {
+            advance(1, skip_ws, skip_lnbrks);
+
             return token;
         }
 
         return nullptr;
+    }
+
+    bool Parser::skipLinebreaks()
+    {
+        bool r = false;
+
+        while (match(Token::Type::kLnBrk, false, false)) {
+            advance(1, false, false);
+            r = true;
+        }
+
+        return r;
+    }
+
+    bool Parser::skipWhitespaces() 
+    {
+        bool r = false;
+
+        while (match(Token::Type::kWS)) {
+            advance(1, false, false);
+            r = true;
+        }
+
+        return r;
     }
 
     const Token* Parser::peek(uint64_t off, bool skip_ws, bool skip_lnbrks) 

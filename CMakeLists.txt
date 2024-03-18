@@ -10,6 +10,9 @@ option(MANA_BUILD_CLI "Enable command-line tool build." ON)
 option(MANA_IS_SHARED "Build Mana as a shared library." OFF)
 option(MANA_USE_PIC "Use -fPIC when building MANA." OFF)
 
+add_compile_options(-g)
+add_link_options(-g)
+
 if (MANA_USE_PIC)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         if (NOT WIN32)
@@ -48,7 +51,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     if (MANA_IS_ASAN OR CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_options(${PROJECT_NAME} PRIVATE -O0 -g)
     elseif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_options(${PROJECT_NAME} PRIVATE -Ofast)
+        target_compile_options(${PROJECT_NAME} PRIVATE -O0)
     endif()
 endif()
 
@@ -89,7 +92,7 @@ endif()
 target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/Lexer.cc
                                         Parser/AST/CloneContext.cc
-                                        Parser/AST/Attribute.cc
+                                        Parser/AST/CCAttribute.cc
                                         Parser/AST/BinaryExpression.cc
                                         Parser/AST/BoolLiteralExpression.cc
                                         Parser/AST/ComponentDeclaration.cc
@@ -120,11 +123,7 @@ if (MANA_BUILD_CLI)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_compile_options(${PROJECT_NAME} PRIVATE -fno-asynchronous-unwind-tables -fno-exceptions)
 
-        if (MANA_IS_ASAN)
-            target_compile_options(manac PRIVATE -O0)
-        else()
-            target_compile_options(manac PRIVATE -Ofast)
-        endif()
+        target_compile_options(manac PRIVATE -O0)
     endif()
 
     target_link_libraries(manac PRIVATE ${PROJECT_NAME})

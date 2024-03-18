@@ -2,6 +2,7 @@
 
 #include "TreeNode.hh"
 
+#include "Attribute.hh"
 #include "TypeDeclaration.hh"
 #include "IdentifierExpression.hh"
 
@@ -12,7 +13,8 @@ namespace mana::ast {
             const std::string& name,
             std::vector<const Declaration*> fields,
             std::vector<const IdentifierExpression*> inheritances,
-            bool isExported
+            bool isExported,
+            const std::vector<const Attribute*> attributes
         );
 
         const ComponentDeclaration* clone(CloneContext& ctx) const override;
@@ -28,6 +30,8 @@ namespace mana::ast {
         std::vector<const Declaration*> m_fields;
 
         std::vector<const IdentifierExpression*> m_inheritances;
+
+        std::vector<const Attribute*> m_attributes;
     };
 }
 

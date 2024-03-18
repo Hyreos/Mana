@@ -19,6 +19,7 @@
 #include "AST/TreeNode.hh"
 #include "AST/TypeDeclaration.hh"
 #include "AST/UnaryExpression.hh"
+#include "AST/CCAttribute.hh"
 
 #include "Helpers/Deleted.hh"
 #include "Helpers/Macros.hh"
@@ -128,7 +129,7 @@ namespace mana {
 
         Result<const ast::Expression*> primaryExpression();
 
-        Result<const ast::Attribute*> parseAttribute();
+        Result<const ast::Attribute*> attribute();
 
         Result<std::vector<const ast::Attribute*>> attributes();
 
@@ -160,7 +161,7 @@ namespace mana {
             auto r = f(std::forward<Args>(args)...);
 
             if (!r.ok())
-                while (!match(1, sync_token, false, false))                   
+                while (!match(sync_token, false, false) && !match(Token::Type::kEOF, false, false))
                     advance();
 
             return r;
@@ -176,9 +177,13 @@ namespace mana {
 
         const Token* peek(uint64_t off, bool skip_ws = true, bool skip_lnbrks = true);
 
-        const Token* match(int64_t off, std::string_view str, bool skip_ws = true, bool skip_lnbrks = true);
+        const Token* match(std::string_view str, bool skip_ws = true, bool skip_lnbrks = true);
 
-        const Token* match(int64_t off, Token::Type token_type, bool skip_ws = true, bool skip_lnbrks = true);
+        const Token* match(Token::Type token_type, bool skip_ws = true, bool skip_lnbrks = true);
+
+        bool skipLinebreaks();
+
+        bool skipWhitespaces();
 
         const Token* advance(size_t off = 1, bool skip_ws = true, bool skip_lnbrks = true);
 

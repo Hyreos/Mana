@@ -22,6 +22,17 @@ namespace mana::ast {
         }
 
         template<typename T>
+        const std::vector<const T*> clone(const std::vector<const T*>& array)
+        {
+            std::vector<const T*> c;
+
+            for (const T* node : array)
+                c.push_back(clone(node));
+
+            return c;
+        } 
+
+        template<typename T>
         const T* cloneNode(const T* obj) {
             return static_cast<const T*>(obj->clone(*this));
         }

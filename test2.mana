@@ -1,0 +1,4 @@
+@cc
+component A {
+    str? p1 = 78
+}

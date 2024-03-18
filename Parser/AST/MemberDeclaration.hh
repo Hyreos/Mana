@@ -2,9 +2,11 @@
 
 #include "Declaration.hh"
 #include "IdentifierExpression.hh"
+#include "Attribute.hh"
 
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace mana::ast {
     class MemberDeclaration final : public rtti::Castable<MemberDeclaration, Declaration> {
@@ -13,7 +15,8 @@ namespace mana::ast {
             const IdentifierExpression* type,
             const std::string& name,
             const Expression* defaultValue,
-            bool isOptional
+            bool isOptional,
+            const std::vector<const Attribute*> attributes 
         );
 
         const MemberDeclaration* clone(CloneContext& ctx) const override;
@@ -26,6 +29,7 @@ namespace mana::ast {
         bool m_optional;
         const IdentifierExpression* m_type;
         const Expression* m_default;
+        const std::vector<const Attribute*> m_attributes;
     };
 }
 

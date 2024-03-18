@@ -57,6 +57,8 @@ public:
 
                         parser.registerErrorCallback(LogParserError);
 
+                        std::cout << "AWAWAAWA" << std::endl;
+
                         parser.parse(data); 
 
                         std::cout << "[@] Done." << std::endl;

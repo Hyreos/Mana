@@ -5,12 +5,14 @@ namespace mana::ast {
         const IdentifierExpression* type,
         const std::string& name,
         const Expression* defaultValue,
-        bool isOptional
+        bool isOptional,
+        const std::vector<const Attribute*> attributes
     ) 
         : m_name{ name },
             m_type{ std::move(type) },
             m_default { std::move(defaultValue) },
-            m_optional { isOptional }
+            m_optional { isOptional },
+            m_attributes { attributes }
     {
     }
 
@@ -20,7 +22,8 @@ namespace mana::ast {
             ctx.clone(m_type),
             m_name,
             ctx.clone(m_default),
-            m_optional
+            m_optional,
+            ctx.clone(m_attributes)
         );
     }
 

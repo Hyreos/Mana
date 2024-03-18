@@ -8,11 +8,7 @@
 namespace mana::ast {
     class Attribute : public rtti::Castable<Attribute, TreeNode> {
     public:
-        Attribute(const std::string& name);
-
-        const std::string& name() const;
-    private:
-        std::string m_name;
+        virtual std::string name() const = 0;
     };
 }
 
