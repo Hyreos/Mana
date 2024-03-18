@@ -111,16 +111,30 @@ namespace mana {
 
     class Parser {
     public:
+        struct Stats {
+            size_t lineIndex, 
+            columnIndex;
+        };
+
+        struct Error {
+            Stats stats;
+            std::string message;
+        };
+
         Parser();
 
         void parse(const std::string& code);
 
         void registerErrorCallback(ErrorCallback_T callback);
+
+        const std::vector<Error>& errorList() const;
     private:
         enum class Associativity {
             kLeft,
             kRight
         };
+
+        void error(const std::string& message);
 
         void doParse();
 
@@ -165,24 +179,22 @@ namespace mana {
 
             if (!r.ok())
                 while (continueParsing()) {
-                    if (sync_token == Token::Type::kLeftParen && match(Token::Type::kLeftParen)) {
+                    if (peek(0)->kind == Token::Type::kLeftParen)
                         parenCount++;
-                        continue;
-                    } else if (sync_token == Token::Type::kLeftBracket && match(Token::Type::kLeftBracket)) {
+                    else if (peek(0)->kind == Token::Type::kLeftBracket)
                         bracketCount++;
-                        continue;
-                    }
-
-                    if (match(Token::Type::kRightParen)) {
+                    else if (peek(0)->kind == Token::Type::kRightParen) {
                         if (parenCount > 0) parenCount--;
-
-                        if (sync_token == Token::Type::kRightParen) break;
-                    } else if (match(Token::Type::kRightBracket)) {
+                        
+                        if (parenCount == 0 && sync_token == Token::Type::kRightParen) break;
+                    } else if (peek(0)->kind == Token::Type::kRightBracket) {
                         if (bracketCount > 0) bracketCount--;
 
-                        if (sync_token == Token::Type::kRightBracket) break;
-                    } else if (match(sync_token)) break;
-                    else advance();
+                        if (bracketCount == 0 && sync_token == Token::Type::kRightBracket) break;
+                    } else if (peek(0)->kind == sync_token) 
+                        break;
+                    
+                    advance();
                 }
 
             return r;
@@ -210,10 +222,9 @@ namespace mana {
 
         const Token* advance(size_t off = 1, bool skip_ws = true, bool skip_lnbrks = true);
 
-        struct {
-            size_t lineIndex;
-            size_t columnIndex;
-        } m_stats;
+        std::vector<Error> m_errors;
+
+        Stats m_stats;
         
         int64_t m_tokenIdx;   
 

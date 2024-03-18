@@ -3,7 +3,13 @@ import (
     "test/test3"
 )
 
-@seriaslized()
+@serialize()
+component K {
+    f32 teste = 66
+}
+
+
+@serffialize()
 component K {
     f32 teste = 66
 }

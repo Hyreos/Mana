@@ -80,6 +80,11 @@ namespace mana {
         return Failure::kNoMatch;
     }
 
+    const std::vector<Parser::Error>& Parser::errorList() const
+    {
+        return m_errors;
+    }
+
     Result<const ast::Expression*> Parser::expression()
     {
         auto lit = literal();
@@ -103,6 +108,11 @@ namespace mana {
         result = parseExpression1(result.unwrap(), 0ull);
 
         return result;
+    }
+
+    void Parser::error(const std::string& message)
+    {
+        m_errors.push_back({ m_stats, message });
     }
 
     bool Parser::isOperator(const Token& tok)
@@ -309,13 +319,7 @@ namespace mana {
             auto name_token = match(kAttributeList);
 
             if (!name_token) {
-                std::cerr << "unrecognized attribute named '";
-                
-                std::visit([](const auto& v) {
-                    std::cerr << v;
-                }, peek(1)->value);
-
-                std::cerr << "'." << std::endl;
+                error("unrecognized attribute '" + peek(1)->toString() + "'.");
                 
                 return Failure::kError;
             }
@@ -328,7 +332,7 @@ namespace mana {
                 if (expr_list.errored) return Failure::kError;
 
                 if (!match(Token::Type::kRightParen)) {
-                    std::cerr << "missing ')' at end of expression list when parsing attribute params." << std::endl;
+                    error("missing ')' at end of expression list when parsing attribute params.");
                     
                     return Failure::kError;
                 }
@@ -336,18 +340,18 @@ namespace mana {
 
             if (name_token->match("cc")) {
                 if (expr_list.value.size() > 0) {
-                    std::cerr << "builtin attribute '@cc' doesn't accept any parameters." << std::endl;
+                    error("builtin attribute '@cc' doesn't accept any parameters.");
                     return Failure::kError;
                 }
             
                 return m_ctx.create<ast::CCAttribute>();
             } else if (name_token->match("serialize")) {
                 if (expr_list.value.size() == 0) {
-                    std::cerr << "builtin attribute '@serialize' needs at least one parameter." << std::endl;
+                    error("builtin attribute '@serialize' needs at least one parameter.");
                     
                     return Failure::kError;
                 } else if (expr_list.value.size() > 1) {
-                    std::cerr << "builtin attribute '@serialize' can only accept a single parameter." << std::endl;
+                    error("builtin attribute '@serialize' can only accept a single parameter.");
                     
                     return Failure::kError;
                 }
@@ -391,7 +395,7 @@ namespace mana {
             return std::move(expr);
         }
 
-        return {};
+        return Failure::kNoMatch;
     }
 
     Result<const ast::ComponentDeclaration*> Parser::componentDeclaration(
@@ -406,7 +410,7 @@ namespace mana {
         auto decl_name = match(Token::Type::kIdentifier);
 
         if (!decl_name) {
-            std::cerr << "missing identifier when declaring a component name." << std::endl;
+            error("missing identifier when declaring a component name.");
             return Failure::kError;
         }
 
@@ -423,7 +427,7 @@ namespace mana {
         }
 
         if (!match(Token::Type::kLeftBracket)) {
-            std::cerr << "missing token '{' in component declaration." << std::endl;
+            error("missing token '{' in component declaration.");
             return Failure::kError;
         }
 
@@ -445,7 +449,8 @@ namespace mana {
             auto* field_name = match(Token::Type::kIdentifier);
 
             if (!field_name) {
-                std::cerr << "missing identifier in field name." << std::endl;
+                error("missing identifier in field name.");
+
                 return Failure::kError;
             }
 
@@ -455,7 +460,8 @@ namespace mana {
                 auto prop_name = match(Token::Type::kIdentifier);
 
                 if (!prop_name) {
-                    std::cerr << "missing identifier after '->' in cross language alias." << std::endl;
+                    error("missing identifier after '->' in cross language alias.");
+
                     return Failure::kError;
                 }
 
@@ -477,8 +483,9 @@ namespace mana {
                     auto* member = static_cast<const ast::MemberDeclaration*>(m); 
 
                     if (field_name->match(member->name())) {
-                        std::cerr << "error when declaring member, identifier '" 
-                            << field_name->asStr() << "' already exists in this component." << std::endl;
+                        error("error when declaring member, identifier '" 
+                            + field_name->asStr() + "' already exists in this component.");
+
                         return Failure::kError;
                     }
                 }
@@ -524,7 +531,8 @@ namespace mana {
                 auto* path = match(Token::Type::kStrLit);
 
                 if (!path) {
-                    std::cerr << "missing string literal in an import declaration.";
+                    error("missing string literal in an import declaration.");
+
                     return Failure::kError;
                 }
 
@@ -534,7 +542,8 @@ namespace mana {
             const Token* next = match(Token::Type::kStrLit);
 
             if (!next) {
-                std::cerr << "error when declaring import, missing string literal." << std::endl;
+                error("error when declaring import, missing string literal.");
+
                 return Failure::kError;
             }
 
@@ -555,41 +564,23 @@ namespace mana {
 
     void Parser::globalDeclaration()
     {
-        auto attribute_list = attributes();
+        auto attribute_list = sync(Token::Type::kRightParen, [&]() -> Result<std::vector<const ast::Attribute*>> {
+            auto attrs = attributes();
+
+            return attrs;
+        }); 
 
         auto decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ComponentDeclaration*> {   
             auto cd = componentDeclaration(attribute_list.value);
 
-            if (cd.errored) 
-                return Failure::kError;
-
-            if (cd.matched)
-                return cd; 
-
-            return Failure::kNoMatch;
+            return cd;
         });
-
-        if (decl.matched) {
-            decl->print(std::cout, 0);
-        }
 
         auto import_decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ImportDeclaration*> {
             auto id = importDeclaration(attribute_list.value);
 
-            if (id.errored)
-                return Failure::kError;
-
-            if (id.matched) {
-                // TODO: Add this to AST builder
-                return id;
-            }
-
-            return Failure::kNoMatch;
+            return id;
         });
-
-        if (import_decl.matched) {
-            import_decl->print(std::cout, 0);
-        }
     }
 
     void Parser::doParse()

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <string_view>
+#include <sstream>
 #include <absl/types/variant.h>
 
 #include "Helpers/Macros.hh"
@@ -50,6 +51,18 @@ namespace mana {
         Type kind;
 
         absl::variant<std::string_view, double, int64_t> value;
+
+        inline std::string toString() const {
+            std::string result;
+            
+            std::visit([&result](auto v) {
+                std::stringstream ss;
+                ss << v;
+                result = ss.str();
+            }, value);
+
+            return result;
+        }
 
         inline const std::string asStr() const
         {

@@ -18,6 +18,10 @@ namespace mana::ast {
 
     void SerializeAttribute::print(std::ostream& stream, size_t ident) const
     {
-        stream << "@" << name();
+        stream << "@" << name() << "(";
+        
+        m_expression->print(stream, ident);
+
+        stream << ")";
     }
 }

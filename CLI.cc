@@ -56,6 +56,10 @@ public:
                         parser.registerErrorCallback(LogParserError);
 
                         parser.parse(data); 
+
+                        for (auto& err : parser.errorList()) {
+                            printf("(line: %d, column: %d): %s\n", err.stats.lineIndex, err.stats.columnIndex, err.message.c_str());
+                        }
                     }
                 }
             }
