@@ -100,7 +100,8 @@ namespace mana {
         return Failure::kNoMatch;
     }
 
-    Result<const ast::Expression*> Parser::expectExpression() {
+    Result<const ast::Expression*> Parser::expectExpression() 
+    {
         auto result = primaryExpression();
 
         if (!result.matched || result.errored) return Failure::kError;
@@ -367,11 +368,12 @@ namespace mana {
 
     bool Parser::isQualifier(Token tok) const
     {
-        if (tok.match("readonly"))
-            return true;
-        else if (tok.match("export"))
-            return true;
-        return false;
+        static std::array<std::string_view, 2> kQualifiers = {{
+            "readonly",
+            "export"
+        }};
+
+        return tok.match(kQualifiers);
     }
 
     Result<const ast::UnaryExpression*> Parser::unaryExpression()
@@ -482,12 +484,27 @@ namespace mana {
 
             const ast::Expression* field_default_value;
 
-            if (match(Token::Type::kEqual)) {
+            if (!is_optional)
+                if (match(Token::Type::kEqual)) {
+                    auto expr = expectExpression();
+
+                    if (expr.errored)
+                        return Failure::kError;
+                
+                    field_default_value = expr.unwrap();
+                }
+            else {
+                if (!match(Token::Type::kEqual)) {
+                    error("missing an '=' in non-optional property from component.");
+
+                    return Failure::kError;
+                }
+
                 auto expr = expectExpression();
 
                 if (expr.errored)
                     return Failure::kError;
-                
+
                 field_default_value = expr.unwrap();
             }
 

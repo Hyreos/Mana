@@ -4,6 +4,7 @@
 #include <vector>
 #include <string_view>
 #include <sstream>
+#include <span>
 #include <absl/types/variant.h>
 
 #include "Helpers/Macros.hh"
@@ -100,6 +101,15 @@ namespace mana {
             CHECK(kind == Type::kIdentifier);
 
             return std::get<std::string_view>(value) == str;
+        }
+
+        inline bool match(std::span<std::string_view> array) const
+        {
+            for (auto& str : array)
+                if (match(str))
+                    return true;
+
+            return false;
         }
     };
     
