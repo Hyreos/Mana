@@ -32,7 +32,7 @@ public:
                     auto value = str.substr(vsepp + 1);
 
                     if (arg == "file" || arg == "f") {
-                        auto& file = value;
+                        auto& file = value; 
 
                         std::ifstream f { std::string(file), std::ios::ate };
 
@@ -51,17 +51,11 @@ public:
                         
                         f.read(&data[0], data.size());
 
-                        std::cout << "[@] Generating..." << std::endl;
-
                         auto parser = mana::Parser();
 
                         parser.registerErrorCallback(LogParserError);
 
-                        std::cout << "AWAWAAWA" << std::endl;
-
                         parser.parse(data); 
-
-                        std::cout << "[@] Done." << std::endl;
                     }
                 }
             }

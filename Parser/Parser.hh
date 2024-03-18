@@ -26,6 +26,7 @@
 
 #include <queue>
 #include <stack>
+#include <span>
 
 #include "Lexer.hh"
 
@@ -121,9 +122,9 @@ namespace mana {
 
         void doParse();
 
-        Result<const ast::Expression*> expectExpression(bool isExpr = false);
+        Result<const ast::Expression*> expectExpression();
 
-        Result<const ast::Expression*> expectGroup(bool isExpr = false);
+        Result<const ast::Expression*> expectGroup();
 
         Result<const ast::Expression*> expression();
 
@@ -132,6 +133,8 @@ namespace mana {
         Result<const ast::Attribute*> attribute();
 
         Result<std::vector<const ast::Attribute*>> attributes();
+
+        Result<std::vector<const ast::Expression*>> expressionList();
 
         Result<const ast::IdentifierExpression*> identifierExpression();
 
@@ -143,11 +146,7 @@ namespace mana {
 
         Result<const ast::ImportDeclaration*> importDeclaration(const std::vector<const ast::Attribute*> attributes);
 
-        Result<const ast::Expression*> parseExpression1(
-            const ast::Expression* lhs,
-            size_t min_precedence,
-            bool isExpr = false
-        );
+        Result<const ast::Expression*> parseExpression1(const ast::Expression* lhs, size_t min_precedence);
 
         void globalDeclaration();
 
@@ -158,16 +157,36 @@ namespace mana {
         {
             auto r = f(std::forward<Args>(args)...);
 
+            uint64_t parenCount { 0ull }, bracketCount { 0ull };
+
             if (!r.ok())
-                while (!match(sync_token, false, false) && !match(Token::Type::kEOF, false, false))
-                    advance();
+                while (continueParsing()) {
+                    if (sync_token == Token::Type::kLeftParen && match(Token::Type::kLeftParen)) {
+                        parenCount++;
+                        continue;
+                    } else if (sync_token == Token::Type::kLeftBracket && match(Token::Type::kLeftBracket)) {
+                        bracketCount++;
+                        continue;
+                    }
+
+                    if (match(Token::Type::kRightParen)) {
+                        if (parenCount > 0) parenCount--;
+
+                        if (sync_token == Token::Type::kRightParen) break;
+                    } else if (match(Token::Type::kRightBracket)) {
+                        if (bracketCount > 0) bracketCount--;
+
+                        if (sync_token == Token::Type::kRightBracket) break;
+                    } else if (match(sync_token)) break;
+                    else advance();
+                }
 
             return r;
         }
 
         bool continueParsing();
 
-        bool isOperator(const Token& tok, bool isWithinExpr);
+        bool isOperator(const Token& tok);
 
         Associativity getAssociativity(const Token& tk);
 
@@ -178,6 +197,8 @@ namespace mana {
         const Token* match(std::string_view str, bool skip_ws = true, bool skip_lnbrks = true);
 
         const Token* match(Token::Type token_type, bool skip_ws = true, bool skip_lnbrks = true);
+
+        const Token* match(std::span<std::string_view> list, bool skip_ws = true, bool skip_lnbrks = true);
 
         bool skipLinebreaks();
 

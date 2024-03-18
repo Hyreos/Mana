@@ -51,12 +51,12 @@ namespace mana {
 
         absl::variant<std::string_view, double, int64_t> value;
 
-        inline const std::string asString() const
+        inline const std::string asStr() const
         {
-            return std::string(asStringView());
+            return std::string(asStrView());
         }
 
-        inline const std::string_view& asStringView() const
+        inline const std::string_view& asStrView() const
         {
             CHECK(kind == Type::kIdentifier || kind == Type::kStrLit);
             

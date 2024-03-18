@@ -27,15 +27,6 @@ namespace mana {
         std::vector<std::unique_ptr<ast::TreeNode>> tr_nodes;
         
         doParse();
-
-        std::ostream& stream { std::cout };
-
-        stream << "AST Print:" << std::endl;
-
-        for (auto& it : tr_nodes) {
-            it->print(stream, 0);
-            stream << std::endl;
-        }
     }
 
     size_t Parser::getPrecedence(const Token& tk) {
@@ -104,17 +95,17 @@ namespace mana {
         return Failure::kNoMatch;
     }
 
-    Result<const ast::Expression*> Parser::expectExpression(bool isExpr) {
+    Result<const ast::Expression*> Parser::expectExpression() {
         auto result = primaryExpression();
 
         if (!result.matched || result.errored) return Failure::kError;
 
-        result = parseExpression1(result.unwrap(), 0ull, isExpr);
+        result = parseExpression1(result.unwrap(), 0ull);
 
         return result;
     }
 
-    bool Parser::isOperator(const Token& tok, bool isWithinExpr)
+    bool Parser::isOperator(const Token& tok)
     {
         switch (tok.kind) {
             case Token::Type::kAsterisk:
@@ -123,9 +114,6 @@ namespace mana {
             case Token::Type::kMinus:
             case Token::Type::kDualColon:
                 return true;
-            case Token::Type::kComma:
-                if (isWithinExpr) return true;
-                else MANA_FATAL_NO_RETURN("COMMA IS NOT AN OPERATOR");
             default:
                 return false;
         }
@@ -135,16 +123,15 @@ namespace mana {
 
     Result<const ast::Expression*> Parser::parseExpression1(
         const ast::Expression* lhs,
-        size_t min_precedence,
-        bool isExpr
+        size_t min_precedence
     )
     {
         auto* lookahead = peek(1);
 
-        if (lookahead && isOperator(*lookahead, isExpr)) {
+        if (lookahead && isOperator(*lookahead)) {
             MANA_CHECK_MAYBE_RETURN(lookahead, "Trying to consume end of stream.");
 
-            while (lookahead && isOperator(*lookahead, isExpr) && getPrecedence(*lookahead) >= min_precedence) {
+            while (lookahead && isOperator(*lookahead) && getPrecedence(*lookahead) >= min_precedence) {
                 auto op = lookahead;
 
                 advance();
@@ -160,7 +147,7 @@ namespace mana {
                 lookahead = peek(1);
 
                 while (lookahead && (
-                    isOperator(*lookahead, isExpr) 
+                    isOperator(*lookahead) 
                     && (getPrecedence(*lookahead) >= getPrecedence(*op) 
                             || (getAssociativity(*lookahead) == Associativity::kRight 
                                     && getPrecedence(*lookahead) == getPrecedence(*op)))
@@ -168,8 +155,7 @@ namespace mana {
                 {
                     auto rhs_expr2 = parseExpression1(
                         rhs,
-                        getPrecedence(*op) + ((getPrecedence(*lookahead) > getPrecedence(*op)) ? 1 : 0),
-                        isExpr
+                        getPrecedence(*op) + ((getPrecedence(*lookahead) > getPrecedence(*op)) ? 1 : 0)
                     );
 
                     if (rhs_expr2.errored || !rhs_expr2.matched) {
@@ -231,7 +217,7 @@ namespace mana {
                     } break;
 
                     default:
-                        MANA_FATAL_NO_RETURN("Invalid operator type.");
+                        return Failure::kError;
                 }
             }
 
@@ -239,6 +225,30 @@ namespace mana {
         } else {
             return lhs;
         }
+    }
+
+    Result<std::vector<const ast::Expression*>> Parser::expressionList()
+    {
+        std::vector<const ast::Expression*> expression_list;
+
+        for (size_t i = 0; continueParsing(); i++) {
+            if (i > 0)
+                if (!match(Token::Type::kComma)) {
+                    std::cerr << "missing ',' when parsing expression list." << std::endl;
+                    
+                    return Failure::kError;
+                }
+
+            auto expr = expression();
+
+            if (!expr.matched) break;
+
+            if (expr.errored) return Failure::kError;
+
+            expression_list.push_back(expr.value);
+        }
+
+        return expression_list;
     }
 
     Result<std::vector<const ast::Attribute*>> Parser::attributes()
@@ -266,7 +276,7 @@ namespace mana {
                 tok->asInteger()
             );
         else if (auto* tok = match(Token::Type::kStrLit))
-            return m_ctx.create<ast::StringLiteralExpression>(tok->asString());
+            return m_ctx.create<ast::StringLiteralExpression>(tok->asStr());
         else if (auto* tok = match("true")) 
             return m_ctx.create<ast::BoolLiteralExpression>(true);
         else if (auto* tok = match("false"))
@@ -279,8 +289,7 @@ namespace mana {
     {
         auto* token = match(Token::Type::kIdentifier);
 
-        if (token)
-            return m_ctx.create<ast::IdentifierExpression>(token->asString());
+        if (token) return m_ctx.create<ast::IdentifierExpression>(token->asStr());
 
         return Failure::kNoMatch;
     }
@@ -291,9 +300,8 @@ namespace mana {
             if (match("cc")) {
                 // 'cc' does not accept any parameters.
                 // TODO: This is dumb, check using some other function to parse an expression list.
-                if (match(Token::Type::kLeftParen) && !match(Token::Type::kRightParen)) {
+                if (match(Token::Type::kLeftParen) && !match(Token::Type::kRightParen))
                     return Failure::kError;
-                }
                 
                 return m_ctx.create<ast::CCAttribute>();
             }
@@ -317,21 +325,18 @@ namespace mana {
     Result<const ast::UnaryExpression*> Parser::unaryExpression()
     {
         if (match(Token::Type::kMinus)) {
-            
         } else if (match(Token::Type::kPlus)) {
-
         }
 
-        return {};
+        return Failure::kNoMatch;
     }
 
-    Result<const ast::Expression*> Parser::expectGroup(bool isExpr)
+    Result<const ast::Expression*> Parser::expectGroup()
     {
         if (match(Token::Type::kLeftParen)) {
             auto expr = expectExpression();
 
             if (!match(Token::Type::kRightParen)) {
-                // Handle error here
                 return Failure::kError;
             }
 
@@ -346,16 +351,14 @@ namespace mana {
     )
     {
         bool is_component_exported = false;
+        if (match("export")) is_component_exported = true;
 
-        if (match("export"))
-            is_component_exported = true;
-
-        if (!match("component")) return {};
+        if (!match("component")) return Failure::kNoMatch;
 
         auto decl_name = match(Token::Type::kIdentifier);
 
         if (!decl_name) {
-            // TODO: Add error message here                
+            std::cerr << "missing identifier when declaring a component name." << std::endl;
             return Failure::kError;
         }
 
@@ -367,14 +370,12 @@ namespace mana {
 
                 if (inh.errored) return Failure::kError;
 
-                if (inh.matched)
-                    inheritances.push_back(inh.unwrap());
+                if (inh.matched) inheritances.push_back(inh.unwrap());
             } while (match(Token::Type::kComma));
         }
 
         if (!match(Token::Type::kLeftBracket)) {
             std::cerr << "missing token '{' in component declaration." << std::endl;
-            
             return Failure::kError;
         }
 
@@ -407,11 +408,10 @@ namespace mana {
 
                 if (!prop_name) {
                     std::cerr << "missing identifier after '->' in cross language alias." << std::endl;
-
                     return Failure::kError;
                 }
 
-                    la = prop_name->asString();
+                la = prop_name->asStr();
             }
 
             const ast::Expression* field_default_value;
@@ -430,7 +430,7 @@ namespace mana {
 
                     if (field_name->match(member->name())) {
                         std::cerr << "error when declaring member, identifier '" 
-                            << field_name->asString() << "' already exists in this component." << std::endl;
+                            << field_name->asStr() << "' already exists in this component." << std::endl;
                         return Failure::kError;
                     }
                 }
@@ -443,7 +443,7 @@ namespace mana {
             members.push_back(
                 m_ctx.create<ast::MemberDeclaration>(
                     std::move(vuw),
-                    field_name->asString(),
+                    field_name->asStr(),
                     std::move(field_default_value),
                     is_optional,
                     attrs
@@ -452,7 +452,7 @@ namespace mana {
         }
 
         auto comp_decl = m_ctx.create<ast::ComponentDeclaration>(
-            decl_name->asString(),
+            decl_name->asStr(),
             std::move(members),
             std::move(inheritances),
             is_component_exported,
@@ -480,7 +480,7 @@ namespace mana {
                     return Failure::kError;
                 }
 
-                pathlist.push_back(path->asString());
+                pathlist.push_back(path->asStr());
             }
         } else {
             const Token* next = match(Token::Type::kStrLit);
@@ -490,7 +490,7 @@ namespace mana {
                 return Failure::kError;
             }
 
-            pathlist.push_back(next->asString());
+            pathlist.push_back(next->asStr());
         }
 
         return m_ctx.create<ast::ImportDeclaration>(
@@ -536,11 +536,11 @@ namespace mana {
                 return id;
             }
 
-            return {};
+            return Failure::kNoMatch;
         });
 
         if (import_decl.matched) {
-            return import_decl->print(std::cout, 0);
+            import_decl->print(std::cout, 0);
         }
     }
 
@@ -580,6 +580,16 @@ namespace mana {
             advance(1, skip_ws, skip_lnbrks);
 
             return token;
+        }
+
+        return nullptr;
+    }
+
+    const Token* Parser::match(std::span<std::string_view> list, bool skip_ws, bool skip_lnbrks)
+    {
+        for (auto& str : list) {
+            if (auto tok = match(str, skip_ws, skip_lnbrks))
+                return tok;
         }
 
         return nullptr;
