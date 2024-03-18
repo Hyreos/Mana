@@ -9,7 +9,7 @@ import (
     "glm/glm.hpp"
 )
 
-@cc(666)
+@cc(556565)
 component A {
     @cc str? p1 = 78
 }

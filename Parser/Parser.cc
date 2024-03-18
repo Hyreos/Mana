@@ -245,7 +245,9 @@ namespace mana {
 
             auto expr = expression();
 
-            if (expr.errored || !expr.matched) return Failure::kError;
+            if (expr.errored) return Failure::kError;
+
+            if (!expr.matched) break;
 
             expression_list.push_back(expr.value);
         }
