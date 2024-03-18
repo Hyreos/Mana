@@ -11,5 +11,5 @@ component K {
 
 @serffialize()
 component K {
-    f32 teste = 66
+    f32 teste 555 = 66
 }

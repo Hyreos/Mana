@@ -319,7 +319,7 @@ namespace mana {
             auto name_token = match(kAttributeList);
 
             if (!name_token) {
-                error("unrecognized attribute '" + peek(1)->toString() + "'.");
+                error("unrecognized attribute '@" + peek(1)->toString() + "'.");
                 
                 return Failure::kError;
             }
@@ -420,14 +420,20 @@ namespace mana {
             do {
                 auto inh = identifierExpression();
 
-                if (inh.errored) return Failure::kError;
+                if (inh.errored) {
+                    error("expected an identifier when parsing inheritances of component.");;
+                    
+                    return Failure::kError;
+                }
 
-                if (inh.matched) inheritances.push_back(inh.unwrap());
+                if (inh.matched) 
+                    inheritances.push_back(inh.unwrap());
             } while (match(Token::Type::kComma));
         }
 
         if (!match(Token::Type::kLeftBracket)) {
             error("missing token '{' in component declaration.");
+
             return Failure::kError;
         }
 
@@ -441,15 +447,21 @@ namespace mana {
 
             auto type = identifierExpression();
 
-            if (type.errored || !type.matched) return Failure::kError;
+            if (type.errored || !type.matched) {
+                error("missing type when declaring a component property.");
+
+                return Failure::kError;
+            }
 
             bool is_optional = false;
-            if (match(Token::Type::kQuestion)) is_optional = true;
+            
+            if (match(Token::Type::kQuestion)) 
+                is_optional = true;
 
             auto* field_name = match(Token::Type::kIdentifier);
 
             if (!field_name) {
-                error("missing identifier in field name.");
+                error("missing name identifier when declaring a component property.");
 
                 return Failure::kError;
             }
@@ -473,8 +485,9 @@ namespace mana {
             if (match(Token::Type::kEqual)) {
                 auto expr = expectExpression();
 
-                if (expr.errored) return Failure::kError;
-
+                if (expr.errored)
+                    return Failure::kError;
+                
                 field_default_value = expr.unwrap();
             }
 
@@ -573,11 +586,15 @@ namespace mana {
         auto decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ComponentDeclaration*> {   
             auto cd = componentDeclaration(attribute_list.value);
 
+            if (cd.errored) error("error while parsing a component declaration.");
+
             return cd;
         });
 
         auto import_decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ImportDeclaration*> {
             auto id = importDeclaration(attribute_list.value);
+
+            if (id.errored) error("error while parsing an import declaration.");
 
             return id;
         });
