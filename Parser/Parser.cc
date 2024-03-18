@@ -55,6 +55,7 @@ namespace mana {
             default:
                 return 0;
         }
+        unreachable();
     }
 
     Parser::Associativity Parser::getAssociativity(const Token& tk) {
