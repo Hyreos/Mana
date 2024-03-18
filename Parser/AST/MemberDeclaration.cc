@@ -29,7 +29,10 @@ namespace mana::ast {
 
     void MemberDeclaration::print(std::ostream& stream, size_t ident) const
     {
-        TreeNode::print(stream, ident);
+        for (auto& attribute : m_attributes) {
+            attribute->print(stream, ident);
+            stream << " ";
+        }
 
         m_type->print(stream, ident);
 

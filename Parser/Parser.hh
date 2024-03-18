@@ -139,9 +139,9 @@ namespace mana {
 
         Result<const ast::UnaryExpression*> unaryExpression();
 
-        Result<const ast::ComponentDeclaration*> componentDeclaration();
+        Result<const ast::ComponentDeclaration*> componentDeclaration(const std::vector<const ast::Attribute*> attributes);
 
-        Result<const ast::ImportDeclaration*> importDeclaration();
+        Result<const ast::ImportDeclaration*> importDeclaration(const std::vector<const ast::Attribute*> attributes);
 
         Result<const ast::Expression*> parseExpression1(
             const ast::Expression* lhs,
@@ -152,8 +152,6 @@ namespace mana {
         void globalDeclaration();
 
         bool isQualifier(Token tok) const;
-
-        void checkAttribute();
 
         template<class Fn, typename... Args>
         auto sync(Token::Type sync_token, Fn&& f, Args&&... args)

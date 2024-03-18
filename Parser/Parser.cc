@@ -249,8 +249,9 @@ namespace mana {
 
             if (a.errored) return Failure::kError;
 
-            if (a.matched) attrs.push_back(a.unwrap());
-            else break;
+            if (a.matched) {  
+                attrs.push_back(a.unwrap());
+            } else break;
         }
 
         return attrs;
@@ -339,14 +340,11 @@ namespace mana {
         return {};
     }
 
-    Result<const ast::ComponentDeclaration*> Parser::componentDeclaration()
+    Result<const ast::ComponentDeclaration*> Parser::componentDeclaration(
+        const std::vector<const ast::Attribute*> attributes_list
+    )
     {
         bool is_component_exported = false;
-
-        auto component_attrs = attributes();
-
-        if (component_attrs.errored)
-            return Failure::kError;
 
         if (match("export"))
             is_component_exported = true;
@@ -457,14 +455,16 @@ namespace mana {
             std::move(members),
             std::move(inheritances),
             is_component_exported,
-            component_attrs.unwrap()
+            attributes_list
         );
         
         return comp_decl;
     }
 
-    Result<const ast::ImportDeclaration*> Parser::importDeclaration() {
-        if (!match("import")) return {};
+    Result<const ast::ImportDeclaration*> Parser::importDeclaration(
+        const std::vector<const ast::Attribute*> attribute_list
+    ) {
+        if (!match("import")) return Failure::kNoMatch;
         
         bool is_cc = false;
                                                 
@@ -475,16 +475,11 @@ namespace mana {
                 auto* path = match(Token::Type::kStrLit);
 
                 if (!path) {
-                    // TODO: Handle error here
+                    std::cerr << "missing string literal in an import declaration.";
                     return Failure::kError;
                 }
 
                 pathlist.push_back(path->asString());
-            }
-
-            if (!match(Token::Type::kRightParen)) {
-                // TODO: Handle error here.
-                return Failure::kError;
             }
         } else {
             const Token* next = match(Token::Type::kStrLit);
@@ -499,7 +494,8 @@ namespace mana {
 
         return m_ctx.create<ast::ImportDeclaration>(
             std::move(pathlist),
-            is_cc
+            is_cc,
+            attribute_list
         );
     }
 
@@ -510,8 +506,10 @@ namespace mana {
 
     void Parser::globalDeclaration()
     {
+        auto attribute_list = attributes();
+
         auto decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ComponentDeclaration*> {   
-            auto cd = componentDeclaration();
+            auto cd = componentDeclaration(attribute_list.value);
 
             if (cd.errored) 
                 return Failure::kError;
@@ -527,7 +525,7 @@ namespace mana {
         }
 
         auto import_decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ImportDeclaration*> {
-            auto id = importDeclaration();
+            auto id = importDeclaration(attribute_list.value);
 
             if (id.errored)
                 return Failure::kError;
@@ -545,25 +543,6 @@ namespace mana {
         }
     }
 
-    void Parser::checkAttribute()
-    {
-        auto as = attributes();
-
-        /*if (as.empty()) return;*/
-
-        auto nxt = componentDeclaration();
-
-        if (nxt.errored) {
-            // TODO: Handle error here
-            return;
-        }
-
-        /*if (nxt.matched) {
-            for (auto& a : as) 
-                nxt->addAttribute(std::move(a));
-        }*/
-    }
-    
     void Parser::doParse()
     {
 #       ifdef MANA_IS_VERBOSE
@@ -574,8 +553,6 @@ namespace mana {
 
         while (continueParsing()) {
             globalDeclaration();
-
-            //checkAttribute();
         }
     }
 

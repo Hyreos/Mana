@@ -2,22 +2,28 @@
 
 namespace mana::ast {
     ImportDeclaration::ImportDeclaration(
-        std::vector<std::filesystem::path> pathlist,
-        bool iscc
+        const std::vector<std::filesystem::path>& pathlist,
+        bool iscc,
+        const std::vector<const Attribute*>& attributes
     ) 
         : m_pathlist{ std::move(pathlist) },
-            m_isCc { iscc }
+            m_isCc { iscc },
+            m_attributes { attributes }
     {
     }
 
     const ImportDeclaration* ImportDeclaration::clone(CloneContext& ctx) const
     {
-        return ctx.create<ImportDeclaration>(m_pathlist, m_isCc);
+        return ctx.create<ImportDeclaration>(m_pathlist, m_isCc, ctx.clone(m_attributes));
     }
 
     void ImportDeclaration::print(std::ostream& stream, size_t ident) const
     {
-        TreeNode::print(stream, ident);
+        for (auto* attr : m_attributes) {
+            attr->print(stream, ident);
+
+            stream << " ";
+        }
 
         stream << "import ("<< std::endl;
 

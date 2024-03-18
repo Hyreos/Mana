@@ -1,4 +1,15 @@
+import (
+    "test/test1"
+    "test/test3"
+)
+
+@cc import "module/file.mn"
+
+@cc import (
+    "glm/glm.hpp"
+)
+
 @cc
 component A {
-    str? p1 = 78
+    @cc str? p1 = 78
 }
