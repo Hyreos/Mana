@@ -2,20 +2,17 @@
 
 namespace mana::ast {
     // Readonly Qualifier
-    ReadonlyQualifier::ReadonlyQualifier(const Declaration* declaration) 
-        : m_declaration { declaration }
+    ReadonlyQualifier::ReadonlyQualifier() 
     {
     }
 
     const ReadonlyQualifier* ReadonlyQualifier::clone(CloneContext& ctx) const
     {
-        return ctx.create<ReadonlyQualifier>(ctx.clone(m_declaration));
+        return ctx.create<ReadonlyQualifier>();
     }
 
     void ReadonlyQualifier::print(std::ostream& stream, size_t ident) const
     {
-        stream << "readonly ";
-
-        m_declaration->print(stream, ident);
+        stream << "readonly";
     }
 }

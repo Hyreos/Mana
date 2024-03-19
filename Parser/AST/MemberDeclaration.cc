@@ -6,13 +6,15 @@ namespace mana::ast {
         const std::string& name,
         const Expression* defaultValue,
         bool isOptional,
-        const std::vector<const Attribute*> attributes
+        const std::vector<const Attribute*> attributes,
+        const std::vector<const Qualifier*> qualifiers
     ) 
         : m_name{ name },
             m_type{ std::move(type) },
             m_default { std::move(defaultValue) },
             m_optional { isOptional },
-            m_attributes { attributes }
+            m_attributes { attributes },
+            m_qualifiers { qualifiers }
     {
     }
 
@@ -23,12 +25,18 @@ namespace mana::ast {
             m_name,
             ctx.clone(m_default),
             m_optional,
-            ctx.clone(m_attributes)
+            ctx.clone(m_attributes),
+            ctx.clone(m_qualifiers)
         );
     }
 
     void MemberDeclaration::print(std::ostream& stream, size_t ident) const
     {
+        for (auto& qualifier : m_qualifiers) {
+            qualifier->print(stream, ident);
+            stream << " ";
+        }
+
         for (auto& attribute : m_attributes) {
             attribute->print(stream, ident);
             stream << " ";

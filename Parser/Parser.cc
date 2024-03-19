@@ -382,14 +382,29 @@ namespace mana {
         return Failure::kNoMatch;
     }
 
-    bool Parser::isQualifier(Token tok) const
+    Result<std::vector<const ast::Qualifier*>> Parser::qualifiers()
     {
         static std::array<std::string_view, 2> kQualifiers = {{
             "readonly",
             "export"
         }};
 
-        return tok.match(kQualifiers);
+        std::vector<const ast::Qualifier*> qualifier_list;
+
+        while (continueParsing()) {
+            auto qualifier_name = match(kQualifiers);
+
+            if (qualifier_name) {
+                if (qualifier_name->match("readonly"))
+                    qualifier_list.push_back(m_ctx.create<ast::ReadonlyQualifier>());
+                else if (qualifier_name->match("export"))
+                    qualifier_list.push_back(m_ctx.create<ast::ExportQualifier>());
+                else error("unimplemented qualifier.");
+            } else break;
+        }
+
+        if (qualifier_list.size() > 0) return qualifier_list;
+        else return Failure::kNoMatch;
     }
 
     Result<const ast::UnaryExpression*> Parser::unaryExpression()
@@ -459,9 +474,29 @@ namespace mana {
 
         while (!match(Token::Type::kRightBracket)) {
             std::vector<const ast::Attribute*> attrs;
-            
-            if (auto a = attributes(); a.matched)
-                attrs = a.unwrap();
+            std::vector<const ast::Qualifier*> quals;
+
+            while (continueParsing()) {
+                bool go_out = true;
+
+                auto al = attributes();
+
+                if (al.matched)
+                    for (auto& a : al.value) { 
+                        attrs.push_back(a);
+                        go_out = false;
+                    }
+
+                auto qualifier_list = qualifiers();
+
+                if (qualifier_list.matched)
+                    for (auto& q : qualifier_list.value) {
+                        quals.push_back(q);
+                        go_out = false;
+                    }
+
+                if (go_out) break;
+            }
 
             auto type = expectIdentifierExpression();
 
@@ -547,7 +582,8 @@ namespace mana {
                     field_name->asStr(),
                     std::move(field_default_value),
                     is_optional,
-                    attrs
+                    attrs,
+                    quals
                 )
             );
         }
@@ -563,9 +599,7 @@ namespace mana {
         return comp_decl;
     }
 
-    Result<const ast::ImportDeclaration*> Parser::importDeclaration(
-        const std::vector<const ast::Attribute*> attribute_list
-    ) {
+    Result<const ast::ImportDeclaration*> Parser::importDeclaration(const std::vector<const ast::Attribute*> attribute_list) {
         if (!match("import")) return Failure::kNoMatch;
         
         bool is_cc = false;

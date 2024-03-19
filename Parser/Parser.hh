@@ -21,6 +21,8 @@
 #include "AST/UnaryExpression.hh"
 #include "AST/CCAttribute.hh"
 #include "AST/SerializeAttribute.hh"
+#include "AST/ExportQualifier.hh"
+#include "AST/ReadonlyQualifier.hh"
 
 #include "Helpers/Deleted.hh"
 #include "Helpers/Macros.hh"
@@ -152,6 +154,8 @@ namespace mana {
 
         Result<std::vector<const ast::Attribute*>> attributes();
 
+        Result<std::vector<const ast::Qualifier*>> qualifiers();
+
         Result<std::vector<const ast::Expression*>> expectExpressionList();
 
         Result<std::vector<const ast::Expression*>> expressionList();
@@ -171,8 +175,6 @@ namespace mana {
         Result<const ast::Expression*> parseExpression1(const ast::Expression* lhs, size_t min_precedence);
 
         void globalDeclaration();
-
-        bool isQualifier(Token tok) const;
 
         template<class Fn, typename... Args>
         auto sync(Token::Type sync_token, Fn&& f, Args&&... args)

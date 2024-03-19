@@ -3,6 +3,7 @@
 #include "Declaration.hh"
 #include "IdentifierExpression.hh"
 #include "Attribute.hh"
+#include "Qualifier.hh"
 
 #include <optional>
 #include <string>
@@ -16,7 +17,8 @@ namespace mana::ast {
             const std::string& name,
             const Expression* defaultValue,
             bool isOptional,
-            const std::vector<const Attribute*> attributes 
+            const std::vector<const Attribute*> attributes,
+            const std::vector<const Qualifier*> qualifiers
         );
 
         const MemberDeclaration* clone(CloneContext& ctx) const override;
@@ -30,6 +32,7 @@ namespace mana::ast {
         const IdentifierExpression* m_type;
         const Expression* m_default;
         const std::vector<const Attribute*> m_attributes;
+        const std::vector<const Qualifier*> m_qualifiers;
     };
 }
 

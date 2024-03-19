@@ -15,6 +15,6 @@ component K {
 @serialize(48, 66, 77)
 @serfffialize()
 component K {
-    @cc() f32 teste = 55 + 88 / 87 * 55 + 232 * 55 / 4 / 5 / 6
+    @cc() readonly f32 teste = 55 + 88 / 87 * 55 + 232 * 55 / 4 / 5 / 6
 }
 
