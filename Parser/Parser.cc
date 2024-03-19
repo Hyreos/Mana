@@ -434,6 +434,15 @@ namespace mana {
         return Failure::kNoMatch;
     }
 
+    Result<const ast::LiteralExpression*> Parser::expectLiteral()
+    {
+        auto lit = literal();
+
+        if (!lit.matched) return Failure::kError;
+
+        return lit;
+    }
+
     Result<const ast::EnumDeclaration*> Parser::enumDeclaration(const std::vector<const ast::Attribute*> _attributes)
     {
         if (match("enum")) {
@@ -472,10 +481,13 @@ namespace mana {
                 const ast::Expression* assign_expression = nullptr;
 
                 if (match(Token::Type::kEqual)) {
-                    auto expr = expectExpression();
+                    auto expr = expectLiteral();
 
-                    if (expr.errored) 
+                    if (expr.errored) {
+                        error("missing literal in enum entry.");
+                        
                         return Failure::kError;
+                    }
 
                     assign_expression = expr.unwrap();
                 }

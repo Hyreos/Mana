@@ -162,6 +162,8 @@ namespace mana {
 
         Result<std::vector<const ast::Expression*>> expressionList();
 
+        Result<const ast::LiteralExpression*> expectLiteral();
+
         Result<const ast::IdentifierExpression*> expectIdentifierExpression();
 
         Result<const ast::IdentifierExpression*> identifierExpression();
