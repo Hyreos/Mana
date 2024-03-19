@@ -885,6 +885,7 @@ namespace mana {
             if ((*m_lexer)[m_tokenIdx].kind == Token::Type::kWS)
                 if (skip_ws) {
                     m_tokenIdx++;
+                    
                     continue;
                 }
 

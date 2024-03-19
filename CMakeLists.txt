@@ -91,25 +91,25 @@ endif()
 
 target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/Lexer.cc
-                                        Parser/AST/ExportQualifier.cc
-                                        Parser/AST/ReadonlyQualifier.cc
-                                        Parser/AST/CCAttribute.cc
-                                        Parser/AST/SerializeAttribute.cc
-                                        Parser/AST/BinaryExpression.cc
-                                        Parser/AST/BoolLiteralExpression.cc
-                                        Parser/AST/ComponentDeclaration.cc
-                                        Parser/AST/FloatLiteralExpression.cc
-                                        Parser/AST/GroupExpression.cc
-                                        Parser/AST/EnumDeclaration.cc
-                                        Parser/AST/EntryDeclaration.cc
-                                        Parser/AST/IdentifierExpression.cc
-                                        Parser/AST/ImportDeclaration.cc
-                                        Parser/AST/IntegerLiteralExpression.cc
-                                        Parser/AST/MemberDeclaration.cc
-                                        Parser/AST/StringLiteralExpression.cc
-                                        Parser/AST/TreeNode.cc
-                                        Parser/AST/TypeDeclaration.cc
-                                        Parser/AST/UnaryExpression.cc
+                                        AST/ExportQualifier.cc
+                                        AST/ReadonlyQualifier.cc
+                                        AST/CCAttribute.cc
+                                        AST/SerializeAttribute.cc
+                                        AST/BinaryExpression.cc
+                                        AST/BoolLiteralExpression.cc
+                                        AST/ComponentDeclaration.cc
+                                        AST/FloatLiteralExpression.cc
+                                        AST/GroupExpression.cc
+                                        AST/EnumDeclaration.cc
+                                        AST/EntryDeclaration.cc
+                                        AST/IdentifierExpression.cc
+                                        AST/ImportDeclaration.cc
+                                        AST/IntegerLiteralExpression.cc
+                                        AST/MemberDeclaration.cc
+                                        AST/StringLiteralExpression.cc
+                                        AST/TreeNode.cc
+                                        AST/TypeDeclaration.cc
+                                        AST/UnaryExpression.cc
                                         Utils/RTTI.cc)
 
 if (MANA_BUILD_CLI)
