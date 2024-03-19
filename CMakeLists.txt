@@ -91,7 +91,6 @@ endif()
 
 target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/Lexer.cc
-                                        Parser/AST/CloneContext.cc
                                         Parser/AST/CCAttribute.cc
                                         Parser/AST/SerializeAttribute.cc
                                         Parser/AST/BinaryExpression.cc

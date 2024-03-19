@@ -728,7 +728,7 @@ namespace mana {
         m_tokenIdx++;
 
         while (off != 0 && m_tokenIdx < m_lexer->size()) {
-            m_stats.columnIndex += 1;//(*m_lexer)[m_tokenIdx].value.size();
+            m_stats.columnIndex +=(*m_lexer)[m_tokenIdx].toString().size();
 
             if ((*m_lexer)[m_tokenIdx].kind == Token::Type::kWS)
                 if (skip_ws) {
