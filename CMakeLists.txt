@@ -91,6 +91,8 @@ endif()
 
 target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/Lexer.cc
+                                        Parser/AST/ExportQualifier.cc
+                                        Parser/AST/ReadonlyQualifier.cc
                                         Parser/AST/CCAttribute.cc
                                         Parser/AST/SerializeAttribute.cc
                                         Parser/AST/BinaryExpression.cc
@@ -102,7 +104,6 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/AST/ImportDeclaration.cc
                                         Parser/AST/IntegerLiteralExpression.cc
                                         Parser/AST/MemberDeclaration.cc
-                                        Parser/AST/Qualifier.cc
                                         Parser/AST/StringLiteralExpression.cc
                                         Parser/AST/TreeNode.cc
                                         Parser/AST/TypeDeclaration.cc
