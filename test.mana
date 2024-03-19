@@ -10,11 +10,10 @@ component K {
     f32 teste = 66
 }
 
-
-@afejgeiojgi()
-@serialize(48, 66, 77)
+@serialize(0xFF, 0X1)
+@serialize(0xFFFFFFFul)
 @serfffialize()
-component K {
+component K3 {
     @cc() readonly f32 teste = 55 + 88 / 87 * 55 + 232 * 55 / 4 / 5 / 6
 }
 

@@ -274,13 +274,16 @@ namespace mana {
         std::vector<const ast::Attribute*> attrs;
 
         while (continueParsing()) {
-            auto a = attribute();
+            auto a = sync(Token::Type::kRightParen, [&]() -> Result<const ast::Attribute*> {
+                auto a = attribute();
 
-            if (a.errored) return Failure::kError;
+                if (a.errored) return Failure::kError;
 
-            if (a.matched) {  
-                attrs.push_back(a.unwrap());
-            } else break;
+                return a;
+            });
+
+            if (!a.matched && !a.errored) break;
+            else if (a.matched) attrs.push_back(a.unwrap());
         }
 
         return attrs;
