@@ -146,6 +146,8 @@ namespace mana {
 
         Result<const ast::Expression*> primaryExpression();
 
+        Result<const ast::Expression*> expectPrimaryExpression();
+
         Result<const ast::Attribute*> attribute();
 
         Result<std::vector<const ast::Attribute*>> attributes();
@@ -153,6 +155,8 @@ namespace mana {
         Result<std::vector<const ast::Expression*>> expectExpressionList();
 
         Result<std::vector<const ast::Expression*>> expressionList();
+
+        Result<const ast::IdentifierExpression*> expectIdentifierExpression();
 
         Result<const ast::IdentifierExpression*> identifierExpression();
 

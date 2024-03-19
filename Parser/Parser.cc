@@ -67,17 +67,18 @@ namespace mana {
 
     Result<const ast::Expression*> Parser::primaryExpression()
     {
-        auto expr = expression();
+        auto expression = literal();
 
-        if (expr.errored) {
-            return Failure::kError;
-        } 
+        return expression;
+    }
 
-        if (expr.matched) {
-            return expr;
-        }
+    Result<const ast::Expression*> Parser::expectPrimaryExpression()
+    {
+        auto expression = primaryExpression();
+    
+        if (!expression.matched) return Failure::kError;
 
-        return Failure::kNoMatch;
+        return expression;
     }
 
     const std::vector<Parser::Error>& Parser::errorList() const
@@ -87,26 +88,24 @@ namespace mana {
 
     Result<const ast::Expression*> Parser::expression()
     {
-        auto lit = literal();
+        auto result = primaryExpression();
 
-        if (lit.errored) {
-            return Failure::kError;
+        if (result.matched) {
+            auto next = peek(1);
+
+            if (next && isOperator(*next)) {
+                result = parseExpression1(result.unwrap(), 0ull);
+            }
         }
 
-        if (lit.matched) {
-            return lit;
-        }
-
-        return Failure::kNoMatch;
+        return result;
     }
 
     Result<const ast::Expression*> Parser::expectExpression() 
     {
-        auto result = primaryExpression();
+        auto result = expression();
 
-        if (!result.matched || result.errored) return Failure::kError;
-
-        result = parseExpression1(result.unwrap(), 0ull);
+        if (!result.matched) return Failure::kError;
 
         return result;
     }
@@ -139,101 +138,105 @@ namespace mana {
     {
         auto* lookahead = peek(1);
 
-        if (lookahead && isOperator(*lookahead)) {
-            while (lookahead && isOperator(*lookahead) && getPrecedence(*lookahead) >= min_precedence) {
-                auto op = lookahead;
+        if (!lookahead) return lhs;
 
-                advance();
+        while (lookahead && isOperator(*lookahead) && getPrecedence(*lookahead) >= min_precedence) {
+            auto op = lookahead;
 
-                auto rhs_expr = primaryExpression();
+            advance();
 
-                if (rhs_expr.errored || !rhs_expr.matched) {
+            auto rhs_expr = primaryExpression();
+
+            if (rhs_expr.errored || !rhs_expr.matched) {
+                error("error while parsing expression.");
+                
+                return Failure::kError;
+            }
+
+            auto* rhs = rhs_expr.unwrap();
+
+            lookahead = peek(1);
+
+            while (lookahead && (
+                isOperator(*lookahead) 
+                && (getPrecedence(*lookahead) >= getPrecedence(*op) 
+                        || (getAssociativity(*lookahead) == Associativity::kRight 
+                                && getPrecedence(*lookahead) == getPrecedence(*op)))
+            ))
+            {
+                auto rhs_expr2 = parseExpression1(
+                    rhs,
+                    getPrecedence(*op) + ((getPrecedence(*lookahead) > getPrecedence(*op)) ? 1 : 0)
+                );
+
+                if (rhs_expr2.errored || !rhs_expr2.matched) {
+                    error("error while parsing expression.");
+                    
                     return Failure::kError;
                 }
 
-                auto* rhs = rhs_expr.unwrap();
+                rhs = rhs_expr2.unwrap();
 
                 lookahead = peek(1);
-
-                while (lookahead && (
-                    isOperator(*lookahead) 
-                    && (getPrecedence(*lookahead) >= getPrecedence(*op) 
-                            || (getAssociativity(*lookahead) == Associativity::kRight 
-                                    && getPrecedence(*lookahead) == getPrecedence(*op)))
-                ))
-                {
-                    auto rhs_expr2 = parseExpression1(
-                        rhs,
-                        getPrecedence(*op) + ((getPrecedence(*lookahead) > getPrecedence(*op)) ? 1 : 0)
-                    );
-
-                    if (rhs_expr2.errored || !rhs_expr2.matched) {
-                        return Failure::kError;
-                    }
-
-                    rhs = rhs_expr2.unwrap();
-
-                    lookahead = peek(1);
-                }
-
-                switch (op->kind) {
-                    case Token::Type::kPlus: {
-                        lhs = m_ctx.create<ast::BinaryExpression>(
-                            std::move(lhs), 
-                            ast::BinaryExpression::OpType::kAdd,
-                            std::move(rhs)
-                        );
-                    } break;
-
-                    case Token::Type::kMinus: {
-                        lhs = m_ctx.create<ast::BinaryExpression>(
-                            std::move(lhs), 
-                            ast::BinaryExpression::OpType::kSubtract, 
-                            std::move(rhs)
-                        );
-                    } break;
-
-                    case Token::Type::kSlash: {
-                        lhs = m_ctx.create<ast::BinaryExpression>(
-                            std::move(lhs),
-                            ast::BinaryExpression::OpType::kDivide, 
-                            std::move(rhs)
-                        );
-                    } break;
-
-                    case Token::Type::kAsterisk: {
-                        lhs = m_ctx.create<ast::BinaryExpression>(
-                            std::move(lhs),
-                            ast::BinaryExpression::OpType::kMultiply, 
-                            std::move(rhs)
-                        );
-                    } break;
-
-                    case Token::Type::kDualColon: {
-                        lhs = m_ctx.create<ast::BinaryExpression>(
-                            std::move(lhs),
-                            ast::BinaryExpression::OpType::kScopeResolution,
-                            std::move(rhs)
-                        );
-                    } break;
-
-                    case Token::Type::kComma: {
-                        lhs = m_ctx.create<ast::BinaryExpression>(
-                            std::move(lhs),
-                            ast::BinaryExpression::OpType::kComma, 
-                            std::move(rhs)
-                        );
-                    } break;
-
-                    default:
-                        return Failure::kError;
-                }
             }
 
-            return lhs;
-        } else {
-            return lhs;
+            switch (op->kind) {
+                case Token::Type::kPlus: {
+                    lhs = m_ctx.create<ast::BinaryExpression>(
+                        std::move(lhs), 
+                        ast::BinaryExpression::OpType::kAdd,
+                        std::move(rhs)
+                    );
+                } break;
+
+                case Token::Type::kMinus: {
+                    lhs = m_ctx.create<ast::BinaryExpression>(
+                        std::move(lhs), 
+                        ast::BinaryExpression::OpType::kSubtract, 
+                        std::move(rhs)
+                    );
+                } break;
+
+                case Token::Type::kSlash: {
+                    lhs = m_ctx.create<ast::BinaryExpression>(
+                        std::move(lhs),
+                        ast::BinaryExpression::OpType::kDivide, 
+                        std::move(rhs)
+                    );
+                } break;
+
+                case Token::Type::kAsterisk: {
+                    lhs = m_ctx.create<ast::BinaryExpression>(
+                        std::move(lhs),
+                        ast::BinaryExpression::OpType::kMultiply, 
+                        std::move(rhs)
+                    );
+                } break;
+
+                case Token::Type::kDualColon: {
+                    lhs = m_ctx.create<ast::BinaryExpression>(
+                        std::move(lhs),
+                        ast::BinaryExpression::OpType::kScopeResolution,
+                        std::move(rhs)
+                    );
+                } break;
+
+                case Token::Type::kComma: {
+                    lhs = m_ctx.create<ast::BinaryExpression>(
+                        std::move(lhs),
+                        ast::BinaryExpression::OpType::kComma, 
+                        std::move(rhs)
+                    );
+                } break;
+
+                default:
+                    error("invalid operator");
+                    
+                    return Failure::kError;
+            }
         }
+
+        return lhs;
     }
 
     Result<std::vector<const ast::Expression*>> Parser::expectExpressionList()
@@ -251,7 +254,7 @@ namespace mana {
 
         for (size_t i = 0; continueParsing(); i++) {
             if (i > 0)
-                if (!match(Token::Type::kComma)) 
+                if (!match(Token::Type::kComma))                   
                     break;
 
             auto expr = expression();
@@ -300,6 +303,15 @@ namespace mana {
         return Failure::kNoMatch;
     }
 
+    Result<const ast::IdentifierExpression*> Parser::expectIdentifierExpression()
+    {
+        auto identifier = identifierExpression();
+
+        if (!identifier.matched) return Failure::kError;
+
+        return identifier;
+    }
+
     Result<const ast::IdentifierExpression*> Parser::identifierExpression()
     {
         auto* token = match(Token::Type::kIdentifier);
@@ -337,6 +349,10 @@ namespace mana {
                     
                     return Failure::kError;
                 }
+            } else {
+                error("missing '(..)' after '@" + peek(1)->toString() + "'.");
+
+                return Failure::kError;
             }
 
             if (name_token->match("cc")) {
@@ -351,7 +367,7 @@ namespace mana {
                     error("builtin attribute '@serialize' needs at least one parameter.");
                     
                     return Failure::kError;
-                } else if (expr_list.value.size() > 1) {
+                } else if (expr_list.value.size() != 1) {
                     error("builtin attribute '@serialize' can only accept a single parameter.");
                     
                     return Failure::kError;
@@ -447,9 +463,9 @@ namespace mana {
             if (auto a = attributes(); a.matched)
                 attrs = a.unwrap();
 
-            auto type = identifierExpression();
+            auto type = expectIdentifierExpression();
 
-            if (type.errored || !type.matched) {
+            if (type.errored) {
                 error("missing type when declaring a component property.");
 
                 return Failure::kError;
@@ -600,7 +616,7 @@ namespace mana {
             return attrs;
         }); 
 
-        auto decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ComponentDeclaration*> {   
+        auto decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::Declaration*> {   
             auto cd = componentDeclaration(attribute_list.value);
 
             if (cd.errored) error("error while parsing a component declaration.");
@@ -608,13 +624,17 @@ namespace mana {
             return cd;
         });
 
-        auto import_decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::ImportDeclaration*> {
+        if (decl.matched) decl->print(std::cout, 0);
+
+        decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::Declaration*> {
             auto id = importDeclaration(attribute_list.value);
 
             if (id.errored) error("error while parsing an import declaration.");
 
             return id;
         });
+
+        if (decl.matched) decl->print(std::cout, 0);
     }
 
     void Parser::doParse()

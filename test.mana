@@ -1,15 +1,20 @@
+
+
 import (
     "test/test1"
     "test/test3"
 )
 
-@serialize()
+@serialize(48 + 99 * 6+5)
 component K {
     f32 teste = 66
 }
 
 
-@serffialize()
+@afejgeiojgi()
+@serialize(48, 66, 77)
+@serfffialize()
 component K {
-    f32 teste = 55
+    @cc() f32 teste = 55 + 88 / 87 * 55 + 232 * 55 / 4 / 5 / 6
 }
+

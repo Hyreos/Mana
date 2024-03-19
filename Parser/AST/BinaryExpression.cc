@@ -28,6 +28,8 @@ namespace mana::ast {
 
     void BinaryExpression::print(std::ostream& stream, size_t ident) const
     {
+        stream << " ( ";
+
         m_lhs->print(stream, ident);
 
         switch (m_type) {
@@ -57,6 +59,8 @@ namespace mana::ast {
         }
 
         m_rhs->print(stream, ident);
+
+        stream << " ) ";
     }
 
     const BinaryExpression* BinaryExpression::clone(CloneContext& ctx) const

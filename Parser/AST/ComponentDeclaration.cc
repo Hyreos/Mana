@@ -56,7 +56,7 @@ namespace mana::ast {
             stream << std::endl;
         }
         
-        stream << "}";
+        stream << "}" << std::endl << std::endl;
     }
 
     void ComponentDeclaration::setExportStatus(bool value)
