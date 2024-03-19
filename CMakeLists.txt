@@ -133,5 +133,5 @@ if (MANA_BUILD_CLI)
 
     target_include_directories(manac PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/ThirdParty/abseil)
 
-    target_sources(manac PRIVATE CLI.cc)
+    target_sources(manac PRIVATE CLI/CLI.cc)
 endif()
