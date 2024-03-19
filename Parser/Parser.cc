@@ -434,6 +434,71 @@ namespace mana {
         return Failure::kNoMatch;
     }
 
+    Result<const ast::EnumDeclaration*> Parser::enumDeclaration(const std::vector<const ast::Attribute*> _attributes)
+    {
+        if (match("enum")) {
+            auto name = match(Token::Type::kIdentifier);
+
+            if (!name) {
+                error("missing name indetifier in enum declaration.");
+
+                return Failure::kError;
+            }
+
+            match(Token::Type::kLeftBracket);
+
+            std::vector<const ast::EEntryDeclaration*> entries;
+
+            size_t i = 0;
+
+            while (continueParsing()) {
+                if (match(Token::Type::kRightBracket)) break;
+
+                if (i++ > 0) 
+                    if (!match(Token::Type::kComma)) {
+                        error("missing comma while separating enum entries.");
+                        
+                        return Failure::kError;
+                    }
+
+                auto entry_identifier = match(Token::Type::kIdentifier);
+            
+                if (!entry_identifier) {
+                    error("missing name identifier in enum entry.");
+
+                    return Failure::kError;
+                }
+
+                const ast::Expression* assign_expression = nullptr;
+
+                if (match(Token::Type::kEqual)) {
+                    auto expr = expectExpression();
+
+                    if (expr.errored) 
+                        return Failure::kError;
+
+                    assign_expression = expr.unwrap();
+                }
+
+                entries.push_back(
+                    m_ctx.create<ast::EEntryDeclaration>(
+                        entry_identifier->asStr(),
+                        assign_expression,
+                        std::vector<const ast::Attribute*>()
+                    )
+                );
+            }
+
+            return m_ctx.create<ast::EnumDeclaration>(
+                name->asStr(),
+                entries,
+                _attributes
+            );
+        }
+
+        return Failure::kNoMatch;
+    }
+
     Result<const ast::ComponentDeclaration*> Parser::componentDeclaration(
         const std::vector<const ast::Attribute*> attributes_list
     )
@@ -538,7 +603,7 @@ namespace mana {
 
             const ast::Expression* field_default_value;
 
-            if (!is_optional)
+            if (!is_optional) {
                 if (match(Token::Type::kEqual)) {
                     auto expr = expectExpression();
 
@@ -547,7 +612,7 @@ namespace mana {
                 
                     field_default_value = expr.unwrap();
                 }
-            else {
+            } else {
                 if (!match(Token::Type::kEqual)) {
                     error("missing an '=' in non-optional property from component.");
 
@@ -647,31 +712,49 @@ namespace mana {
 
     void Parser::globalDeclaration()
     {
-        auto attribute_list = sync(Token::Type::kRightParen, [&]() -> Result<std::vector<const ast::Attribute*>> {
-            auto attrs = attributes();
-
-            return attrs;
-        }); 
+        auto attribute_list = attributes();
 
         auto decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::Declaration*> {   
             auto cd = componentDeclaration(attribute_list.value);
 
-            if (cd.errored) error("error while parsing a component declaration.");
+            if (cd.errored) 
+                error("error while parsing a component declaration.");
 
             return cd;
         });
 
-        if (decl.matched) decl->print(std::cout, 0);
+        if (decl.matched) {    
+            decl->print(std::cout, 0);
+            return;
+        }
 
         decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::Declaration*> {
             auto id = importDeclaration(attribute_list.value);
 
-            if (id.errored) error("error while parsing an import declaration.");
+            if (id.errored) 
+                error("error while parsing an import declaration.");
 
             return id;
         });
 
-        if (decl.matched) decl->print(std::cout, 0);
+        if (decl.matched) {
+            decl->print(std::cout, 0);
+            return;
+        }
+
+        decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::Declaration*> {
+            auto e = enumDeclaration(attribute_list.value);
+
+            if (e.errored)
+                error("error while parsing enum.");
+
+            return e;
+        });
+
+        if (decl.matched) {
+            decl->print(std::cout, 0);
+            return;
+        }
     }
 
     void Parser::doParse()

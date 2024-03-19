@@ -23,6 +23,8 @@
 #include "AST/SerializeAttribute.hh"
 #include "AST/ExportQualifier.hh"
 #include "AST/ReadonlyQualifier.hh"
+#include "AST/EnumDeclaration.hh"
+#include "AST/EntryDeclaration.hh"
 
 #include "Helpers/Deleted.hh"
 #include "Helpers/Macros.hh"
@@ -169,6 +171,8 @@ namespace mana {
         Result<const ast::UnaryExpression*> unaryExpression();
 
         Result<const ast::ComponentDeclaration*> componentDeclaration(const std::vector<const ast::Attribute*> attributes);
+
+        Result<const ast::EnumDeclaration*> enumDeclaration(const std::vector<const ast::Attribute*> attributes);
 
         Result<const ast::ImportDeclaration*> importDeclaration(const std::vector<const ast::Attribute*> attributes);
 

@@ -10,6 +10,14 @@ component K {
     f32 teste = 66
 }
 
+enum MyEnum {
+    ZZZZZZZZZZZZ = 1,
+    YYYYYYYYYYYY = 2,
+    XXXXXXXXXXXX = 3,
+    AAAAAAAAAAAA = 4,
+    BBBBBBBBBBBB = 5
+}
+
 @serialize(0xFF, 0X1)
 @serialize(0xFFFFFFFul)
 @serfffialize()
