@@ -172,7 +172,10 @@ namespace mana {
 
         Result<const ast::UnaryExpression*> unaryExpression();
 
-        Result<const ast::ComponentDeclaration*> componentDeclaration(const std::vector<const ast::Attribute*> attributes);
+        Result<const ast::ComponentDeclaration*> componentDeclaration(
+            const std::vector<const ast::Attribute*> attributes,
+            const std::vector<const ast::Qualifier*> qualifiers
+        );
 
         Result<const ast::EnumDeclaration*> enumDeclaration(const std::vector<const ast::Attribute*> attributes);
 

@@ -512,12 +512,10 @@ namespace mana {
     }
 
     Result<const ast::ComponentDeclaration*> Parser::componentDeclaration(
-        const std::vector<const ast::Attribute*> attributes_list
+        const std::vector<const ast::Attribute*> attributes_list,
+        const std::vector<const ast::Qualifier*> qualifier_list
     )
     {
-        bool is_component_exported = false;
-        if (match("export")) is_component_exported = true;
-
         if (!match("component")) return Failure::kNoMatch;
 
         auto decl_name = match(Token::Type::kIdentifier);
@@ -672,7 +670,7 @@ namespace mana {
             decl_name->asStr(),
             std::move(members),
             std::move(inheritances),
-            is_component_exported,
+            qualifier_list,
             attributes_list
         );
         
@@ -726,8 +724,10 @@ namespace mana {
     {
         auto attribute_list = attributes();
 
+        auto qualifier_list = qualifiers();
+
         auto decl = sync(Token::Type::kRightBracket, [&]() -> Result<const ast::Declaration*> {   
-            auto cd = componentDeclaration(attribute_list.value);
+            auto cd = componentDeclaration(attribute_list.value, qualifier_list.value);
 
             if (cd.errored) 
                 error("error while parsing a component declaration.");

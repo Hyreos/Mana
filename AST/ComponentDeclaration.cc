@@ -5,12 +5,12 @@ namespace mana::ast {
         const std::string& name,
         std::vector<const Declaration*> fields,
         std::vector<const IdentifierExpression*> inheritances,
-        bool isExported,
+        std::vector<const Qualifier*> qualifiers,
         std::vector<const Attribute*> attributes
     ) 
         : m_fields{ std::move(fields) },
             m_inheritances { std::move(inheritances) },
-            m_exported { isExported },
+            m_qualifiers { qualifiers },
             m_attributes { attributes }
     {
         m_name = name;
@@ -22,7 +22,7 @@ namespace mana::ast {
             m_name, 
             ctx.clone(m_fields), 
             ctx.clone(m_inheritances), 
-            m_exported,
+            ctx.clone(m_qualifiers),
             ctx.clone(m_attributes)
         );
     }
@@ -35,7 +35,11 @@ namespace mana::ast {
             stream << " ";
         }
 
-        if (m_exported) stream << "export ";
+        for (auto& qual : m_qualifiers) {
+            qual->print(stream, ident);
+
+            stream << " ";
+        }
 
         stream << "component " << m_name;
 
@@ -57,15 +61,5 @@ namespace mana::ast {
         }
         
         stream << "}" << std::endl << std::endl;
-    }
-
-    void ComponentDeclaration::setExportStatus(bool value)
-    {
-        m_exported = value;
-    }
-
-    bool ComponentDeclaration::isExported() const
-    {
-        return m_exported;
     }
 }

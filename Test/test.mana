@@ -6,7 +6,7 @@ import (
 )
 
 @serialize(48 + 99 * 6+5)
-component K {
+export component K {
     f32 teste = 66
 }
 
