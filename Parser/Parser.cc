@@ -289,6 +289,121 @@ namespace mana {
         return attrs;
     }
 
+    Result<const ast::FunctionParameter*> Parser::functionParameter()
+    {
+        auto attr_list = attributes();
+
+        auto qual_list = qualifiers();
+
+        auto type_identifier = expectIdentifierExpression();
+
+        if (type_identifier.errored) return Failure::kError;
+
+        auto type = m_ctx.create<ast::Type>(type_identifier.unwrap());
+
+        auto variable_identifier = expectIdentifierExpression();
+
+        if (variable_identifier.errored) return Failure::kError;
+
+        const ast::Expression* default_value_expression;
+
+        if (match(Token::Type::kEqual)) {
+            auto expr = expectExpression();
+
+            if (expr.errored) return Failure::kError;
+
+            default_value_expression = expr.unwrap();
+        }
+
+        return m_ctx.create<ast::FunctionParameter>(
+            attr_list.unwrap(),
+            qual_list.unwrap(),
+            type,
+            type_identifier.unwrap(),
+            default_value_expression
+        );
+    }
+
+    Result<const std::vector<const ast::FunctionParameter*>> Parser::functionParameterList()
+    {
+        std::vector<const ast::FunctionParameter*> parameters;
+
+        while (continueParsing()) {
+            auto param = functionParameter();
+
+            if (param.errored) return Failure::kError;
+
+            if (param.matched)
+                parameters.push_back(param.unwrap());
+
+            if (!match(Token::Type::kComma)) {
+                if (peek(1)->kind == Token::Type::kRightParen) 
+                    break;
+                else {
+                    error("missing comma ',' when separating function parameters.");
+
+                    return Failure::kError;
+                }
+            }
+        }
+
+        return parameters;
+    }
+
+    Result<const ast::FunctionDeclaration*> Parser::functionDeclaration(
+        const std::vector<const ast::Attribute*>& attributes,
+        const std::vector<const ast::Qualifier*>& qualifiers
+    ) {
+        if (match("fn")) {
+            auto name = expectIdentifierExpression();
+
+            if (name.errored) {
+                error("missing name identifier in function declaration.");
+
+                return Failure::kError;
+            }
+
+            if (!match(Token::Type::kLeftParen)) {
+                error("missing left parenthesis '(' after name identifier in function declaration.");
+
+                return Failure::kError;
+            }
+
+            auto parameters = functionParameterList();
+
+            if (!match(Token::Type::kRightParen)) {
+                error("missing right parenthesis ')' after name identifier in function declaration.");
+
+                return Failure::kError;
+            }
+
+            const ast::Type* returnType;
+
+            if (match(Token::Type::kArrow)) {
+                auto return_type_identifier = expectIdentifierExpression();
+
+                if (return_type_identifier.errored) 
+                    return Failure::kError;
+
+                returnType = m_ctx.create<ast::Type>(return_type_identifier.unwrap());
+            } else {
+                returnType = m_ctx.create<ast::Type>(
+                    m_ctx.create<ast::IdentifierExpression>("void")
+                );
+            }
+
+            return m_ctx.create<ast::FunctionDeclaration>(
+                returnType,
+                name.unwrap(),
+                attributes,
+                qualifiers,
+                parameters.unwrap()
+            );
+        }
+
+        return Failure::kNoMatch;
+    }
+
     Result<const ast::LiteralExpression*> Parser::literal()
     {
         if (auto* tok = match(Token::Type::kInteger))           
@@ -554,26 +669,24 @@ namespace mana {
             std::vector<const ast::Attribute*> attrs;
             std::vector<const ast::Qualifier*> quals;
 
-            while (continueParsing()) {
-                bool go_out = true;
+            auto al = attributes();
 
-                auto al = attributes();
+            if (al.matched)
+                for (auto& a : al.value) { 
+                    attrs.push_back(a);
+                }
 
-                if (al.matched)
-                    for (auto& a : al.value) { 
-                        attrs.push_back(a);
-                        go_out = false;
-                    }
+            auto qualifier_list = qualifiers();
 
-                auto qualifier_list = qualifiers();
+            if (qualifier_list.matched)
+                for (auto& q : qualifier_list.value) {
+                    quals.push_back(q);
+                }
 
-                if (qualifier_list.matched)
-                    for (auto& q : qualifier_list.value) {
-                        quals.push_back(q);
-                        go_out = false;
-                    }
+            auto func_decl = functionDeclaration(attrs, quals);
 
-                if (go_out) break;
+            if (func_decl.matched) {
+
             }
 
             auto type_identifier = expectIdentifierExpression();

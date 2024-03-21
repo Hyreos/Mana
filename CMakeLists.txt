@@ -105,7 +105,10 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         AST/Qualifier.cc
                                         AST/LiteralExpression.cc
                                         AST/Expression.cc
+                                        AST/FunctionDeclaration.cc
+                                        AST/FunctionParameter.cc
                                         AST/Declaration.cc
+                                        AST/Variable.cc
                                         AST/Attribute.cc
                                         AST/EnumDeclaration.cc
                                         AST/EntryDeclaration.cc

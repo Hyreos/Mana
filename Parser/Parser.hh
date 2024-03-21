@@ -24,7 +24,9 @@
 #include "AST/ExportQualifier.hh"
 #include "AST/ReadonlyQualifier.hh"
 #include "AST/EnumDeclaration.hh"
+#include "AST/FunctionParameter.hh"
 #include "AST/EntryDeclaration.hh"
+#include "AST/FunctionDeclaration.hh"
 #include "AST/Type.hh"
 
 #include "Helpers/Deleted.hh"
@@ -172,6 +174,15 @@ namespace mana {
         Result<const ast::LiteralExpression*> literal();
 
         Result<const ast::UnaryExpression*> unaryExpression();
+
+        Result<const ast::FunctionParameter*> functionParameter();
+
+        Result<const std::vector<const ast::FunctionParameter*>> functionParameterList();
+
+        Result<const ast::FunctionDeclaration*> functionDeclaration(
+            const std::vector<const ast::Attribute*>& attributes,
+            const std::vector<const ast::Qualifier*>& qualifiers
+        );
 
         Result<const ast::ComponentDeclaration*> componentDeclaration(
             const std::vector<const ast::Attribute*> attributes,
