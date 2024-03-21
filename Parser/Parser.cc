@@ -295,7 +295,7 @@ namespace mana {
 
         auto qual_list = qualifiers();
 
-        auto type_identifier = expectIdentifierExpression();
+        auto type_identifier = expectType();
 
         if (type_identifier.errored) {
             std::cout << "Next token was " << peek(1)->toString() << std::endl;
@@ -305,13 +305,13 @@ namespace mana {
             return Failure::kError;
         }
 
-        auto type = m_ctx.create<ast::Type>(type_identifier.unwrap());
+        auto type = type_identifier.unwrap();
 
         auto variable_identifier = expectIdentifierExpression();
 
         if (variable_identifier.errored) return Failure::kError;
 
-        const ast::Expression* default_value_expression;
+        const ast::Expression* default_value_expression = nullptr;
 
         if (match(Token::Type::kEqual)) {
             auto expr = expectExpression();
@@ -329,7 +329,7 @@ namespace mana {
             attr_list.unwrap(),
             qual_list.unwrap(),
             type,
-            type_identifier.unwrap(),
+            variable_identifier.unwrap(),
             default_value_expression
         );
     }
@@ -391,7 +391,7 @@ namespace mana {
             const ast::Type* returnType;
 
             if (match(Token::Type::kArrow)) {
-                auto return_type_identifier = expectIdentifierExpression();
+                auto return_type_identifier = expectType();
 
                 if (return_type_identifier.errored) {
                     error("missing return type identifier after '->' when declaring function.");
@@ -399,7 +399,7 @@ namespace mana {
                     return Failure::kError;
                 }
 
-                returnType = m_ctx.create<ast::Type>(return_type_identifier.unwrap());
+                returnType = return_type_identifier.unwrap();
             } else {
                 returnType = m_ctx.create<ast::Type>(
                     m_ctx.create<ast::IdentifierExpression>("void")
@@ -572,6 +572,33 @@ namespace mana {
         return Failure::kNoMatch;
     }
 
+    Result<const ast::Type*> Parser::expectType()
+    {
+        auto identifier = expectIdentifierExpression();
+
+        if (identifier.errored) 
+            return Failure::kError;
+
+        const ast::Type* subtype = nullptr;
+
+        if (match(Token::Type::kLessThan)) {
+            auto inner_type = expectType();
+
+            if (inner_type.errored) return Failure::kError;
+
+            subtype = inner_type.unwrap();
+
+            if (!match(Token::Type::kGreaterThan)) {
+                return Failure::kError;
+            }
+        }
+
+        return m_ctx.create<ast::Type>(
+            identifier.unwrap(),
+            subtype
+        );
+    }
+
     Result<const ast::LiteralExpression*> Parser::expectLiteral()
     {
         auto lit = literal();
@@ -714,7 +741,7 @@ namespace mana {
                 continue;
             }
 
-            auto type_identifier = expectIdentifierExpression();
+            auto type_identifier = expectType();
 
             if (type_identifier.errored) {
                 error("missing type when declaring a component property.");
@@ -722,7 +749,7 @@ namespace mana {
                 return Failure::kError;
             }
 
-            auto type = m_ctx.create<ast::Type>(type_identifier.unwrap());
+            auto type = type_identifier.unwrap();
 
             bool is_optional = false;
             

@@ -150,6 +150,8 @@ namespace mana {
 
         Result<const ast::Expression*> expectGroup();
 
+        Result<const ast::Type*> expectType();
+
         Result<const ast::Expression*> expression();
 
         Result<const ast::Expression*> primaryExpression();

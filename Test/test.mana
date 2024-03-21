@@ -11,5 +11,5 @@ component K3 {
 
     @cc()
     @exposed("Window", "Worker")
-    fn my_func() -> f32
+    fn my_func(f32 test = 888) -> array<array<f32>>
 }
