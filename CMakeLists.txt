@@ -62,9 +62,9 @@ if (WIN32)
     add_compile_definitions(_DISABLE_STRING_ANNOTATION=1 _DISABLE_VECTOR_ANNOTATION=1)
 endif()
 
-add_subdirectory(ThirdParty/abseil)
+# add_subdirectory(ThirdParty/abseil)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE absl::strings)
+# target_link_libraries(${PROJECT_NAME} PRIVATE absl::strings)
 
 if (MANA_IS_ASAN)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
@@ -81,7 +81,8 @@ if (MANA_IS_ASAN)
 endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}
-                                                    ${CMAKE_CURRENT_LIST_DIR}/ThirdParty/abseil)
+                                                    # ${CMAKE_CURRENT_LIST_DIR}/ThirdParty/abseil
+                                                    )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 
@@ -137,7 +138,9 @@ if (MANA_BUILD_CLI)
 
     target_link_libraries(manac PRIVATE ${PROJECT_NAME})
 
-    target_include_directories(manac PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/ThirdParty/abseil)
+    target_include_directories(manac PRIVATE ${CMAKE_CURRENT_LIST_DIR} 
+                                                #${CMAKE_CURRENT_LIST_DIR}/ThirdParty/abseil
+    )
 
     target_sources(manac PRIVATE CLI/CLI.cc)
 endif()

@@ -6,7 +6,6 @@
 #include <sstream>
 #include <string>
 
-#include <absl/strings/charconv.h>
 #include "Helpers/Macros.hh"
 
 namespace mana {
@@ -78,7 +77,7 @@ namespace mana {
 
                         double dvalue;
 
-                        auto [_, ec] = absl::from_chars(number.data(), number.data() + number.length(), dvalue);
+                        auto [_, ec] = std::from_chars(number.data(), number.data() + number.length(), dvalue);
                     
                         if (ec != std::errc()) {
                             if (ec == std::errc::invalid_argument) {

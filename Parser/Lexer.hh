@@ -5,7 +5,7 @@
 #include <string_view>
 #include <sstream>
 #include <span>
-#include <absl/types/variant.h>
+#include <variant>
 
 #include "Helpers/Macros.hh"
 
@@ -51,7 +51,7 @@ namespace mana {
 
         Type kind;
 
-        absl::variant<std::string_view, double, int64_t> value;
+        std::variant<std::string_view, double, int64_t> value;
 
         inline std::string toString() const {
             std::string result;
