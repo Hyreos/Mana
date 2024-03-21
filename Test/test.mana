@@ -6,7 +6,10 @@ import (
 )
 
 component K3 {
-    @cc() readonly f32 teste = 55 + 88 / 87 * 55 + 232 * 55 / 4 / 5 / 6
+    @cc() 
+    readonly f32 teste = 55 + 88 / 87 * 55 + 232 * 55 / 4 / 5 / 6
 
-    @cc() fn my_func() -> f32
+    @cc()
+    @exposed("Window", "Worker")
+    fn my_func() -> f32
 }

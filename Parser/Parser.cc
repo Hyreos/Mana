@@ -456,9 +456,10 @@ namespace mana {
     Result<const ast::Attribute*> Parser::attribute()
     {
         if (match(Token::Type::kAt)) {
-            static std::array<std::string_view, 2> kAttributeList = {
+            static std::array<std::string_view, 3> kAttributeList = {
                 "cc",
-                "serialize"
+                "serialize",
+                "exposed"
             };
 
             auto name_token = match(kAttributeList);
@@ -506,6 +507,14 @@ namespace mana {
                 }
                 
                 return m_ctx.create<ast::SerializeAttribute>(expr_list.value[0]);
+            } else if (name_token->match("exposed")) {
+                if (expr_list.value.size() == 0) {
+                    error("builtin attribute '@exposed' needs at least one parameter.");
+
+                    return Failure::kError;
+                }
+
+                return m_ctx.create<ast::ExposedAttribute>(expr_list.value);
             }
 
             CHECK(false);

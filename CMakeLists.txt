@@ -110,6 +110,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         AST/Declaration.cc
                                         AST/Variable.cc
                                         AST/Attribute.cc
+                                        AST/ExposedAttribute.cc
                                         AST/EnumDeclaration.cc
                                         AST/EntryDeclaration.cc
                                         AST/IdentifierExpression.cc

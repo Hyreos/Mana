@@ -21,6 +21,7 @@
 #include "AST/UnaryExpression.hh"
 #include "AST/CCAttribute.hh"
 #include "AST/SerializeAttribute.hh"
+#include "AST/ExposedAttribute.hh"
 #include "AST/ExportQualifier.hh"
 #include "AST/ReadonlyQualifier.hh"
 #include "AST/EnumDeclaration.hh"
