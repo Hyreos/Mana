@@ -18,3 +18,5 @@ namespace mana::ast {
         stream << "(" << m_value << "_bool" << ")";
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::BoolLiteralExpression);

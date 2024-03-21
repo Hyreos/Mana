@@ -16,3 +16,5 @@ namespace mana::ast {
         stream << "export";
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::ExportQualifier);

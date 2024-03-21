@@ -19,3 +19,5 @@ namespace mana::ast {
         stream << "(\"" << m_value << "\"_string" << ")";
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::StringLiteralExpression);

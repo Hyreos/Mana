@@ -31,5 +31,3 @@ namespace mana::ast {
         std::vector<const Attribute*> m_attributes;
     };
 }
-
-MANA_RTTI_TYPE(mana::ast::TreeNode);

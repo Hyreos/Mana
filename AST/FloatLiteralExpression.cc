@@ -18,3 +18,5 @@ namespace mana::ast {
         stream << "(" << m_value << "_fp" << ")";
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::FloatLiteralExpression);

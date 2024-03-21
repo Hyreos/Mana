@@ -25,5 +25,3 @@ namespace mana::ast {
         bool m_isCc;
     };
 }
-
-MANA_RTTI_TYPE(mana::ast::ImportDeclaration);

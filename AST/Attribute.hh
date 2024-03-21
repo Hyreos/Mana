@@ -11,5 +11,3 @@ namespace mana::ast {
         virtual std::string name() const = 0;
     };
 }
-
-MANA_RTTI_TYPE(mana::ast::Attribute)

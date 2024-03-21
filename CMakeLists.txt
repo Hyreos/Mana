@@ -101,6 +101,11 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         AST/ComponentDeclaration.cc
                                         AST/FloatLiteralExpression.cc
                                         AST/GroupExpression.cc
+                                        AST/Qualifier.cc
+                                        AST/LiteralExpression.cc
+                                        AST/Expression.cc
+                                        AST/Declaration.cc
+                                        AST/Attribute.cc
                                         AST/EnumDeclaration.cc
                                         AST/EntryDeclaration.cc
                                         AST/IdentifierExpression.cc

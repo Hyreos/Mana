@@ -34,3 +34,5 @@ namespace mana::ast {
         stream << ")" << std::endl;
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::ImportDeclaration);

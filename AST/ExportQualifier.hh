@@ -18,5 +18,3 @@ namespace mana::ast {
         void print(std::ostream& stream, size_t ident) const override;
     };
 }
-
-MANA_RTTI_TYPE(mana::ast::ExportQualifier);

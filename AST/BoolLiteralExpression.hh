@@ -12,5 +12,3 @@ namespace mana::ast {
         bool m_value;
     };
 }
-
-MANA_RTTI_TYPE(mana::ast::BoolLiteralExpression);

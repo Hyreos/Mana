@@ -34,4 +34,3 @@ namespace mana::ast {
     };
 }
 
-MANA_RTTI_TYPE(mana::ast::ComponentDeclaration)

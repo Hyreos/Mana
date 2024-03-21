@@ -19,5 +19,3 @@ namespace mana::ast {
         std::string name() const override;
     };
 }
-
-MANA_RTTI_TYPE(mana::ast::CCAttribute);

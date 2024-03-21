@@ -18,3 +18,5 @@ namespace mana::ast {
         stream << m_identifier;
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::IdentifierExpression);

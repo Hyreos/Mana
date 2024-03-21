@@ -16,3 +16,5 @@ namespace mana::ast {
         stream << "readonly";
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::ReadonlyQualifier);

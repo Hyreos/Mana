@@ -20,3 +20,5 @@ namespace mana::ast {
         stream << " ) ";
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::GroupExpression);

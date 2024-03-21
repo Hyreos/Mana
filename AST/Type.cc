@@ -20,3 +20,5 @@ namespace mana::ast {
         return m_symbol;
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::Type)

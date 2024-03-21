@@ -21,5 +21,3 @@ namespace mana::ast {
         uint64_t m_value;
     };
 }
-
-MANA_RTTI_TYPE(mana::ast::IntegerLiteralExpression);

@@ -6,3 +6,5 @@ namespace mana::ast {
         return m_name;
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::TypeDeclaration);

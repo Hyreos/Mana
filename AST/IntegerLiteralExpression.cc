@@ -25,3 +25,5 @@ namespace mana::ast {
         else stream << m_value;
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::IntegerLiteralExpression);

@@ -29,3 +29,5 @@ namespace mana::ast {
         m_expression->print(stream, ident);
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::EEntryDeclaration)

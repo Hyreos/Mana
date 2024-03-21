@@ -19,5 +19,3 @@ namespace mana::ast {
         double m_value;
     };
 }
-
-MANA_RTTI_TYPE(mana::ast::FloatLiteralExpression);

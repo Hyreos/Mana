@@ -24,3 +24,5 @@ namespace mana::ast {
         return m_attributes;
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::TreeNode);

@@ -24,3 +24,5 @@ namespace mana::ast {
         return ctx.create<UnaryExpression>(m_kind, ctx.clone(m_operand));
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::UnaryExpression);

@@ -63,3 +63,5 @@ namespace mana::ast {
         stream << "}" << std::endl << std::endl;
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::ComponentDeclaration)

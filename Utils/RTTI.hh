@@ -97,7 +97,7 @@ namespace mana::rtti {
     };
 
     template<typename T>
-    using remove_all_const_t = remove_all_const<T>::type;
+    using remove_all_const_t = typename remove_all_const<T>::type;
 
     template<typename T>
     using raw_type_t = remove_all_const_t<std::remove_pointer_t<std::decay_t<T>>>;

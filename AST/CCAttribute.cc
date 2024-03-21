@@ -16,3 +16,5 @@ namespace mana::ast {
         stream << "@" << name();
     }
 }
+
+MANA_RTTI_TYPE(mana::ast::CCAttribute);
