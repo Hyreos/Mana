@@ -1,5 +1,7 @@
 #include "RTTI.hh"
 
+MANA_RTTI_TYPE(mana::rtti::Base)
+
 namespace mana::rtti {
     bool TypeMetadata::match(const TypeMetadata* metadata) const
     {
@@ -15,5 +17,3 @@ namespace mana::rtti {
         return false;
     }
 }
-
-MANA_RTTI_TYPE(mana::rtti::Base)
