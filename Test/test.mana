@@ -5,37 +5,8 @@ import (
     "test/test3"
 )
 
-@serialize(48 + 99 * 6+5)
-export component K {
-    f32 teste = 66
-}
-
-enum MyEnum {
-    ZZZZZZZZZZZZ = 1,
-    YYYYYYYYYYYY = 2,
-    XXXXXXXXXXXX = 3,
-    AAAAAAAAAAAA = 4,
-    BBBBBBBBBBBB = 5
-}
-
-enum MyEnum2 {
-    ZZZZZZZZZZZZ = 1,
-    YYYYYYYYYYYY = 2,
-    XXXXXXXXXXXX = 3,
-    AAAAAAAAAAAA = 4,
-    BBBBBBBBBBBB = 5
-}
-
-alias Something = (
-    MyEnum,
-    MyEnum2
-)
-
-@serialize(0xFF, 0X1)
-@serialize(0xFFFFFFFul)
-@serfffialize()
 component K3 {
     @cc() readonly f32 teste = 55 + 88 / 87 * 55 + 232 * 55 / 4 / 5 / 6
-    @cc() readonly array<f32> teste2 = []
-}
 
+    @cc() fn my_func() -> f32
+}

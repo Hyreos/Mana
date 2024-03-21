@@ -297,7 +297,13 @@ namespace mana {
 
         auto type_identifier = expectIdentifierExpression();
 
-        if (type_identifier.errored) return Failure::kError;
+        if (type_identifier.errored) {
+            std::cout << "Next token was " << peek(1)->toString() << std::endl;
+
+            error("missing type identifier in function parameter.");
+
+            return Failure::kError;
+        }
 
         auto type = m_ctx.create<ast::Type>(type_identifier.unwrap());
 
@@ -310,7 +316,11 @@ namespace mana {
         if (match(Token::Type::kEqual)) {
             auto expr = expectExpression();
 
-            if (expr.errored) return Failure::kError;
+            if (expr.errored) {
+                error("missing expression after '=' in function parameter.");
+                    
+                return Failure::kError;
+            }
 
             default_value_expression = expr.unwrap();
         }
@@ -328,10 +338,11 @@ namespace mana {
     {
         std::vector<const ast::FunctionParameter*> parameters;
 
-        while (continueParsing()) {
+        while (continueParsing() && peek(1)->kind != Token::Type::kRightParen) {
             auto param = functionParameter();
 
-            if (param.errored) return Failure::kError;
+            if (param.errored)     
+                return Failure::kError;
 
             if (param.matched)
                 parameters.push_back(param.unwrap());
@@ -382,8 +393,11 @@ namespace mana {
             if (match(Token::Type::kArrow)) {
                 auto return_type_identifier = expectIdentifierExpression();
 
-                if (return_type_identifier.errored) 
+                if (return_type_identifier.errored) {
+                    error("missing return type identifier after '->' when declaring function.");
+                    
                     return Failure::kError;
+                }
 
                 returnType = m_ctx.create<ast::Type>(return_type_identifier.unwrap());
             } else {
@@ -669,24 +683,26 @@ namespace mana {
             std::vector<const ast::Attribute*> attrs;
             std::vector<const ast::Qualifier*> quals;
 
-            auto al = attributes();
+            auto attr_list = attributes();
 
-            if (al.matched)
-                for (auto& a : al.value) { 
-                    attrs.push_back(a);
-                }
+            if (attr_list.errored) return Failure::kError;
 
-            auto qualifier_list = qualifiers();
+            if (attr_list.matched)
+                attrs = attr_list.unwrap();
 
-            if (qualifier_list.matched)
-                for (auto& q : qualifier_list.value) {
-                    quals.push_back(q);
-                }
+            auto qual_list = qualifiers();
+
+            if (qual_list.errored) return Failure::kError;
+
+            if (qual_list.matched)
+                quals = qual_list.unwrap();
 
             auto func_decl = functionDeclaration(attrs, quals);
 
             if (func_decl.matched) {
-
+                members.push_back(func_decl.unwrap());
+                
+                continue;
             }
 
             auto type_identifier = expectIdentifierExpression();

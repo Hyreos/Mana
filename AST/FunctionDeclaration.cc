@@ -40,9 +40,7 @@ namespace mana::ast {
             stream << " ";
         }
 
-        m_type->print(stream, ident);
-
-        stream << " ";
+        stream << "fn ";
 
         m_identifier->print(stream, ident);
 
@@ -54,7 +52,9 @@ namespace mana::ast {
             m_argsList[i]->print(stream, ident);
         }
 
-        stream << ")";
+        stream << ") -> ";
+
+        m_type->print(stream, ident);
     }
 }
 
