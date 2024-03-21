@@ -1,3 +1,5 @@
+#pragma once
+
 #include "LiteralExpression.hh"
 
 namespace mana::ast {

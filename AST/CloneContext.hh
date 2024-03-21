@@ -39,7 +39,8 @@ namespace mana::ast {
 
         inline void destroyAll()
         {
-            for (auto& node : m_nodes) delete node;
+            // TODO: Memory leak here, fix it after
+            //for (auto& node : m_nodes) delete node;
             
             m_nodes.clear();
         }

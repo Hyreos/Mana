@@ -58,7 +58,7 @@ public:
                         parser.parse(data); 
 
                         for (auto& err : parser.errorList()) {
-                            printf("(line: %d, column: %d): %s\n", err.stats.lineIndex, err.stats.columnIndex, err.message.c_str());
+                            printf("(line: %llu, column: %llu): %s\n", err.stats.lineIndex, err.stats.columnIndex, err.message.c_str());
                         }
                     }
                 }

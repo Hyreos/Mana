@@ -291,7 +291,7 @@ namespace mana {
 
     Result<const ast::LiteralExpression*> Parser::literal()
     {
-        if (auto* tok = match(Token::Type::kInteger))
+        if (auto* tok = match(Token::Type::kInteger))           
             return m_ctx.create<ast::IntegerLiteralExpression>(
                 ast::IntegerLiteralExpression::Sign::kSigned,
                 tok->asInteger()
@@ -491,6 +491,30 @@ namespace mana {
 
                     assign_expression = expr.unwrap();
                 }
+
+                bool val = Match(
+                    assign_expression, 
+                    [](const ast::StringLiteralExpression* expr) {
+                        return false;
+                    },
+                    [](const ast::IntegerLiteralExpression* expr) {
+                        return true;
+                    },
+                    [](Default) {
+                        return false;
+                    });
+
+                bool value;
+
+                if (assign_expression->match<ast::StringLiteralExpression>()) {
+                    value = false;
+                } else if (assign_expression->match<ast::IntegerLiteralExpression>()) {
+                    value = true;
+                } else {
+                    value = false;
+                }
+
+                std::cout << "BB: " << std::boolalpha << val << std::endl;
 
                 entries.push_back(
                     m_ctx.create<ast::EEntryDeclaration>(

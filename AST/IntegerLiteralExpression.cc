@@ -1,5 +1,3 @@
-#pragma once
-
 #include "IntegerLiteralExpression.hh"
 
 namespace mana::ast {
