@@ -191,5 +191,3 @@ namespace mana::rtti {
         }
     }
 }
-
-MANA_RTTI_TYPE(mana::rtti::Base)

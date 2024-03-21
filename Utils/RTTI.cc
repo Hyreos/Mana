@@ -15,3 +15,5 @@ namespace mana::rtti {
         return false;
     }
 }
+
+MANA_RTTI_TYPE(mana::rtti::Base)
