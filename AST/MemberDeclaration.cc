@@ -2,7 +2,7 @@
 
 namespace mana::ast {
     MemberDeclaration::MemberDeclaration(
-        const IdentifierExpression* type,
+        const Type* type,
         const std::string& name,
         const Expression* defaultValue,
         bool isOptional,

@@ -96,6 +96,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         AST/CCAttribute.cc
                                         AST/SerializeAttribute.cc
                                         AST/BinaryExpression.cc
+                                        AST/Type.cc
                                         AST/BoolLiteralExpression.cc
                                         AST/ComponentDeclaration.cc
                                         AST/FloatLiteralExpression.cc

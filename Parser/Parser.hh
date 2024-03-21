@@ -25,6 +25,7 @@
 #include "AST/ReadonlyQualifier.hh"
 #include "AST/EnumDeclaration.hh"
 #include "AST/EntryDeclaration.hh"
+#include "AST/Type.hh"
 
 #include "Helpers/Deleted.hh"
 #include "Helpers/Macros.hh"

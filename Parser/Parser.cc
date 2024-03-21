@@ -492,30 +492,6 @@ namespace mana {
                     assign_expression = expr.unwrap();
                 }
 
-                bool val = Match(
-                    assign_expression, 
-                    [](const ast::StringLiteralExpression* expr) {
-                        return false;
-                    },
-                    [](const ast::IntegerLiteralExpression* expr) {
-                        return true;
-                    },
-                    [](Default) {
-                        return false;
-                    });
-
-                bool value;
-
-                if (assign_expression->match<ast::StringLiteralExpression>()) {
-                    value = false;
-                } else if (assign_expression->match<ast::IntegerLiteralExpression>()) {
-                    value = true;
-                } else {
-                    value = false;
-                }
-
-                std::cout << "BB: " << std::boolalpha << val << std::endl;
-
                 entries.push_back(
                     m_ctx.create<ast::EEntryDeclaration>(
                         entry_identifier->asStr(),
@@ -600,13 +576,15 @@ namespace mana {
                 if (go_out) break;
             }
 
-            auto type = expectIdentifierExpression();
+            auto type_identifier = expectIdentifierExpression();
 
-            if (type.errored) {
+            if (type_identifier.errored) {
                 error("missing type when declaring a component property.");
 
                 return Failure::kError;
             }
+
+            auto type = m_ctx.create<ast::Type>(type_identifier.unwrap());
 
             bool is_optional = false;
             
@@ -674,13 +652,9 @@ namespace mana {
                 }
             }
 
-            auto vuw = type.unwrap();
-
-            auto tree_ = static_cast<const ast::TreeNode*>(vuw);
-
             members.push_back(
                 m_ctx.create<ast::MemberDeclaration>(
-                    std::move(vuw),
+                    type,
                     field_name->asStr(),
                     std::move(field_default_value),
                     is_optional,

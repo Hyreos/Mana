@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Declaration.hh"
-#include "IdentifierExpression.hh"
+#include "Type.hh"
 #include "Attribute.hh"
 #include "Qualifier.hh"
 
@@ -13,7 +13,7 @@ namespace mana::ast {
     class MemberDeclaration final : public rtti::Castable<MemberDeclaration, Declaration> {
     public:
         MemberDeclaration(
-            const IdentifierExpression* type,
+            const Type* type,
             const std::string& name,
             const Expression* defaultValue,
             bool isOptional,
@@ -29,7 +29,7 @@ namespace mana::ast {
     private:
         std::string m_name;
         bool m_optional;
-        const IdentifierExpression* m_type;
+        const Type* m_type;
         const Expression* m_default;
         const std::vector<const Attribute*> m_attributes;
         const std::vector<const Qualifier*> m_qualifiers;
