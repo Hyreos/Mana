@@ -27,6 +27,7 @@
 #include "AST/EnumDeclaration.hh"
 #include "AST/FunctionParameter.hh"
 #include "AST/EntryDeclaration.hh"
+#include "AST/AliasDeclaration.hh"
 #include "AST/FunctionDeclaration.hh"
 #include "AST/Module.hh"
 #include "AST/Type.hh"
@@ -182,6 +183,12 @@ namespace mana {
         Result<const ast::UnaryExpression*> unaryExpression();
 
         Result<const ast::FunctionParameter*> functionParameter();
+
+        Result<const std::vector<const ast::Type*>> typeList();
+
+        Result<const ast::AliasDeclaration*> aliasDeclaration(
+            const std::vector<const ast::Attribute*>& attributes
+        );
 
         Result<const std::vector<const ast::FunctionParameter*>> functionParameterList();
 

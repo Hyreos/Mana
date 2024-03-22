@@ -29,11 +29,11 @@ namespace mana {
                     }
                 };
 
-                rtti::Match(
+                Match(
                     decl,
-                    [&](const ast::ComponentDeclaration* component_decl) -> void {
+                    [&](const ast::ComponentDeclaration* component_decl) {
                         for (auto* member : component_decl->members()) {
-                            rtti::Match(
+                            Match(
                                 member, 
                                 [&](const ast::FunctionDeclaration* fn) {
                                     for (auto& arg : fn->args())
@@ -49,7 +49,7 @@ namespace mana {
                                 });
                         }
                     },
-                    [](Default) -> void {
+                    [](Default) {
                         std::cerr << "Trying to match wrong type!" << std::endl;
                     }
                 );

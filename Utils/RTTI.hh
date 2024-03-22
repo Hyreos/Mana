@@ -156,9 +156,13 @@ namespace mana::rtti {
 
     template<typename T>
     inline constexpr bool is_default_match_case_v = is_default_match_case<T>::value;
-   
+}
+
+namespace mana {
     template<typename T, typename... Fn_T>
     inline auto Match(T* object, Fn_T&&... args) {
+        using namespace rtti;
+        
         using FirstCallbackArg_T = std::tuple_element_t<0, std::tuple<Fn_T...>>;
         using FirstCallbackArgTraits_T = function_traits<FirstCallbackArg_T>;
         using FirstCallbackArgFirstParam_T = typename std::tuple_element_t<0, typename FirstCallbackArgTraits_T::argument_types>;
@@ -186,7 +190,7 @@ namespace mana::rtti {
             );
 
             if constexpr (!std::is_same_v<FuncTraitFirstArgNoConstPtr_T, Default>) {
-                if (match<FuncTraitFirstArgNoConstPtr_T>(object)) {
+                if (rtti::match<FuncTraitFirstArgNoConstPtr_T>(object)) {
                     if constexpr (!std::is_same_v<typename FuncTrait_T::result_type, void>)
                         new (storageptr) Storage_T(case_fn(static_cast<FuncTraitFirstArg_T>(object)));
                     else case_fn(static_cast<FuncTraitFirstArg_T>(object));

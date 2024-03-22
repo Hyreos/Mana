@@ -33,7 +33,7 @@ namespace mana {
         Resolver resolver(std::vector<const ast::Module*> {{ getModule() }});
 
         std::cout << "???" << std::endl;
-        
+
         resolver.resolve();
     }
 
@@ -345,6 +345,78 @@ namespace mana {
             variable_identifier.unwrap(),
             default_value_expression
         );
+    }
+
+    Result<const std::vector<const ast::Type*>> Parser::typeList()
+    {
+        std::vector<const ast::Type*> types;
+
+        while (continueParsing()) {
+            auto type = expectType();
+
+            if (type.errored) return Failure::kError;
+
+            types.push_back(type.unwrap());
+
+            if (!match(Token::Type::kOr)) break;
+        }
+
+        return types;
+    }
+
+    Result<const ast::AliasDeclaration*> Parser::aliasDeclaration(
+        const std::vector<const ast::Attribute*>& attributes
+    )
+    {
+        if (match("alias")) {
+            auto identifier = expectIdentifierExpression();
+
+            if (identifier.errored) {
+                error("missing identifier in alias name.");
+
+                return Failure::kError;
+            }
+
+            if (!match(Token::Type::kEqual)) {
+                error("missing '=' in alias declaration.");
+                
+                return Failure::kError;
+            }
+
+            if (match(Token::Type::kLeftParen)) {
+                auto types = typeList();
+
+                if (types.errored) return Failure::kError;
+
+                if (!match(Token::Type::kRightParen)) {
+                    error("missing ')' after end of alias type list.");
+                    
+                    return Failure::kError;
+                }
+
+                return m_ctx.create<ast::AliasDeclaration>(
+                    identifier.unwrap(),
+                    types.unwrap(),
+                    attributes
+                );
+            } else {
+                auto type = expectType();
+
+                if (type.errored) {
+                    error("missing a type in the alias value.");
+                    
+                    return Failure::kError;
+                }
+
+                return m_ctx.create<ast::AliasDeclaration>(
+                    identifier.unwrap(),
+                    std::vector<const ast::Type*>{{ type.unwrap() }},
+                    attributes
+                );
+            }
+        }
+
+        return Failure::kNoMatch;
     }
 
     Result<const std::vector<const ast::FunctionParameter*>> Parser::functionParameterList()
@@ -915,6 +987,23 @@ namespace mana {
             m_module->addDeclaration(decl.unwrap());
 
             decl->print(std::cout, 0);
+            return;
+        }
+
+        decl = sync(Token::Type::kRightParen, [&]() -> Result<const ast::Declaration*> {
+            auto alias = aliasDeclaration(attribute_list.value);
+
+            if (alias.errored)
+                error("error while parsing alias.");
+
+            return alias;
+        });
+
+        if (decl.matched) {
+            m_module->addDeclaration(decl.unwrap());
+
+            decl->print(std::cout, 0);
+
             return;
         }
 

@@ -35,6 +35,7 @@ namespace mana {
             kLessThan, // <
             kComma, // ,
             kInv, // !
+            kOr, // |
             kLeftBracket, // {
             kRightBracket, // }
             kMod, // %
