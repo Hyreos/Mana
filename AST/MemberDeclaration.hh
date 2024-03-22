@@ -25,6 +25,8 @@ namespace mana::ast {
 
         void print(std::ostream& stream, size_t ident) const override;
 
+        const Type* type() const;
+
         const std::string& name() const;
     private:
         std::string m_name;

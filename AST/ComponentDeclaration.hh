@@ -21,6 +21,10 @@ namespace mana::ast {
         const ComponentDeclaration* clone(CloneContext& ctx) const override;
 
         void print(std::ostream& stream, size_t ident) const override;
+
+        const std::vector<const IdentifierExpression*>& inheritances() const;
+
+        const std::vector<const Declaration*>& members() const;
     private:
         bool m_exported { false };
 

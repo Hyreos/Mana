@@ -11,12 +11,12 @@ namespace mana::ast {
     {
     }
 
-    const Expression* BinaryExpression::lhs() 
+    const Expression* BinaryExpression::lhs() const
     {
         return m_lhs;
     }
 
-    const Expression* BinaryExpression::rhs()
+    const Expression* BinaryExpression::rhs() const
     {
         return m_rhs;
     }

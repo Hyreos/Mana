@@ -56,6 +56,21 @@ namespace mana::ast {
 
         m_type->print(stream, ident);
     }
+
+    const IdentifierExpression* FunctionDeclaration::identifier() const
+    {
+        return m_identifier;
+    }
+
+    const Type* FunctionDeclaration::returnType() const
+    {
+        return m_type;
+    }
+
+    const std::vector<const FunctionParameter*>& FunctionDeclaration::args() const
+    {
+        return m_argsList;
+    }
 }
 
 MANA_RTTI_TYPE(mana::ast::FunctionDeclaration)

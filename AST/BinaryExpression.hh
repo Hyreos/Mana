@@ -26,9 +26,9 @@ namespace mana::ast {
             const Expression* rhs
         );
 
-        const Expression* lhs();
+        const Expression* lhs() const;
 
-        const Expression* rhs();
+        const Expression* rhs() const;
 
         OpType type() const;
 

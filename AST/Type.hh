@@ -13,6 +13,8 @@ namespace mana::ast {
 
         const Type* clone(CloneContext& ctx) const override;
 
+        const Type* subType() const;
+
         const IdentifierExpression* symbol() const;
     private:
         const IdentifierExpression* m_symbol;

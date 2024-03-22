@@ -2,6 +2,7 @@
 
 #include <type_traits>
 #include <functional>
+#include <array>
 #include <stdint.h>
 
 template<typename T>
@@ -28,10 +29,25 @@ namespace mana::rtti {
         }
     };
 
+    template<typename CmpT, typename T>
+    inline bool match(T* obj);
+
     struct Base {
         using Base_T = Base;
 
         const TypeMetadata* type_metadata;
+
+        template<typename T>
+        const T* as() const
+        {
+            return static_cast<const T*>(this);
+        }
+
+        template<typename T>
+        bool is() const
+        {
+            return match<T>(this);
+        }
     };
 }
 
@@ -177,7 +193,12 @@ namespace mana::rtti {
 
                     return true;
                 }
-            } else new (storageptr) Storage_T(case_fn(Default()));
+            } else {
+                if constexpr (!std::is_same_v<typename FuncTrait_T::result_type, void>)
+                    new (storageptr) Storage_T(case_fn(Default()));
+                else
+                    case_fn(Default());
+            }
 
             return false;
         };

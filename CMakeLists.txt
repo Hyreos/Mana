@@ -121,6 +121,11 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         AST/TreeNode.cc
                                         AST/TypeDeclaration.cc
                                         AST/UnaryExpression.cc
+
+                                        Resolver/Resolver.cc
+                                        Resolver/DependencyGraph.cc
+
+
                                         Utils/RTTI.cc)
 
 if (MANA_BUILD_CLI)

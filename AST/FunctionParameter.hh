@@ -23,6 +23,8 @@ namespace mana::ast {
         void print(std::ostream& stream, size_t ident) const override;
 
         const FunctionParameter* clone(CloneContext& ctx) const override;
+
+        const Type* type() const;
     private:
         const std::vector<const Attribute*> m_attributes;
         const std::vector<const Qualifier*> m_qualifiers;

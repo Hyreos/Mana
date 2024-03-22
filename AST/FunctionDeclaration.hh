@@ -25,6 +25,10 @@ namespace mana::ast {
         void print(std::ostream& stream, size_t ident) const override;
 
         const IdentifierExpression* identifier() const;
+
+        const Type* returnType() const;
+
+        const std::vector<const FunctionParameter*>& args() const;
     private:
         const Type* m_type;
         const IdentifierExpression* m_identifier;

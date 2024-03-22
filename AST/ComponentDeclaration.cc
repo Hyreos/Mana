@@ -62,6 +62,16 @@ namespace mana::ast {
         
         stream << "}" << std::endl << std::endl;
     }
+
+    const std::vector<const Declaration*>& ComponentDeclaration::members() const
+    {
+        return m_fields;
+    }
+
+    const std::vector<const IdentifierExpression*>& ComponentDeclaration::inheritances() const
+    {
+        return m_inheritances;
+    }
 }
 
 MANA_RTTI_TYPE(mana::ast::ComponentDeclaration)

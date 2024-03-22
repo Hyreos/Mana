@@ -52,6 +52,11 @@ namespace mana::ast {
             (m_defaultValueExpression) ? ctx.clone(m_defaultValueExpression) : nullptr
         );
     }
+
+    const Type* FunctionParameter::type() const
+    {
+        return m_type;
+    }
 }
 
 MANA_RTTI_TYPE(mana::ast::FunctionParameter);

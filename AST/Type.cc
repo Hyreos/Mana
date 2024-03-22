@@ -21,6 +21,11 @@ namespace mana::ast {
         }
     }
 
+    const Type* Type::subType() const
+    {
+        return m_subtype;
+    }
+
     const Type* Type::clone(CloneContext& ctx) const
     {
         return ctx.create<Type>(ctx.clone(m_symbol));

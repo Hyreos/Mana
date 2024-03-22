@@ -30,6 +30,11 @@ namespace mana::ast {
         );
     }
 
+    const Type* MemberDeclaration::type() const
+    {
+        return m_type;
+    }
+
     void MemberDeclaration::print(std::ostream& stream, size_t ident) const
     {
         for (auto& qualifier : m_qualifiers) {
