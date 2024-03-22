@@ -12,6 +12,8 @@ namespace mana::ast {
         const IdentifierExpression* clone(CloneContext& ctx) const override;
 
         void print(std::ostream& stream, size_t ident) const override;
+
+        const std::string& identifier() const;
     private:
         std::string m_identifier;
     };

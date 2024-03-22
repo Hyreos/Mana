@@ -6,6 +6,6 @@
 
 namespace mana::ast {
     class Declaration : public rtti::Castable<Declaration, TreeNode> 
-    { 
+    {
     };
 }

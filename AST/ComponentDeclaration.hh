@@ -25,6 +25,8 @@ namespace mana::ast {
         const std::vector<const IdentifierExpression*>& inheritances() const;
 
         const std::vector<const Declaration*>& members() const;
+
+        const std::string& name() const;
     private:
         bool m_exported { false };
 

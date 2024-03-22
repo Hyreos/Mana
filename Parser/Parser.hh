@@ -28,6 +28,7 @@
 #include "AST/FunctionParameter.hh"
 #include "AST/EntryDeclaration.hh"
 #include "AST/FunctionDeclaration.hh"
+#include "AST/Module.hh"
 #include "AST/Type.hh"
 
 #include "Helpers/Deleted.hh"
@@ -136,6 +137,8 @@ namespace mana {
         void registerErrorCallback(ErrorCallback_T callback);
 
         const std::vector<Error>& errorList() const;
+
+        ast::Module* getModule();
     private:
         enum class Associativity {
             kLeft,
@@ -257,6 +260,8 @@ namespace mana {
         Stats m_stats;
         
         int64_t m_tokenIdx;   
+
+        std::unique_ptr<ast::Module> m_module;
 
         ast::CloneContext m_ctx;
 

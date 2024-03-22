@@ -5,8 +5,10 @@
 #include <stack>
 #include <filesystem>
 
+#include "Resolver/Resolver.hh"
+
 namespace mana {
-    Parser::Parser()
+    Parser::Parser() : m_module { std::make_unique<ast::Module>() }
     {
     }
 
@@ -27,6 +29,17 @@ namespace mana {
         std::vector<std::unique_ptr<ast::TreeNode>> tr_nodes;
         
         doParse();
+
+        Resolver resolver(std::vector<const ast::Module*> {{ getModule() }});
+
+        std::cout << "???" << std::endl;
+        
+        resolver.resolve();
+    }
+
+    ast::Module* Parser::getModule()
+    {
+        return m_module.get();
     }
 
     size_t Parser::getPrecedence(const Token& tk) {
@@ -898,7 +911,9 @@ namespace mana {
             return cd;
         });
 
-        if (decl.matched) {    
+        if (decl.matched) {
+            m_module->addDeclaration(decl.unwrap());
+
             decl->print(std::cout, 0);
             return;
         }

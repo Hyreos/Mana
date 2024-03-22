@@ -92,6 +92,7 @@ endif()
 
 target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Parser/Lexer.cc
+                                        
                                         AST/ExportQualifier.cc
                                         AST/ReadonlyQualifier.cc
                                         AST/CCAttribute.cc
@@ -109,6 +110,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         AST/FunctionParameter.cc
                                         AST/Declaration.cc
                                         AST/Variable.cc
+                                        AST/Module.cc
                                         AST/Attribute.cc
                                         AST/ExposedAttribute.cc
                                         AST/EnumDeclaration.cc

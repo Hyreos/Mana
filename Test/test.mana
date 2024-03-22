@@ -6,10 +6,33 @@ import (
 )
 
 component K3 {
+    @cc()
+    @exposed("Window", "Worker")
+    fn my_func(f32 test = 888) -> array<array<f32>>
+
+    @cc() 
+    readonly K4 teste = 55 + 88 / 87 * 55 + 232 * 55 / 4 / 5 / 6
+}
+
+component K5 {
     @cc() 
     readonly f32 teste = 55 + 88 / 87 * 55 + 232 * 55 / 4 / 5 / 6
 
     @cc()
     @exposed("Window", "Worker")
+    fn my_func(K6 test = 888) -> array<array<f32>>
+}
+
+component K4 {
+    @cc() 
+    readonly K5 teste = 55 + 88 / 87 * 55 + 232 * 55 / 4 / 5 / 6
+
+    @cc()
+    @exposed("Window", "Worker")
     fn my_func(f32 test = 888) -> array<array<f32>>
+}
+
+
+component K6 {
+    f32 test = 11
 }

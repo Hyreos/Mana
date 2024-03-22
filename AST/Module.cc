@@ -1,12 +1,12 @@
 #include "Module.hh"
 
 namespace mana::ast {
-    void Module::addDeclaration(Declaration* declaration)
+    void Module::addDeclaration(const Declaration* declaration)
     {
         m_globalDeclarations.push_back(declaration);
     }
 
-    std::vector<const Declaration*>& Module::getDeclarationList() const
+    const std::vector<const Declaration*>& Module::getDeclarationList() const
     {
         return m_globalDeclarations;
     }

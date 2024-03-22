@@ -63,6 +63,11 @@ namespace mana::ast {
         stream << "}" << std::endl << std::endl;
     }
 
+    const std::string& ComponentDeclaration::name() const
+    {
+        return m_name;
+    }
+
     const std::vector<const Declaration*>& ComponentDeclaration::members() const
     {
         return m_fields;

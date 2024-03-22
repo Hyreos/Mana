@@ -7,10 +7,10 @@
 namespace mana::ast {
     class Module {
     public:
-        void addDeclaration(Declaration* declaration);
+        void addDeclaration(const Declaration* declaration);
 
-        const std::vector<Declaration*>& getDeclarationList() const;
+        const std::vector<const Declaration*>& getDeclarationList() const;
     private:
-        std::vector<Declaration*> m_globalDeclarations;
+        std::vector<const Declaration*> m_globalDeclarations;
     };
 }

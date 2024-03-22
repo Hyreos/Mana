@@ -17,6 +17,11 @@ namespace mana::ast {
 
         stream << m_identifier;
     }
+
+    const std::string& IdentifierExpression::identifier() const
+    {
+        return m_identifier;
+    }
 }
 
 MANA_RTTI_TYPE(mana::ast::IdentifierExpression);
