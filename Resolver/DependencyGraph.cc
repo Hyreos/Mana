@@ -17,54 +17,48 @@ namespace mana {
     {
     }
 
-    DependencyGraph::DependencyGraph(const std::vector<const ast::Module*>& module_list)
+    DependencyGraph::DependencyGraph(ast::Module* mod)
     {
         // Iterate over modules and make a dependency list for each one of them.
-        for (const auto* mod : module_list) {
-            auto& declaration_list = mod->declarations();
+        auto& declaration_list = mod->declarations();
 
-            for (const auto* decl : declaration_list) {
-                auto add_type_to_decl = [&](const std::string target, const ast::Type* type) -> void {
-                    for (auto* ttype = type; ttype; ttype = ttype->subType()) {
-                        m_decl_deps[target].deps.emplace(ttype->symbol()->identifier());
-                        m_decl_deps[target].declaration = decl;
+        for (const auto* decl : declaration_list) {
+            auto add_type_to_decl = [&](const std::string target, const ast::Type* type) -> void {
+                for (auto* ttype = type; ttype; ttype = ttype->subType()) {
+                    m_decl_deps[target].deps.emplace(ttype->symbol()->identifier());
+                    m_decl_deps[target].declaration = decl;
+                }
+            };
+
+            Match(
+                decl,
+                [&](const ast::ComponentDeclaration* component_decl) {
+                    for (auto* member : component_decl->members()) {
+                        m_decl_deps[component_decl->name()].declaration = component_decl;
+
+                        Match(
+                            member, 
+                            [&](const ast::FunctionDeclaration* fn) {
+                                for (auto& arg : fn->args())
+                                    add_type_to_decl(component_decl->name(), arg->type());
+
+                                add_type_to_decl(component_decl->name(), fn->returnType());
+                            }, 
+                            [&](const ast::MemberDeclaration* member) {
+                                add_type_to_decl(component_decl->name(),  member->type());
+                            },
+                            [](Default) {
+                                std::cerr << "invalid node type received as global declaration!" << std::endl;
+                            });
                     }
-                };
-
-                Match(
-                    decl,
-                    [&](const ast::ComponentDeclaration* component_decl) {
-                        for (auto* member : component_decl->members()) {
-                            m_decl_deps[component_decl->name()].declaration = component_decl;
-
-                            Match(
-                                member, 
-                                [&](const ast::FunctionDeclaration* fn) {
-                                    for (auto& arg : fn->args())
-                                        add_type_to_decl(component_decl->name(), arg->type());
-
-                                    add_type_to_decl(component_decl->name(), fn->returnType());
-                                }, 
-                                [&](const ast::MemberDeclaration* member) {
-                                    add_type_to_decl(component_decl->name(),  member->type());
-                                },
-                                [](Default) {
-                                    std::cerr << "invalid node type received as global declaration!" << std::endl;
-                                });
-                        }
-                    },
-                    [&](const ast::AliasDeclaration* alias_decl) {
-                        m_decl_deps[alias_decl->identifier()->identifier()].declaration = alias_decl;
-
-                    },
-                    [&](const ast::ImportDeclaration* decl) {
-                        
-                    },
-                    [](Default) {
-                        std::cerr << "Trying to match wrong type!" << std::endl;
-                    }
-                );
-            }
+                },
+                [&](const ast::AliasDeclaration* alias_decl) {
+                    m_decl_deps[alias_decl->identifier()->identifier()].declaration = alias_decl;
+                },
+                [](Default) {
+                    std::cerr << "Trying to match wrong type!" << std::endl;
+                }
+            );
         }
 
         for (auto& [symbol, dependencies] : m_decl_deps)
@@ -85,8 +79,14 @@ namespace mana {
             }
         }
 
-        for (auto& d : m_declv) {
-            d.second->print(std::cout, 0);
+        auto& module_decls = const_cast<std::vector<const ast::Declaration*>&>(mod->declarations());
+
+        module_decls.clear();
+
+        for (auto& [_, m] : m_declv) {
+            m->print(std::cout, 0);
+            
+            module_decls.push_back(m);
         }
     }
 

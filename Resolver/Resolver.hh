@@ -28,5 +28,7 @@ namespace mana {
         void resolve(ast::IdentifierExpression* identifier);
     private:
         Compiler* m_compiler; 
+        
+        ast::Module* m_module;
     };
 }

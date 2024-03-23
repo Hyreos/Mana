@@ -6,26 +6,32 @@
 
 namespace mana {
     Resolver::Resolver(Compiler* compiler) 
-        : m_compiler { compiler }
+        : m_compiler { compiler },
+            m_module { nullptr }
     {
     }
 
     void Resolver::resolve(ast::Module* module)
     {
-        for (auto& module : module->declarations()) {
+        m_module = module;
+
+        for (auto i = 0; i < module->declarations().size(); i++) {
             Match(
-                module,
+                module->declarations()[i],
                 [&](const ast::ImportDeclaration* declaration)
                 {
                     resolve(const_cast<ast::ImportDeclaration*>(declaration));
                 },
                 [](Default) {}
-            );    
+            );
         }
 
-        for (auto& module : module->declarations()) {
+        DependencyGraph depGraph(module);
+        // all declarations are sorted at this point.
+
+        for (auto& decl : module->declarations()) {
             Match(
-                module,
+                decl,
                 [&](const ast::AliasDeclaration* declaration)
                 {
                     resolve(const_cast<ast::AliasDeclaration*>(declaration));
@@ -71,6 +77,14 @@ namespace mana {
     void Resolver::resolve(ast::ImportDeclaration* import_declaration)
     {
         // First load the imported module
-        m_compiler->loadModule(import_declaration->path());
+        auto* mod = m_compiler->loadModule(import_declaration->path());
+
+        std::cout << "Adding " << mod->declarations().size() << " modules." << std::endl;
+    
+        for (auto& decl : mod->declarations()) {
+            m_module->addDeclaration(decl);
+        }
+
+        std::cout << "Done!" << std::endl;
     }
 }

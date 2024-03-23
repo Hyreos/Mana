@@ -40,18 +40,6 @@ public:
                         mana::Compiler compiler;
                         compiler.loadModule(file);
 
-                        std::vector<const mana::ast::Module*> modules;
-
-                        for (auto& [path, mod] : compiler.modules()) {
-                            modules.push_back(mod.get());
-                        }
-
-                        std::cout << "Number of Modules: " << modules.size() << std::endl;
-
-                        std::cout << "================================================" << std::endl;
-
-                        mana::DependencyGraph graph(modules);
-
                         /*DependencyGraph graph(modules);
 
                         std::ifstream f { std::string(file), std::ios::ate };
