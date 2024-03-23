@@ -9,7 +9,7 @@ namespace mana::ast {
     public:
         void addDeclaration(const Declaration* declaration);
 
-        const std::vector<const Declaration*>& getDeclarationList() const;
+        const std::vector<const Declaration*>& declarations() const;
     private:
         std::vector<const Declaration*> m_globalDeclarations;
     };

@@ -5,6 +5,9 @@
 
 #include "Parser/Parser.hh"
 
+#include "Compiler.hh"
+#include "Resolver/DependencyGraph.hh"
+
 void LogParserError(const std::string& msg) {
     std::cerr << "FATAL: " << msg << std::endl;
     CHECK(false);
@@ -34,6 +37,23 @@ public:
                     if (arg == "file" || arg == "f") {
                         auto& file = value; 
 
+                        mana::Compiler compiler;
+                        compiler.loadModule(file);
+
+                        std::vector<const mana::ast::Module*> modules;
+
+                        for (auto& [path, mod] : compiler.modules()) {
+                            modules.push_back(mod.get());
+                        }
+
+                        std::cout << "Number of Modules: " << modules.size() << std::endl;
+
+                        std::cout << "================================================" << std::endl;
+
+                        mana::DependencyGraph graph(modules);
+
+                        /*DependencyGraph graph(modules);
+
                         std::ifstream f { std::string(file), std::ios::ate };
 
                         if (!f) {
@@ -52,14 +72,12 @@ public:
                         f.read(&data[0], data.size());
 
                         auto parser = mana::Parser();
-
                         parser.registerErrorCallback(LogParserError);
-
                         parser.parse(data); 
 
                         for (auto& err : parser.errorList()) {
                             printf("(line: %llu, column: %llu): %s\n", err.stats.lineIndex, err.stats.columnIndex, err.message.c_str());
-                        }
+                        }*/
                     }
                 }
             }

@@ -133,7 +133,7 @@ namespace mana {
 
         Parser();
 
-        void parse(const std::string& code);
+        std::unique_ptr<ast::Module> parse(const std::string& code);
 
         void registerErrorCallback(ErrorCallback_T callback);
 

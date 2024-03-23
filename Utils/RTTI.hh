@@ -162,11 +162,10 @@ namespace mana {
     template<typename T, typename... Fn_T>
     inline auto Match(T* object, Fn_T&&... args) {
         using namespace rtti;
-        
+
         using FirstCallbackArg_T = std::tuple_element_t<0, std::tuple<Fn_T...>>;
         using FirstCallbackArgTraits_T = function_traits<FirstCallbackArg_T>;
         using FirstCallbackArgFirstParam_T = typename std::tuple_element_t<0, typename FirstCallbackArgTraits_T::argument_types>;
-
         using Storage_T = std::conditional_t<   std::is_same_v<typename FirstCallbackArgTraits_T::result_type, void>, 
                                                 uint8_t, 
                                                 typename FirstCallbackArgTraits_T::result_type   >;
@@ -209,10 +208,7 @@ namespace mana {
 
         auto v = ((try_case(std::forward<Fn_T>(args)) || ...));
 
-        if constexpr (!std::is_same_v<typename FirstCallbackArgTraits_T::result_type, void>) {
+        if constexpr (!std::is_same_v<typename FirstCallbackArgTraits_T::result_type, void>)
             return std::move(*storageptr);
-        } else {
-            return;
-        }
     }
 }

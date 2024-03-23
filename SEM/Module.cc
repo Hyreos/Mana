@@ -1,8 +1,10 @@
 #include "Module.hh"
 
 namespace mana::sem {
-    void Module::addGlobalDeclaration(const ast::Declaration* declaration)
+    ast::Module* Module::ast()
     {
-        m_globalDeclarations.push_back(declaration);
+        return m_module;
     }
 }
+
+MANA_RTTI_TYPE(mana::sem::Module)

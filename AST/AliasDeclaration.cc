@@ -34,7 +34,11 @@ namespace mana::ast {
             stream << " ";
         }
 
-        stream << "alias " << m_name << " = (" << std::endl;
+        stream << "alias ";
+        
+        m_identifier->print(stream, ident);
+        
+        stream << " = (" << std::endl;
 
         size_t i = 0;
 

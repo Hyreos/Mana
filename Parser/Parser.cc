@@ -17,7 +17,7 @@ namespace mana {
         g_errorCallback = callback;
     }
 
-    void Parser::parse(const std::string& code) 
+    std::unique_ptr<ast::Module> Parser::parse(const std::string& code) 
     {
         m_tokenIdx = -1;
 
@@ -30,11 +30,7 @@ namespace mana {
         
         doParse();
 
-        Resolver resolver(std::vector<const ast::Module*> {{ getModule() }});
-
-        std::cout << "???" << std::endl;
-
-        resolver.resolve();
+        return std::move(m_module);
     }
 
     ast::Module* Parser::getModule()
@@ -927,38 +923,32 @@ namespace mana {
 
     Result<const ast::ImportDeclaration*> Parser::importDeclaration(const std::vector<const ast::Attribute*> attribute_list) {
         if (!match("import")) return Failure::kNoMatch;
-        
-        bool is_cc = false;
-                                                
-        std::vector<std::filesystem::path> pathlist;
 
-        if (match(Token::Type::kLeftParen)) {
-            while (!match(Token::Type::kRightParen)) {
-                auto* path = match(Token::Type::kStrLit);
+        auto module_identifier = expectIdentifierExpression();
 
-                if (!path) {
-                    error("missing string literal in an import declaration.");
+        if (module_identifier.errored) return Failure::kError;
 
-                    return Failure::kError;
-                }
+        if (!match("from")) {
+            error("missing 'from' in import.");
 
-                pathlist.push_back(path->asStr());
-            }
-        } else {
-            const Token* next = match(Token::Type::kStrLit);
+            return Failure::kError;
+        }
+                                                        
+        std::filesystem::path path;
 
-            if (!next) {
-                error("error when declaring import, missing string literal.");
+        const Token* next = match(Token::Type::kStrLit);
 
-                return Failure::kError;
-            }
+        if (!next) {
+            error("error when declaring import, missing string literal.");
 
-            pathlist.push_back(next->asStr());
+            return Failure::kError;
         }
 
+        std::cout << "MODULE:: " << next->asStr() << std::endl;
+
         return m_ctx.create<ast::ImportDeclaration>(
-            std::move(pathlist),
-            is_cc,
+            module_identifier.unwrap(),
+            next->asStr(),
             attribute_list
         );
     }
@@ -1017,7 +1007,10 @@ namespace mana {
         });
 
         if (decl.matched) {
+            m_module->addDeclaration(decl.unwrap());
+
             decl->print(std::cout, 0);
+
             return;
         }
 

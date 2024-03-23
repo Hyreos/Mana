@@ -128,6 +128,7 @@ target_sources(${PROJECT_NAME} PRIVATE  Parser/Parser.cc
                                         Resolver/Resolver.cc
                                         Resolver/DependencyGraph.cc
 
+                                        Compiler.cc
 
                                         Utils/RTTI.cc)
 

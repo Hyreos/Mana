@@ -6,7 +6,7 @@ namespace mana::ast {
         m_globalDeclarations.push_back(declaration);
     }
 
-    const std::vector<const Declaration*>& Module::getDeclarationList() const
+    const std::vector<const Declaration*>& Module::declarations() const
     {
         return m_globalDeclarations;
     }

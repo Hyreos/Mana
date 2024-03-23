@@ -2,19 +2,19 @@
 
 namespace mana::ast {
     ImportDeclaration::ImportDeclaration(
-        const std::vector<std::filesystem::path>& pathlist,
-        bool iscc,
+        const ast::IdentifierExpression* module_identifier,
+        const std::filesystem::path& path,
         const std::vector<const Attribute*>& attributes
     ) 
-        : m_pathlist{ std::move(pathlist) },
-            m_isCc { iscc },
-            m_attributes { attributes }
+        : m_path { std::move(path) },
+            m_attributes { attributes },
+            m_module_identifier { module_identifier }
     {
     }
 
     const ImportDeclaration* ImportDeclaration::clone(CloneContext& ctx) const
     {
-        return ctx.create<ImportDeclaration>(m_pathlist, m_isCc, ctx.clone(m_attributes));
+        return ctx.create<ImportDeclaration>(m_module_identifier, m_path, ctx.clone(m_attributes));
     }
 
     void ImportDeclaration::print(std::ostream& stream, size_t ident) const
@@ -25,13 +25,16 @@ namespace mana::ast {
             stream << " ";
         }
 
-        stream << "import ("<< std::endl;
+        stream << "import ";
 
-        for (auto i = 0; i < m_pathlist.size(); i++) {
-            stream << std::string(2 * ident + 2, ' ') << m_pathlist[i] << std::endl;
-        }
+        m_module_identifier->print(stream, ident);
 
-        stream << ")" << std::endl;
+        stream << " from '" << m_path << "'" << std::endl;
+    }
+
+    const std::filesystem::path& ImportDeclaration::path() const
+    {
+        return m_path;
     }
 }
 

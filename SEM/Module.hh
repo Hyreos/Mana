@@ -1,16 +1,18 @@
 #pragma once
 
-#include "AST/Declaration.hh"
+#include "Node.hh"
+
+#include "AST/Module.hh"
 
 namespace mana::sem {
-    class Module {
+    class Module : public rtti::Castable<Module, Node> {
     public:
-        Module() = default;
+        Module(ast::Module* mod);
 
         ~Module() = default;
-
-        void addGlobalDeclaration(const ast::Declaration* declaration);
+    
+        ast::Module* ast();
     private:
-        std::vector<const ast::Declaration*> m_globalDeclarations;
+        ast::Module* m_module;
     };
 }
